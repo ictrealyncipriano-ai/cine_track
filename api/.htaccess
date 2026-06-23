@@ -1,0 +1,7 @@
+# CORS — set specific origin for production, e.g.:
+# SetEnvIf Origin "https://yourdomain.com$" CORS_ORIGIN=$1
+# Header set Access-Control-Allow-Origin "%{CORS_ORIGIN}e" env=CORS_ORIGIN
+# Or set CORS_ORIGIN in .env (PHP endpoints use getAllowedOrigin())
+Header set Access-Control-Allow-Origin "*"
+Header set Access-Control-Allow-Methods "GET, POST, DELETE, OPTIONS"
+Header set Access-Control-Allow-Headers "Content-Type, Authorization"
