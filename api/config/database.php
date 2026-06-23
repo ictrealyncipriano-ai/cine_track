@@ -14,14 +14,18 @@ function getDb(): PDO {
         $pass = getenv('DB_PASSWORD') ?: '';
 
         $caPath = __DIR__ . '/certs/isrg-root-x1.pem';
-        $verifyConstant = PHP_VERSION_ID >= 80500
-            ? Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT
-            : PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT;
 
-        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
-            PDO::MYSQL_ATTR_SSL_CA => $caPath,
-            $verifyConstant => false,
-        ]);
+        if (PHP_VERSION_ID >= 80500) {
+            $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
+                Pdo\Mysql::ATTR_SSL_CA => $caPath,
+                Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT => false,
+            ]);
+        } else {
+            $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
+                PDO::MYSQL_ATTR_SSL_CA => $caPath,
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+            ]);
+        }
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
