@@ -13,7 +13,12 @@ function getDb(): PDO {
         $user = getenv('DB_USERNAME') ?: 'root';
         $pass = getenv('DB_PASSWORD') ?: '';
 
-        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass);
+        $sslCa = getenv('DB_SSL_CA') ?: '';
+        $sslOpts = $sslCa
+            ? [PDO::MYSQL_ATTR_SSL_CA => $sslCa, PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => true]
+            : [PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false];
+
+        $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, $sslOpts);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }

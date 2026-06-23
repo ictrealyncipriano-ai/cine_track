@@ -8,18 +8,5 @@
   },
   "routes": [
     { "src": "/api/(.*)", "dest": "/api/$1" }
-  ],
-  "env": {
-    "DB_HOST": "@db_host",
-    "DB_PORT": "4000",
-    "DB_DATABASE": "@db_database",
-    "DB_USERNAME": "@db_username",
-    "DB_PASSWORD": "@db_password",
-    "CORS_ORIGIN": "*",
-    "MAIL_HOST": "@mail_host",
-    "MAIL_USERNAME": "@mail_username",
-    "MAIL_PASSWORD": "@mail_password",
-    "MAIL_FROM_ADDRESS": "@mail_from_address",
-    "MAIL_FROM_NAME": "CineTrack"
-  }
+  ]
 }
