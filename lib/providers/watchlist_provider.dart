@@ -1,17 +1,31 @@
 import 'package:flutter/foundation.dart';
 import '../models/movie.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class WatchlistProvider extends ChangeNotifier {
   final ApiService _api;
+  final AuthService _authService;
   final List<Movie> _watchlist = [];
 
-  WatchlistProvider(this._api);
+  WatchlistProvider(this._api, this._authService) {
+    _authService.addListener(_onAuthChanged);
+  }
 
   List<Movie> get watchlist => List.unmodifiable(_watchlist);
   bool get isEmpty => _watchlist.isEmpty;
 
   bool isLoading = true;
+
+  void _onAuthChanged() {
+    if (_authService.isAuthenticated) {
+      fetchWatchlist();
+    } else {
+      _watchlist.clear();
+      isLoading = true;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchWatchlist() async {
     isLoading = true;
@@ -44,4 +58,10 @@ class WatchlistProvider extends ChangeNotifier {
   }
 
   bool isInWatchlist(int movieId) => _watchlist.any((m) => m.id == movieId);
+
+  @override
+  void dispose() {
+    _authService.removeListener(_onAuthChanged);
+    super.dispose();
+  }
 }

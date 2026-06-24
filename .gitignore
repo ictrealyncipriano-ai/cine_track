@@ -56,3 +56,5 @@ node_modules/
 # Log files
 flutter_*.log
 logs/
+
+api/cache/

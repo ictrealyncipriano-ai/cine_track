@@ -1,17 +1,31 @@
 import 'package:flutter/foundation.dart';
 import '../models/movie.dart';
 import '../services/api_service.dart';
+import '../services/auth_service.dart';
 
 class FavoritesProvider extends ChangeNotifier {
   final ApiService _api;
+  final AuthService _authService;
   final List<Movie> _favorites = [];
 
-  FavoritesProvider(this._api);
+  FavoritesProvider(this._api, this._authService) {
+    _authService.addListener(_onAuthChanged);
+  }
 
   List<Movie> get favorites => List.unmodifiable(_favorites);
   bool get isEmpty => _favorites.isEmpty;
 
   bool isLoading = true;
+
+  void _onAuthChanged() {
+    if (_authService.isAuthenticated) {
+      fetchFavorites();
+    } else {
+      _favorites.clear();
+      isLoading = true;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchFavorites() async {
     isLoading = true;
@@ -44,4 +58,10 @@ class FavoritesProvider extends ChangeNotifier {
   }
 
   bool isFavorite(int movieId) => _favorites.any((m) => m.id == movieId);
+
+  @override
+  void dispose() {
+    _authService.removeListener(_onAuthChanged);
+    super.dispose();
+  }
 }

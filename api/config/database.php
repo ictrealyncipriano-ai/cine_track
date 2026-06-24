@@ -1,36 +1,20 @@
 <?php
 
-require_once __DIR__ . '/env.php';
-
 function getDb(): PDO {
     static $pdo = null;
     if ($pdo === null) {
-        loadEnv();
+        $host = '127.0.0.1';
+        $db   = 'cinetracker';
+        $user = 'root';
+        $pass = '';
 
-        $host = getenv('DB_HOST') ?: '127.0.0.1';
-        $port = getenv('DB_PORT') ?: '3306';
-        $db   = getenv('DB_DATABASE') ?: 'cinetracker';
-        $user = getenv('DB_USERNAME') ?: 'root';
-        $pass = getenv('DB_PASSWORD') ?: '';
-
-        $caPath = __DIR__ . '/certs/isrg-root-x1.pem';
-
-        if (PHP_VERSION_ID >= 80500) {
-            $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
-                Pdo\Mysql::ATTR_SSL_CA => $caPath,
-                Pdo\Mysql::ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]);
-        } else {
-            $pdo = new PDO("mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4", $user, $pass, [
-                PDO::MYSQL_ATTR_SSL_CA => $caPath,
-                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
-            ]);
-        }
+        $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
     return $pdo;
 }
+
 
 function jsonResponse(mixed $data, int $code = 200): void {
     http_response_code($code);
@@ -44,17 +28,59 @@ function jsonError(string $message, int $code = 400): void {
 }
 
 function getAllowedOrigin(): string {
-    return getenv('CORS_ORIGIN') ?: '*';
+    $origins = [
+        'http://localhost:3000',
+        'http://localhost:5000',
+        'http://10.0.2.2:3000',
+        'http://10.0.2.2:5000',
+    ];
+    $origin = $_SERVER['HTTP_ORIGIN'] ?? '*';
+    return in_array($origin, $origins, true) ? $origin : '*';
 }
 
-function requireRole(int $userId, string ...$roles): void {
-    $pdo = getDb();
-    $stmt = $pdo->prepare('SELECT role FROM users WHERE id = ?');
-    $stmt->execute([$userId]);
-    $user = $stmt->fetch();
-    if (!$user || !in_array($user['role'], $roles)) {
-        jsonError('Forbidden', 403);
+function _rateLimitKey(string $key): string {
+    return __DIR__ . '/../cache/' . md5($key) . '.lock';
+}
+
+function checkRateLimit(string $key, int $maxAttempts, int $windowMinutes): void {
+    $file = _rateLimitKey($key);
+    $data = @file_get_contents($file);
+    $attempts = $data ? json_decode($data, true) : [];
+    $attempts = array_values(array_filter($attempts, fn($t) => $t > time() - $windowMinutes * 60));
+    if (count($attempts) >= $maxAttempts) {
+        jsonError('Too many attempts. Please try again later.', 429);
     }
+}
+
+function incrementRateLimit(string $key, int $windowMinutes): void {
+    $file = _rateLimitKey($key);
+    $dir = dirname($file);
+    if (!is_dir($dir)) {
+        mkdir($dir, 0777, true);
+    }
+    $data = @file_get_contents($file);
+    $attempts = $data ? json_decode($data, true) : [];
+    $attempts[] = time();
+    file_put_contents($file, json_encode($attempts));
+}
+
+function clearRateLimit(string $key): void {
+    $file = _rateLimitKey($key);
+    if (file_exists($file)) {
+        @unlink($file);
+    }
+}
+
+function checkAccountLockout(string $email, int $maxAttempts, int $windowMinutes): void {
+    checkRateLimit("lockout:$email", $maxAttempts, $windowMinutes);
+}
+
+function incrementAccountLockout(string $email, int $maxAttempts, int $windowMinutes): void {
+    incrementRateLimit("lockout:$email", $windowMinutes);
+}
+
+function clearAccountLockout(string $email): void {
+    clearRateLimit("lockout:$email");
 }
 
 function getAuthUserId(): int {
@@ -76,110 +102,4 @@ function getAuthUserId(): int {
     }
 
     return (int) $row['user_id'];
-}
-
-function checkRateLimit(string $key, int $maxAttempts = 5, int $decayMinutes = 15): void {
-    $pdo = getDb();
-    $cacheKey = "rate_limit:$key";
-    $stmt = $pdo->prepare('SELECT value, expiration FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
-    $row = $stmt->fetch();
-
-    if ($row) {
-        $expiration = (int) $row['expiration'];
-        if (time() >= $expiration) {
-            $stmt = $pdo->prepare('DELETE FROM cache WHERE `key` = ?');
-            $stmt->execute([$cacheKey]);
-            return;
-        }
-
-        $data = json_decode($row['value'], true);
-        $attempts = $data['attempts'] ?? 0;
-
-        if ($attempts >= $maxAttempts) {
-            $retryAfter = $expiration - time();
-            jsonError("Too many attempts. Please try again in {$retryAfter} seconds.", 429);
-        }
-    }
-}
-
-function incrementRateLimit(string $key, int $decayMinutes = 15): void {
-    $pdo = getDb();
-    $cacheKey = "rate_limit:$key";
-    $expiration = time() + ($decayMinutes * 60);
-
-    $stmt = $pdo->prepare('SELECT value FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
-    $row = $stmt->fetch();
-
-    if ($row) {
-        $data = json_decode($row['value'], true);
-        $data['attempts'] = ($data['attempts'] ?? 0) + 1;
-        $stmt = $pdo->prepare('UPDATE cache SET value = ?, expiration = ? WHERE `key` = ?');
-        $stmt->execute([json_encode($data), $expiration, $cacheKey]);
-    } else {
-        $data = ['attempts' => 1];
-        $stmt = $pdo->prepare('INSERT INTO cache (`key`, value, expiration) VALUES (?, ?, ?)');
-        $stmt->execute([$cacheKey, json_encode($data), $expiration]);
-    }
-}
-
-function clearRateLimit(string $key): void {
-    $pdo = getDb();
-    $cacheKey = "rate_limit:$key";
-    $stmt = $pdo->prepare('DELETE FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
-}
-
-function checkAccountLockout(string $email, int $maxAttempts = 5, int $lockoutMinutes = 15): void {
-    $pdo = getDb();
-    $cacheKey = "lockout:" . md5($email);
-    $stmt = $pdo->prepare('SELECT value, expiration FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
-    $row = $stmt->fetch();
-
-    if ($row) {
-        $expiration = (int) $row['expiration'];
-        if (time() >= $expiration) {
-            $stmt = $pdo->prepare('DELETE FROM cache WHERE `key` = ?');
-            $stmt->execute([$cacheKey]);
-            return;
-        }
-
-        $retryAfter = $expiration - time();
-        jsonError("Account temporarily locked. Try again in {$retryAfter} seconds.", 429);
-    }
-}
-
-function incrementAccountLockout(string $email, int $maxAttempts = 5, int $lockoutMinutes = 15): void {
-    $pdo = getDb();
-    $cacheKey = "lockout:" . md5($email);
-    $expiration = time() + ($lockoutMinutes * 60);
-
-    $stmt = $pdo->prepare('SELECT value FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
-    $row = $stmt->fetch();
-
-    $attempts = 1;
-    if ($row) {
-        $data = json_decode($row['value'], true);
-        $attempts = ($data['attempts'] ?? 0) + 1;
-
-        if ($attempts >= $maxAttempts) {
-            $expiration = time() + ($lockoutMinutes * 60);
-            $stmt = $pdo->prepare('UPDATE cache SET value = ?, expiration = ? WHERE `key` = ?');
-            $stmt->execute([json_encode(['attempts' => $attempts, 'locked' => true]), $expiration, $cacheKey]);
-            jsonError("Account temporarily locked due to too many failed attempts. Try again in {$lockoutMinutes} minutes.", 429);
-        }
-    }
-
-    $stmt = $pdo->prepare('REPLACE INTO cache (`key`, value, expiration) VALUES (?, ?, ?)');
-    $stmt->execute([$cacheKey, json_encode(['attempts' => $attempts]), $expiration]);
-}
-
-function clearAccountLockout(string $email): void {
-    $pdo = getDb();
-    $cacheKey = "lockout:" . md5($email);
-    $stmt = $pdo->prepare('DELETE FROM cache WHERE `key` = ?');
-    $stmt->execute([$cacheKey]);
 }

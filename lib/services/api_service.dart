@@ -58,10 +58,19 @@ class ApiService {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final data = jsonDecode(response.body) as Map<String, dynamic>;
     if (response.statusCode >= 400) {
-      throw Exception(data['error'] ?? 'Request failed');
+      try {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        throw Exception(data['error'] ?? 'Request failed');
+      } catch (e) {
+        if (e is Exception && e is! FormatException) rethrow;
+        throw Exception('Request failed with status ${response.statusCode}: ${response.body}');
+      }
     }
-    return data;
+    try {
+      return jsonDecode(response.body) as Map<String, dynamic>;
+    } catch (_) {
+      throw Exception('${response.statusCode}: ${response.body}');
+    }
   }
 }

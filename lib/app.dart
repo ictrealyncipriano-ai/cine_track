@@ -17,20 +17,21 @@ class CineTrackApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final apiService = ApiService();
+    final authService = AuthService(apiService);
 
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AuthProvider(AuthService(apiService)),
+          create: (_) => AuthProvider(authService),
         ),
         ChangeNotifierProvider(
           create: (_) => MovieProvider(TmdbService()),
         ),
         ChangeNotifierProvider(
-          create: (_) => FavoritesProvider(apiService),
+          create: (_) => FavoritesProvider(apiService, authService),
         ),
         ChangeNotifierProvider(
-          create: (_) => WatchlistProvider(apiService),
+          create: (_) => WatchlistProvider(apiService, authService),
         ),
       ],
       child: MaterialApp(
@@ -47,7 +48,7 @@ class CineTrackApp extends StatelessWidget {
           fontFamily: 'Inter',
         ),
         home: Consumer<AuthProvider>(
-          builder: (_, auth, __) {
+          builder: (_, auth, _) {
             if (auth.isAuthenticated) {
               if (!auth.emailVerified) {
                 return const VerifyEmailScreen();
