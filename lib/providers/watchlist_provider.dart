@@ -16,19 +16,22 @@ class WatchlistProvider extends ChangeNotifier {
   bool get isEmpty => _watchlist.isEmpty;
 
   bool isLoading = true;
+  String? errorMessage;
 
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       fetchWatchlist();
     } else {
       _watchlist.clear();
-      isLoading = true;
+      errorMessage = null;
+      isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> fetchWatchlist() async {
     isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
@@ -38,7 +41,9 @@ class WatchlistProvider extends ChangeNotifier {
       for (final item in list) {
         _watchlist.add(Movie.fromBackendJson(item as Map<String, dynamic>));
       }
-    } catch (_) {
+    } catch (e) {
+      errorMessage = '$e';
+      debugPrint('fetchWatchlist error: $e');
     } finally {
       isLoading = false;
       notifyListeners();

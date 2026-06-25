@@ -16,19 +16,22 @@ class FavoritesProvider extends ChangeNotifier {
   bool get isEmpty => _favorites.isEmpty;
 
   bool isLoading = true;
+  String? errorMessage;
 
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       fetchFavorites();
     } else {
       _favorites.clear();
-      isLoading = true;
+      errorMessage = null;
+      isLoading = false;
       notifyListeners();
     }
   }
 
   Future<void> fetchFavorites() async {
     isLoading = true;
+    errorMessage = null;
     notifyListeners();
 
     try {
@@ -38,7 +41,9 @@ class FavoritesProvider extends ChangeNotifier {
       for (final item in list) {
         _favorites.add(Movie.fromBackendJson(item as Map<String, dynamic>));
       }
-    } catch (_) {
+    } catch (e) {
+      errorMessage = '$e';
+      debugPrint('fetchFavorites error: $e');
     } finally {
       isLoading = false;
       notifyListeners();
