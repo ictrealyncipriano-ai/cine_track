@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/movie.dart';
 import '../models/cast_member.dart';
 import '../models/review.dart';
+import '../models/trailer_video.dart';
 import '../providers/movie_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/watchlist_provider.dart';
@@ -13,6 +14,7 @@ import '../providers/history_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/rating_bar.dart';
 import 'stream_player_screen.dart';
+import 'trailer_player_screen.dart';
 
 class MovieDetailsScreen extends StatefulWidget {
   final Movie movie;
@@ -27,6 +29,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   Movie? _detailed;
   List<CastMember> _cast = [];
   List<Movie> _similarMovies = [];
+  TrailerVideo? _teaser;
   int _userRating = 0;
   final _reviewController = TextEditingController();
   bool _showReviewForm = false;
@@ -39,6 +42,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     _fetchCredits();
     _fetchSimilar();
     _fetchReviews();
+    _fetchTeaser();
   }
 
   @override
@@ -75,6 +79,17 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       final similar = await tmdb.fetchSimilarMovies(widget.movie.id);
       if (mounted) {
         setState(() => _similarMovies = similar);
+      }
+    } catch (_) {
+    }
+  }
+
+  Future<void> _fetchTeaser() async {
+    try {
+      final tmdb = context.read<MovieProvider>();
+      final teaser = await tmdb.fetchMovieTeaser(widget.movie.id);
+      if (mounted) {
+        setState(() => _teaser = teaser);
       }
     } catch (_) {
     }
@@ -254,6 +269,39 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     style: GoogleFonts.inter(fontSize: 14, color: Colors.white70, height: 1.5),
                   ),
                   const SizedBox(height: 24),
+                  if (_teaser != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => TrailerPlayerScreen(
+                                video: _teaser!,
+                                movieTitle: movie.title,
+                              ),
+                            ),
+                          );
+                        },
+                        icon: const Icon(Icons.play_circle_outline, size: 20),
+                        label: Text(
+                          _teaser!.isTeaser ? 'Watch Teaser' : 'Watch Trailer',
+                          style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1A1A2E),
+                          foregroundColor: const Color(0xFFFFC107),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: BorderSide(color: const Color(0xFFFFC107).withValues(alpha: 0.3)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                  ],
                   Row(
                     children: [
                       Expanded(

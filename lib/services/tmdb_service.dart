@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
 import '../models/movie.dart';
+import '../models/trailer_video.dart';
 
 class TmdbService {
   final http.Client _client;
@@ -124,4 +125,27 @@ class TmdbService {
 
   Future<List<Movie>> getRecommendations(int movieId, {int page = 1}) =>
       _fetchMovies('/movie/$movieId/recommendations', page: page);
+
+  Future<List<TrailerVideo>> getMovieVideos(int movieId) async {
+    final params = <String, String>{
+      'api_key': _apiKey,
+      'language': 'en-US',
+    };
+
+    final uri = Uri.parse('${AppConfig.tmdbBaseUrl}/movie/$movieId/videos')
+        .replace(queryParameters: params);
+
+    final response = await _client.get(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception('TMDB API error: ${response.statusCode}');
+    }
+
+    final data = jsonDecode(response.body) as Map<String, dynamic>;
+    final results = data['results'] as List<dynamic>;
+    return results
+        .map((e) => TrailerVideo.fromJson(e as Map<String, dynamic>))
+        .where((v) => v.isPlayable)
+        .toList();
+  }
 }

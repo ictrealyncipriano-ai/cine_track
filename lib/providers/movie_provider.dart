@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../models/movie.dart';
 import '../models/cast_member.dart';
+import '../models/trailer_video.dart';
 import '../services/tmdb_service.dart';
 
 class MovieProvider extends ChangeNotifier {
@@ -200,6 +201,17 @@ class MovieProvider extends ChangeNotifier {
 
   Future<List<Movie>> fetchSimilarMovies(int movieId) async {
     return _tmdbService.getSimilarMovies(movieId);
+  }
+
+  Future<TrailerVideo?> fetchMovieTeaser(int movieId) async {
+    final videos = await _tmdbService.getMovieVideos(movieId);
+    return videos.cast<TrailerVideo?>().firstWhere(
+      (v) => v!.isTeaser,
+      orElse: () => videos.cast<TrailerVideo?>().firstWhere(
+        (v) => v!.isTrailer,
+        orElse: () => null,
+      ),
+    );
   }
 
   Future<void> search(String query) async {
