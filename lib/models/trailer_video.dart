@@ -30,7 +30,7 @@ class TrailerVideo {
   }
 
   String get youtubeUrl =>
-      'https://www.youtube.com/embed/${key}?autoplay=1&rel=0&modestbranding=1';
+      'https://www.youtube.com/watch?v=$key';
 
   bool get isPlayable => site == 'YouTube' && key.isNotEmpty;
 
