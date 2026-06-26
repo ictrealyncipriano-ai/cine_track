@@ -21,8 +21,8 @@ $countStmt = $pdo->prepare('SELECT COUNT(*) as total FROM favorites WHERE user_i
 $countStmt->execute([$userId]);
 $total = (int) $countStmt->fetch()['total'];
 
-$stmt = $pdo->prepare('SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, created_at FROM favorites WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?');
-$stmt->execute([$userId, $perPage, $offset]);
+$stmt = $pdo->prepare("SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, created_at FROM favorites WHERE user_id = ? ORDER BY created_at DESC LIMIT $perPage OFFSET $offset");
+$stmt->execute([$userId]);
 $favorites = $stmt->fetchAll();
 
 jsonResponse([
