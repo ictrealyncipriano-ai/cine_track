@@ -61,13 +61,17 @@ class Movie {
 
   factory Movie.fromBackendJson(Map<String, dynamic> json) {
     return Movie(
-      id: json['movie_id'] as int,
+      id: json['movie_id'] is int
+          ? json['movie_id'] as int
+          : int.parse(json['movie_id'].toString()),
       title: json['title'] as String? ?? '',
       overview: json['overview'] as String? ?? '',
       posterPath: json['poster_path'] as String?,
       backdropPath: json['backdrop_path'] as String?,
       releaseDate: json['release_date'] as String? ?? '',
-      voteAverage: (json['vote_average'] as num?)?.toDouble() ?? 0.0,
+      voteAverage: double.tryParse(json['vote_average']?.toString() ?? '') ??
+          (json['vote_average'] as num?)?.toDouble() ??
+          0.0,
     );
   }
 

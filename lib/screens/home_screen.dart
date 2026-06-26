@@ -3,6 +3,7 @@ import 'browse_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'watchlist_screen.dart';
+import 'history_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -20,6 +21,7 @@ class _HomeScreenState extends State<HomeScreen> {
     SearchScreen(),
     FavoritesScreen(),
     WatchlistScreen(),
+    HistoryScreen(),
     ProfileScreen(),
   ];
 
@@ -49,6 +51,11 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: Icon(Icons.bookmark_outline),
             activeIcon: Icon(Icons.bookmark),
             label: 'Watchlist',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.history),
+            activeIcon: Icon(Icons.history),
+            label: 'History',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],

@@ -12,6 +12,7 @@ android {
     namespace = "com.example.cine_track"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    setProperty("archivesBaseName", "cine_track")
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

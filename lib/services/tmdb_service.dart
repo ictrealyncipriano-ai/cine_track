@@ -118,4 +118,10 @@ class TmdbService {
 
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
+
+  Future<List<Movie>> getSimilarMovies(int movieId, {int page = 1}) =>
+      _fetchMovies('/movie/$movieId/similar', page: page);
+
+  Future<List<Movie>> getRecommendations(int movieId, {int page = 1}) =>
+      _fetchMovies('/movie/$movieId/recommendations', page: page);
 }

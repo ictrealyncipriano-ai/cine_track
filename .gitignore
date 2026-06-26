@@ -58,3 +58,5 @@ flutter_*.log
 logs/
 
 api/cache/
+# Build logs
+*.log.txt

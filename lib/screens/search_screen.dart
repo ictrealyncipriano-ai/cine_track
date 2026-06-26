@@ -14,13 +14,31 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
+  final _scrollController = ScrollController();
   Timer? _debounce;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
 
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onScroll() {
+    final mp = context.read<MovieProvider>();
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !mp.isLoadingMore &&
+        mp.hasMoreSearch) {
+      mp.loadMoreSearch();
+    }
   }
 
   void _onSearchChanged(String query) {
@@ -35,6 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
     final mp = context.watch<MovieProvider>();
     final results = mp.searchResults;
     final isLoading = mp.isLoading;
+    final isLoadingMore = mp.isLoadingMore;
 
     return SafeArea(
       child: Column(
@@ -68,14 +87,15 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ),
           Expanded(
-            child: _buildContent(results, isLoading, _controller.text),
+            child: _buildContent(results, isLoading, isLoadingMore, _controller.text),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildContent(List<dynamic> results, bool isLoading, String query) {
+  Widget _buildContent(
+      List<dynamic> results, bool isLoading, bool isLoadingMore, String query) {
     if (query.isEmpty) {
       return Center(
         child: Padding(
@@ -111,18 +131,42 @@ class _SearchScreenState extends State<SearchScreen> {
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 0.6,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-      ),
-      itemCount: results.length,
-      itemBuilder: (context, index) {
-        return MovieCard(movie: results[index]);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (info) {
+        if (info is ScrollEndNotification) {
+          final mp = context.read<MovieProvider>();
+          if (_scrollController.position.pixels >=
+                  _scrollController.position.maxScrollExtent - 200 &&
+              !mp.isLoadingMore &&
+              mp.hasMoreSearch) {
+            mp.loadMoreSearch();
+          }
+        }
+        return false;
       },
+      child: GridView.builder(
+        controller: _scrollController,
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          childAspectRatio: 0.6,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: results.length + (isLoadingMore ? 1 : 0),
+        itemBuilder: (context, index) {
+          if (index >= results.length) {
+            return const Center(
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            );
+          }
+          return MovieCard(movie: results[index]);
+        },
+      ),
     );
   }
 }

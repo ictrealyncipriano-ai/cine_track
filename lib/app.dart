@@ -4,6 +4,8 @@ import 'providers/auth_provider.dart';
 import 'providers/movie_provider.dart';
 import 'providers/favorites_provider.dart';
 import 'providers/watchlist_provider.dart';
+import 'providers/reviews_provider.dart';
+import 'providers/history_provider.dart';
 import 'screens/landing_page.dart';
 import 'screens/home_screen.dart';
 import 'screens/auth/verify_email_screen.dart';
@@ -32,6 +34,12 @@ class CineTrackApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => WatchlistProvider(apiService, authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ReviewsProvider(apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HistoryProvider(apiService, authService),
         ),
       ],
       child: MaterialApp(

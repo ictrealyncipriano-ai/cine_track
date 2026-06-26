@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../providers/favorites_provider.dart';
+import '../providers/history_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/empty_state.dart';
 
-class FavoritesScreen extends StatefulWidget {
-  const FavoritesScreen({super.key});
+class HistoryScreen extends StatefulWidget {
+  const HistoryScreen({super.key});
 
   @override
-  State<FavoritesScreen> createState() => _FavoritesScreenState();
+  State<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _FavoritesScreenState extends State<FavoritesScreen> {
+class _HistoryScreenState extends State<HistoryScreen> {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
 
@@ -30,30 +30,30 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   }
 
   void _onScroll() {
-    final fp = context.read<FavoritesProvider>();
+    final hp = context.read<HistoryProvider>();
     if (_scrollController.position.pixels >=
             _scrollController.position.maxScrollExtent - 200 &&
-        !fp.isLoadingMore &&
-        fp.hasMore) {
-      fp.loadMoreFavorites();
+        !hp.isLoadingMore &&
+        hp.hasMore) {
+      hp.loadMoreHistory();
     }
   }
 
   Future<void> _load() async {
     if (!_initialized) {
       _initialized = true;
-      await context.read<FavoritesProvider>().fetchFavorites();
+      await context.read<HistoryProvider>().fetchHistory();
     }
   }
 
   Future<void> _onRefresh() async {
-    await context.read<FavoritesProvider>().fetchFavorites();
+    await context.read<HistoryProvider>().fetchHistory();
   }
 
   @override
   Widget build(BuildContext context) {
-    final fp = context.watch<FavoritesProvider>();
-    final favorites = fp.favorites;
+    final hp = context.watch<HistoryProvider>();
+    final history = hp.history;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -67,18 +67,18 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: Row(
                   children: [
                     Text(
-                      'Favorites',
+                      'Watch History',
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                       ),
                     ),
-                    if (!fp.isEmpty)
+                    if (!hp.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
-                          '(${favorites.length})',
+                          '(${history.length})',
                           style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
                         ),
                       ),
@@ -86,7 +86,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
             ),
-            if (fp.errorMessage != null)
+            if (hp.errorMessage != null)
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
@@ -104,12 +104,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            fp.errorMessage!,
+                            hp.errorMessage!,
                             style: GoogleFonts.inter(fontSize: 13, color: Colors.redAccent),
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => fp.clearError(),
+                          onTap: () => hp.clearError(),
                           child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
                         ),
                       ],
@@ -117,16 +117,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                 ),
               ),
-            if (fp.isLoading)
+            if (hp.isLoading)
               const SliverFillRemaining(
                 child: Center(child: CircularProgressIndicator()),
               )
-            else if (favorites.isEmpty)
+            else if (history.isEmpty)
               SliverFillRemaining(
                 child: EmptyState(
-                  icon: Icons.favorite_outline,
-                  title: 'No favorites yet',
-                  subtitle: 'Tap the heart icon on any movie to save it here',
+                  icon: Icons.history,
+                  title: 'No watch history yet',
+                  subtitle: 'Movies you watch will appear here',
                 ),
               )
             else
@@ -141,7 +141,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      if (index >= favorites.length) {
+                      if (index >= history.length) {
                         return const Center(
                           child: SizedBox(
                             width: 24,
@@ -150,9 +150,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                         );
                       }
-                      return MovieCard(movie: favorites[index]);
+                      return MovieCard(movie: history[index]);
                     },
-                    childCount: favorites.length + (fp.isLoadingMore ? 1 : 0),
+                    childCount: history.length + (hp.isLoadingMore ? 1 : 0),
                   ),
                 ),
               ),

@@ -13,6 +13,8 @@ class BrowseScreen extends StatefulWidget {
 }
 
 class _BrowseScreenState extends State<BrowseScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -23,6 +25,23 @@ class _BrowseScreenState extends State<BrowseScreen> {
         _onRefresh();
       }
     });
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final mp = context.read<MovieProvider>();
+    if (_scrollController.position.pixels >=
+            _scrollController.position.maxScrollExtent - 200 &&
+        !mp.isLoadingMore &&
+        mp.selectedGenreId != null) {
+      mp.loadMoreGenre();
+    }
   }
 
   Future<void> _onRefresh() async {
@@ -31,6 +50,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       mp.fetchTrending(),
       mp.fetchNowPlaying(),
       mp.fetchTopRated(),
+      mp.fetchUpcoming(),
     ]);
   }
 
@@ -42,6 +62,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       child: RefreshIndicator(
         onRefresh: _onRefresh,
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
@@ -103,6 +124,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
             else ...[
               _buildSection(context, 'Trending Now', mp.trending, mp.isLoading),
               _buildSection(context, 'Now Playing', mp.nowPlaying, mp.isLoading),
+              _buildSection(context, 'Coming Soon', mp.upcoming, mp.isLoading),
               _buildSection(context, 'Top Rated', mp.topRated, mp.isLoading),
             ],
             if (mp.error != null && mp.selectedGenreId == null)
@@ -170,7 +192,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
               child: Text('No movies found',
                   style: TextStyle(color: Colors.white38)),
             )
-          else
+            else
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: GridView.builder(
@@ -189,6 +211,17 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 },
               ),
             ),
+            if (mp.isLoadingMore)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(
+                  child: SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              ),
         ],
       ),
     );
