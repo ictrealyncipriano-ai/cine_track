@@ -26,6 +26,30 @@ function createStreamContext()
     ]);
 }
 
+function fetchWithCurl(string $url): string|false
+{
+    if (!function_exists('curl_init')) return false;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_MAXREDIRS => 5,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36',
+        CURLOPT_HTTPHEADER => [
+            'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language: en-US,en;q=0.5',
+            'Referer: https://www.themoviedb.org/',
+        ],
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+    ]);
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return ($httpCode >= 200 && $httpCode < 400) ? $result : false;
+}
+
 $sourceIndex = isset($_GET['source']) ? (int) $_GET['source'] : 0;
 $tmdbId = isset($_GET['tmdb']) ? (int) $_GET['tmdb'] : 0;
 
@@ -40,15 +64,16 @@ $sourceIndex = min($sourceIndex, count($sources) - 1);
 $source = $sources[$sourceIndex];
 $embedUrl = sprintf($source['url'], $tmdbId);
 
-// Source 0 (API Player): redirect directly — player controls now work
-if ($sourceIndex === 0) {
+// Source 1 (VidLink): redirect directly — player controls now work
+if ($sourceIndex === 1) {
     header('Location: ' . $embedUrl);
     exit;
 }
 
-// Source 1 (VidLink): redirect directly — player controls now work
-if ($sourceIndex === 1) {
-    header('Location: ' . $embedUrl);
+// Sources 2 & 3 (vidsrcme.su / vidsrcme.ru): iframe wrapper — no X-Frame-Options, player runs on actual origin
+if ($sourceIndex === 2 || $sourceIndex === 3) {
+    $escaped = htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8');
+    echo '<!DOCTYPE html><html><head><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;overflow:hidden;background:#000}iframe{width:100vw;height:100vh;border:none}</style></head><body><iframe src="' . $escaped . '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></body></html>';
     exit;
 }
 
@@ -56,13 +81,19 @@ $context = createStreamContext();
 $html = @file_get_contents($embedUrl, false, $context);
 
 if ($html === false) {
+    $html = fetchWithCurl($embedUrl);
+}
+
+if ($html === false) {
     $err = error_get_last();
     $logDir = __DIR__ . '/../../logs';
     if (!is_dir($logDir)) @mkdir($logDir, 0777, true);
     @file_put_contents($logDir . '/proxy_errors.log', date('Y-m-d H:i:s') . ' | source=' . $sourceIndex . ' | tmdb=' . $tmdbId . ' | ' . ($err['message'] ?? 'unknown') . PHP_EOL, FILE_APPEND);
 
-    http_response_code(502);
-    echo '<html><body><h2>Failed to fetch stream source</h2><p>' . htmlspecialchars($embedUrl) . '</p></body></html>';
+    // Auto-fallback to the next source in the list
+    $fallbackIndex = ($sourceIndex + 1) % count($sources);
+    $fallbackUrl = sprintf($sources[$fallbackIndex]['url'], $tmdbId);
+    header('Location: ' . $fallbackUrl);
     exit;
 }
 
