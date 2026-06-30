@@ -23,6 +23,7 @@ class Movie {
   final List<int> genreIds;
   final int? runtime;
   final List<String> genres;
+  final int watchCount;
 
   Movie({
     required this.id,
@@ -35,6 +36,7 @@ class Movie {
     this.genreIds = const [],
     this.runtime,
     this.genres = const [],
+    this.watchCount = 0,
   });
 
   factory Movie.fromJson(Map<String, dynamic> json) {
@@ -72,6 +74,7 @@ class Movie {
       voteAverage: double.tryParse(json['vote_average']?.toString() ?? '') ??
           (json['vote_average'] as num?)?.toDouble() ??
           0.0,
+      watchCount: json['watch_count'] as int? ?? 0,
     );
   }
 

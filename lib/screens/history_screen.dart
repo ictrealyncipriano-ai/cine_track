@@ -150,7 +150,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           ),
                         );
                       }
-                      return MovieCard(movie: history[index]);
+                      return MovieCard(movie: history[index], watchCount: history[index].watchCount);
                     },
                     childCount: history.length + (hp.isLoadingMore ? 1 : 0),
                   ),

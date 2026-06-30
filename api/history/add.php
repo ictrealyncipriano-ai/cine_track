@@ -23,8 +23,9 @@ if (empty($input['movie_id'])) {
 
 $pdo = getDb();
 $stmt = $pdo->prepare('
-    INSERT INTO watch_history (user_id, movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+    INSERT INTO watch_history (user_id, movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at, watch_count)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), 1)
+    ON DUPLICATE KEY UPDATE watched_at = NOW(), watch_count = watch_count + 1
 ');
 $stmt->execute([
     $userId,

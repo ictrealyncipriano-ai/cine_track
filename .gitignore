@@ -60,3 +60,4 @@ logs/
 api/cache/
 # Build logs
 *.log.txt
+.vercel

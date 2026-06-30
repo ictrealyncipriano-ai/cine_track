@@ -5,8 +5,9 @@ import '../screens/movie_details_screen.dart';
 
 class MovieCard extends StatelessWidget {
   final Movie movie;
+  final int watchCount;
 
-  const MovieCard({super.key, required this.movie});
+  const MovieCard({super.key, required this.movie, this.watchCount = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +58,33 @@ class MovieCard extends StatelessWidget {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            if (watchCount > 1)
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFC107).withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.replay, size: 14, color: Colors.black),
+                      const SizedBox(width: 4),
+                      Text(
+                        '$watchCount',
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

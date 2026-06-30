@@ -21,7 +21,7 @@ $countStmt = $pdo->prepare('SELECT COUNT(*) as total FROM watch_history WHERE us
 $countStmt->execute([$userId]);
 $total = (int) $countStmt->fetch()['total'];
 
-$stmt = $pdo->prepare("SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at FROM watch_history WHERE user_id = ? ORDER BY watched_at DESC LIMIT $perPage OFFSET $offset");
+$stmt = $pdo->prepare("SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at, watch_count FROM watch_history WHERE user_id = ? ORDER BY watched_at DESC LIMIT $perPage OFFSET $offset");
 $stmt->execute([$userId]);
 $history = $stmt->fetchAll();
 
