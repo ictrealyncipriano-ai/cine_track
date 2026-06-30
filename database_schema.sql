@@ -9,8 +9,8 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) DEFAULT 'user',
     email_verified_at DATETIME NULL,
-    google_id VARCHAR(255) NULL UNIQUE,
-    apple_id VARCHAR(255) NULL UNIQUE,
+    google_id VARCHAR(255) NULL,
+    apple_id VARCHAR(255) NULL,
     avatar_url VARCHAR(500) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
