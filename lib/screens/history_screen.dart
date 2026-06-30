@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/history_provider.dart';
-import '../widgets/movie_card.dart';
 import '../widgets/empty_state.dart';
+import 'movie_details_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -48,6 +49,14 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _onRefresh() async {
     await context.read<HistoryProvider>().fetchHistory();
+  }
+
+  String _formatDate(String dateStr) {
+    if (dateStr.isEmpty) return '';
+    final dt = DateTime.tryParse(dateStr);
+    if (dt == null) return dateStr;
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
   @override
@@ -131,26 +140,106 @@ class _HistoryScreenState extends State<HistoryScreen> {
               )
             else
               SliverPadding(
-                padding: const EdgeInsets.all(16),
-                sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.6,
-                    crossAxisSpacing: 10,
-                    mainAxisSpacing: 10,
-                  ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                sliver: SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
                       if (index >= history.length) {
-                        return const Center(
-                          child: SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                        return const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(
+                            child: SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
                           ),
                         );
                       }
-                      return MovieCard(movie: history[index], watchCount: history[index].watchCount);
+                      final movie = history[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => MovieDetailsScreen(movie: movie),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF161B22),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 80,
+                                  height: 120,
+                                  child: movie.posterUrl != null
+                                      ? CachedNetworkImage(
+                                          imageUrl: movie.posterUrl!,
+                                          width: 80,
+                                          height: 120,
+                                          fit: BoxFit.cover,
+                                          placeholder: (_, __) => Container(color: const Color(0xFF0D1117)),
+                                          errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white24),
+                                        )
+                                      : Container(color: const Color(0xFF0D1117), child: const Icon(Icons.movie, color: Colors.white24)),
+                                ),
+                                Expanded(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          movie.title,
+                                          style: GoogleFonts.inter(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          _formatDate(movie.watchedAt),
+                                          style: GoogleFonts.inter(
+                                            fontSize: 13,
+                                            color: Colors.white54,
+                                          ),
+                                        ),
+                                        if (movie.watchCount > 1) ...[
+                                          const SizedBox(height: 4),
+                                          Row(
+                                            children: [
+                                              const Icon(Icons.replay, size: 14, color: Color(0xFFFFC107)),
+                                              const SizedBox(width: 4),
+                                              Text(
+                                                'Watched ${movie.watchCount} times',
+                                                style: GoogleFonts.inter(
+                                                  fontSize: 13,
+                                                  color: const Color(0xFFFFC107),
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
                     },
                     childCount: history.length + (hp.isLoadingMore ? 1 : 0),
                   ),
