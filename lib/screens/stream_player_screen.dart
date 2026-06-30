@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import '../config.dart';
+import '../helpers/open_url.dart';
 import '../models/movie.dart';
 
 class StreamPlayerScreen extends StatefulWidget {
@@ -26,11 +28,18 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    _openSourceOnWeb();
     Timer(const Duration(seconds: 4), () {
       if (mounted && _progress < 1) {
         setState(() => _showTrySource = true);
       }
     });
+  }
+
+  void _openSourceOnWeb() {
+    if (!kIsWeb) return;
+    if (_sourceIndex < 2) return;
+    openUrlInNewTab(_currentUrl);
   }
 
   @override
@@ -42,6 +51,10 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
     _sourceIndex = (_sourceIndex + 1) % AppConfig.streamingSources.length;
     _showTrySource = false;
     _progress = 0;
+    if (kIsWeb && _sourceIndex >= 2) {
+      openUrlInNewTab(_currentUrl);
+      return;
+    }
     _controller?.loadUrl(
       urlRequest: URLRequest(url: WebUri(_currentUrl)),
     );

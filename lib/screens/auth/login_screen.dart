@@ -18,6 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _codeController = TextEditingController();
+  bool _rememberMe = true;
   String? _error;
   bool _emailNotVerified = false;
   bool _resendSent = false;
@@ -47,6 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final error = await auth.login(
       _emailController.text.trim(),
       _passwordController.text,
+      rememberMe: _rememberMe,
     );
 
     if (mounted) {
@@ -173,7 +175,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     obscureText: true,
                     validator: (v) =>
-                        v != null && v.length >= 6 ? null : 'Min 6 characters',
+                        v != null && v.length >= 8 ? null : 'Min 8 characters',
                   ),
                   Align(
                     alignment: Alignment.centerRight,
@@ -193,6 +195,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _rememberMe,
+                        onChanged: (v) => setState(() => _rememberMe = v ?? true),
+                        fillColor: WidgetStateProperty.resolveWith((states) =>
+                            _rememberMe ? Theme.of(context).colorScheme.primary : Colors.white24),
+                        checkColor: Colors.black,
+                        side: const BorderSide(color: Colors.white24),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      ),
+                      Text('Remember me',
+                          style: TextStyle(color: Colors.white54, fontSize: 13)),
+                    ],
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 4),

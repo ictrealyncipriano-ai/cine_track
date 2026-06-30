@@ -51,6 +51,7 @@ function fetchWithCurl(string $url): string|false
 
 $sourceIndex = isset($_GET['source']) ? (int) $_GET['source'] : 0;
 $tmdbId = isset($_GET['tmdb']) ? (int) $_GET['tmdb'] : 0;
+$platform = isset($_GET['platform']) ? $_GET['platform'] : 'mobile';
 
 if ($tmdbId <= 0) {
     http_response_code(400);
@@ -69,8 +70,14 @@ if ($sourceIndex === 1) {
     exit;
 }
 
-// Sources 2 & 3 (vidsrcme.su / vidsrcme.ru): iframe wrapper — no X-Frame-Options, player runs on actual origin
+// Sources 2 & 3 (vidsrcme.su / vidsrcme.ru):
+//   - Web (Chrome HtmlElementView): direct redirect — single iframe from Flutter avoids "Please Disable Sandbox"
+//   - Mobile (InAppWebView): iframe wrapper — avoids Adscore anti-bot detection
 if ($sourceIndex === 2 || $sourceIndex === 3) {
+    if ($platform === 'web') {
+        header('Location: ' . $embedUrl);
+        exit;
+    }
     $escaped = htmlspecialchars($embedUrl, ENT_QUOTES, 'UTF-8');
     echo '<!DOCTYPE html><html><head><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;overflow:hidden;background:#000}iframe{width:100vw;height:100vh;border:none}</style></head><body><iframe src="' . $escaped . '" allow="autoplay; encrypted-media; fullscreen" allowfullscreen></iframe></body></html>';
     exit;

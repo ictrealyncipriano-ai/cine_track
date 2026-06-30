@@ -13,12 +13,15 @@ class WebViewWidget extends StatelessWidget {
     final viewType = 'wv-${identityHashCode(this)}';
     try {
       ui_web.platformViewRegistry.registerViewFactory(viewType, (int id) {
-        return html.IFrameElement()
+        final iframe = html.IFrameElement()
           ..src = url
           ..style.border = 'none'
           ..style.width = '100%'
           ..style.height = '100%'
-          ..allow = 'fullscreen; autoplay; encrypted-media';
+          ..allow = 'fullscreen; autoplay; encrypted-media'
+          ..referrerPolicy = 'no-referrer';
+        try { iframe.sandbox.value = ''; } catch (_) {}
+        return iframe;
       });
     } catch (_) {}
     return HtmlElementView(viewType: viewType);

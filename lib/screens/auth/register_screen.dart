@@ -17,6 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  int _passwordStrength = 0;
   String? _error;
 
   @override
@@ -50,6 +51,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     }
+  }
+
+  Color _strengthColor() {
+    return switch (_passwordStrength) {
+      0 => Colors.red,
+      1 => Colors.orange,
+      2 => Colors.amber,
+      3 => Colors.lightGreen,
+      _ => Colors.green,
+    };
+  }
+
+  String _strengthLabel() {
+    return switch (_passwordStrength) {
+      0 => 'Weak',
+      1 => 'Fair',
+      2 => 'Good',
+      3 => 'Strong',
+      _ => 'Very strong',
+    };
+  }
+
+  void _onPasswordChanged(String v) {
+    int strength = 0;
+    if (v.length >= 8) strength++;
+    if (v.contains(RegExp(r'[A-Z]'))) strength++;
+    if (v.contains(RegExp(r'[a-z]'))) strength++;
+    if (v.contains(RegExp(r'[0-9]'))) strength++;
+    setState(() => _passwordStrength = strength);
   }
 
   @override
@@ -127,6 +157,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     obscureText: true,
+                    onChanged: _onPasswordChanged,
                     validator: (v) {
                       if (v == null || v.length < 8) return 'Min 8 characters';
                       if (!v.contains(RegExp(r'[A-Z]'))) return 'Needs an uppercase letter';
@@ -135,7 +166,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       return null;
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: _passwordStrength / 4,
+                      minHeight: 4,
+                      backgroundColor: Colors.white10,
+                      valueColor: AlwaysStoppedAnimation(_strengthColor()),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(
+                      _strengthLabel(),
+                      style: TextStyle(fontSize: 12, color: _strengthColor()),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: InputDecoration(

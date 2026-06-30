@@ -22,8 +22,8 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> login(String email, String password) async {
-    return _authService.login(email, password);
+  Future<String?> login(String email, String password, {bool rememberMe = true}) async {
+    return _authService.login(email, password, rememberMe: rememberMe);
   }
 
   Future<String?> register(String name, String email, String password) async {

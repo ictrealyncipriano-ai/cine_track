@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $input = json_decode(file_get_contents('php://input'), true);
 $email = trim($input['email'] ?? '');
 $password = $input['password'] ?? '';
+$rememberMe = isset($input['remember_me']) ? (bool) $input['remember_me'] : true;
 
 if (empty($email) || empty($password)) {
     jsonError('Email and password are required');
@@ -53,7 +54,8 @@ if ($user['email_verified_at'] === null) {
 
 $token = bin2hex(random_bytes(32));
 
-$stmt = $pdo->prepare('INSERT INTO api_tokens (user_id, token, expires_at) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 DAY))');
+$expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 30 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
+$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at) VALUES (?, ?, $expiry)");
 $stmt->execute([$user['id'], $token]);
 
 jsonResponse([

@@ -20,6 +20,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _cpController = TextEditingController();
   final _npController = TextEditingController();
   final _cnpController = TextEditingController();
+  int _newPasswordStrength = 0;
   bool _changingPassword = false;
 
   final _deletePwController = TextEditingController();
@@ -138,6 +139,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         );
       }
     }
+  }
+
+  Color _strengthColor() {
+    return switch (_newPasswordStrength) {
+      0 => Colors.red,
+      1 => Colors.orange,
+      2 => Colors.amber,
+      3 => Colors.lightGreen,
+      _ => Colors.green,
+    };
+  }
+
+  String _strengthLabel() {
+    return switch (_newPasswordStrength) {
+      0 => 'Weak',
+      1 => 'Fair',
+      2 => 'Good',
+      3 => 'Strong',
+      _ => 'Very strong',
+    };
+  }
+
+  void _onNewPasswordChanged(String v) {
+    int strength = 0;
+    if (v.length >= 8) strength++;
+    if (v.contains(RegExp(r'[A-Z]'))) strength++;
+    if (v.contains(RegExp(r'[a-z]'))) strength++;
+    if (v.contains(RegExp(r'[0-9]'))) strength++;
+    setState(() => _newPasswordStrength = strength);
   }
 
   void _showDeleteDialog() {
@@ -380,6 +410,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextFormField(
                 controller: _npController,
                 obscureText: true,
+                onChanged: _onNewPasswordChanged,
                 decoration: InputDecoration(
                   labelText: 'New Password',
                   filled: true,
@@ -388,6 +419,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: _newPasswordStrength / 4,
+                  minHeight: 4,
+                  backgroundColor: Colors.white10,
+                  valueColor: AlwaysStoppedAnimation(_strengthColor()),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  _strengthLabel(),
+                  style: TextStyle(fontSize: 12, color: _strengthColor()),
                 ),
               ),
               const SizedBox(height: 12),

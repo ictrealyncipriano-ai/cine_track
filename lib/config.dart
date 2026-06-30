@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 class AppConfig {
   static const String tmdbApiKey = '6e7c39152f79deae9cf6c4160eb245fa';
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
@@ -26,6 +28,7 @@ class AppConfig {
   ];
 
   static String streamUrl(int movieId, int sourceIndex) {
-    return '$apiBaseUrl/proxy/embed.php?source=$sourceIndex&tmdb=$movieId';
+    final platform = kIsWeb ? 'web' : 'mobile';
+    return '$apiBaseUrl/proxy/embed.php?source=$sourceIndex&tmdb=$movieId&platform=$platform';
   }
 }

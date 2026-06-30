@@ -34,7 +34,7 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<String?> login(String email, String password) async {
+  Future<String?> login(String email, String password, {bool rememberMe = true}) async {
     _isLoading = true;
     notifyListeners();
 
@@ -42,6 +42,7 @@ class AuthService extends ChangeNotifier {
       final data = await _api.post('/auth/login.php', {
         'email': email,
         'password': password,
+        'remember_me': rememberMe,
       });
       await _api.saveToken(data['token'] as String);
       _user = data['user'];
