@@ -1,4 +1,8 @@
+import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'api_service.dart';
 
 class AuthService extends ChangeNotifier {
@@ -34,15 +38,39 @@ class AuthService extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<Map<String, dynamic>> _getDeviceInfo() async {
+    final info = DeviceInfoPlugin();
+    try {
+      if (Platform.isAndroid) {
+        final android = await info.androidInfo;
+        return {
+          'platform': 'android',
+          'model': android.model,
+          'os_version': android.version.release,
+        };
+      } else if (Platform.isIOS) {
+        final ios = await info.iosInfo;
+        return {
+          'platform': 'ios',
+          'model': ios.model,
+          'os_version': ios.systemVersion,
+        };
+      }
+    } catch (_) {}
+    return {'platform': kIsWeb ? 'web' : 'unknown'};
+  }
+
   Future<String?> login(String email, String password, {bool rememberMe = true}) async {
     _isLoading = true;
     notifyListeners();
 
     try {
+      final deviceInfo = await _getDeviceInfo();
       final data = await _api.post('/auth/login.php', {
         'email': email,
         'password': password,
         'remember_me': rememberMe,
+        'device_info': deviceInfo,
       });
       await _api.saveToken(data['token'] as String);
       _user = data['user'];
@@ -52,6 +80,68 @@ class AuthService extends ChangeNotifier {
     } finally {
       _isLoading = false;
       notifyListeners();
+    }
+  }
+
+  Future<String?> _oauthLogin(String provider, String idToken, {String? name}) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final deviceInfo = await _getDeviceInfo();
+      final data = await _api.post('/auth/oauth.php', {
+        'provider': provider,
+        'id_token': idToken,
+        'name': name ?? '',
+        'device_info': deviceInfo,
+      });
+      await _api.saveToken(data['token'] as String);
+      _user = data['user'];
+      return null;
+    } catch (e) {
+      return e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<String?> loginWithGoogle() async {
+    try {
+      final googleUser = await GoogleSignIn(
+        scopes: ['email', 'profile'],
+      ).signIn();
+      if (googleUser == null) return 'Sign in cancelled';
+
+      final googleAuth = await googleUser.authentication;
+      if (googleAuth.idToken == null) return 'Failed to get Google ID token';
+
+      return _oauthLogin('google', googleAuth.idToken!, name: googleUser.displayName);
+    } catch (e) {
+      return e.toString();
+    }
+  }
+
+  Future<String?> loginWithApple() async {
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+      );
+      if (credential.identityToken == null) return 'Failed to get Apple ID token';
+
+      String? name;
+      if (credential.givenName != null || credential.familyName != null) {
+        name = [credential.givenName, credential.familyName]
+            .where((n) => n != null)
+            .join(' ');
+      }
+
+      return _oauthLogin('apple', credential.identityToken!, name: name);
+    } catch (e) {
+      return e.toString();
     }
   }
 

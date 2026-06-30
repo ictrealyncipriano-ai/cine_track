@@ -333,6 +333,80 @@ class _LoginScreenState extends State<LoginScreen> {
                                   fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      const Expanded(child: Divider(color: Colors.white12)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: Text('or continue with',
+                            style: TextStyle(color: Colors.white24, fontSize: 12)),
+                      ),
+                      const Expanded(child: Divider(color: Colors.white12)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final auth = context.read<AuthProvider>();
+                              final error = await auth.loginWithGoogle();
+                              if (context.mounted && error == null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                                );
+                              } else if (context.mounted && error != null) {
+                                setState(() => _error = error);
+                              }
+                            },
+                            icon: const Icon(Icons.g_mobiledata, size: 24),
+                            label: const Text('Google', style: TextStyle(fontSize: 13)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white70,
+                              side: const BorderSide(color: Colors.white24),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: SizedBox(
+                          height: 48,
+                          child: OutlinedButton.icon(
+                            onPressed: () async {
+                              final auth = context.read<AuthProvider>();
+                              final error = await auth.loginWithApple();
+                              if (context.mounted && error == null) {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                                );
+                              } else if (context.mounted && error != null) {
+                                setState(() => _error = error);
+                              }
+                            },
+                            icon: const Icon(Icons.apple, size: 24),
+                            label: const Text('Apple', style: TextStyle(fontSize: 13)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white70,
+                              side: const BorderSide(color: Colors.white24),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () {

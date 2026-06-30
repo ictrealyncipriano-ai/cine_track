@@ -26,6 +26,14 @@ class AuthProvider extends ChangeNotifier {
     return _authService.login(email, password, rememberMe: rememberMe);
   }
 
+  Future<String?> loginWithGoogle() async {
+    return _authService.loginWithGoogle();
+  }
+
+  Future<String?> loginWithApple() async {
+    return _authService.loginWithApple();
+  }
+
   Future<String?> register(String name, String email, String password) async {
     return _authService.register(name, email, password);
   }

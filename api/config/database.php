@@ -183,3 +183,9 @@ function clearAccountLockout(string $email): void {
     $stmt = $pdo->prepare('DELETE FROM cache WHERE `key` = ?');
     $stmt->execute([$cacheKey]);
 }
+
+function logLoginAttempt(string $email, ?int $userId, bool $success, string $ip, string $userAgent, string $provider = 'email'): void {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('INSERT INTO login_audit (email, user_id, success, ip, user_agent, provider) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$email, $userId, $success ? 1 : 0, $ip, $userAgent, $provider]);
+}

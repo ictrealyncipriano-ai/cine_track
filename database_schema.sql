@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) DEFAULT 'user',
     email_verified_at DATETIME NULL,
+    google_id VARCHAR(255) NULL UNIQUE,
+    apple_id VARCHAR(255) NULL UNIQUE,
+    avatar_url VARCHAR(500) NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -19,6 +22,9 @@ CREATE TABLE IF NOT EXISTS api_tokens (
     token VARCHAR(255) NOT NULL UNIQUE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     expires_at DATETIME NULL,
+    ip_address VARCHAR(45) DEFAULT '',
+    user_agent VARCHAR(500) DEFAULT '',
+    device_info TEXT,
     INDEX idx_user_id (user_id)
 );
 
@@ -33,6 +39,20 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
     token VARCHAR(255) NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (email, token)
+);
+
+CREATE TABLE IF NOT EXISTS login_audit (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    user_id INT NULL,
+    success TINYINT(1) NOT NULL DEFAULT 0,
+    ip VARCHAR(45) NOT NULL,
+    user_agent VARCHAR(500) DEFAULT '',
+    provider VARCHAR(20) DEFAULT 'email',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email (email),
+    INDEX idx_user_id (user_id),
+    INDEX idx_created_at (created_at)
 );
 
 CREATE TABLE IF NOT EXISTS watchlist (

@@ -27,6 +27,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 checkRateLimit("login:$ip", 5, 5);
 
 checkAccountLockout($email, 5, 5);
@@ -37,6 +38,7 @@ $stmt->execute([$email]);
 $user = $stmt->fetch();
 
 if (!$user || !password_verify($password, $user['password'])) {
+    logLoginAttempt($email, null, false, $ip, $userAgent);
     incrementAccountLockout($email, 5, 5);
     incrementRateLimit("login:$ip", 5);
     jsonError('Invalid email or password', 401);
@@ -52,11 +54,14 @@ if ($user['email_verified_at'] === null) {
     ], 403);
 }
 
+logLoginAttempt($email, (int) $user['id'], true, $ip, $userAgent);
+
 $token = bin2hex(random_bytes(32));
+$deviceInfo = isset($input['device_info']) ? json_encode($input['device_info']) : null;
 
 $expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 30 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
-$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at) VALUES (?, ?, $expiry)");
-$stmt->execute([$user['id'], $token]);
+$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info) VALUES (?, ?, $expiry, ?, ?, ?)");
+$stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo]);
 
 jsonResponse([
     'token' => $token,

@@ -20,15 +20,19 @@ if ($action === 'list') {
     $currentToken = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
     $currentToken = str_replace('Bearer ', '', $currentToken);
 
-    $stmt = $pdo->prepare('SELECT id, token, created_at, expires_at FROM api_tokens WHERE user_id = ? ORDER BY created_at DESC');
+    $stmt = $pdo->prepare('SELECT id, token, created_at, expires_at, ip_address, user_agent, device_info FROM api_tokens WHERE user_id = ? ORDER BY created_at DESC');
     $stmt->execute([$userId]);
     $tokens = $stmt->fetchAll();
 
     $sessions = array_map(function ($t) use ($currentToken) {
+        $deviceInfo = $t['device_info'] ? json_decode($t['device_info'], true) : null;
         return [
             'id' => (int)$t['id'],
             'created_at' => $t['created_at'],
             'expires_at' => $t['expires_at'],
+            'ip_address' => $t['ip_address'] ?? '',
+            'user_agent' => $t['user_agent'] ?? '',
+            'device_info' => $deviceInfo,
             'is_current' => $t['token'] === $currentToken,
         ];
     }, $tokens);

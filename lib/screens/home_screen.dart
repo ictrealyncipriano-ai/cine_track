@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/idle_timer_wrapper.dart';
 import 'browse_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
@@ -28,9 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _screens,
+      body: IdleTimerWrapper(
+        child: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

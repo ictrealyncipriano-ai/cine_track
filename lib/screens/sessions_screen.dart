@@ -96,6 +96,8 @@ class _SessionsScreenState extends State<SessionsScreen> {
                           final isCurrent = s['is_current'] == true;
                           final createdAt = s['created_at'] as String? ?? 'Unknown';
                           final expiresAt = s['expires_at'] as String? ?? 'Unknown';
+                          final deviceInfo = s['device_info'] as Map<String, dynamic>?;
+                          final ipAddress = s['ip_address'] as String? ?? '';
                           final id = s['id'] as int;
 
                           return Container(
@@ -150,6 +152,18 @@ class _SessionsScreenState extends State<SessionsScreen> {
                                         'Expires: $expiresAt',
                                         style: GoogleFonts.inter(fontSize: 12, color: Colors.white38),
                                       ),
+                                      if (deviceInfo != null) ...[
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${deviceInfo['platform'] ?? '?'} · ${deviceInfo['model'] ?? '?'} · ${deviceInfo['os_version'] ?? '?'}',
+                                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white24),
+                                        ),
+                                      ],
+                                      if (ipAddress.isNotEmpty)
+                                        Text(
+                                          ipAddress,
+                                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white24),
+                                        ),
                                     ],
                                   ),
                                 ),
