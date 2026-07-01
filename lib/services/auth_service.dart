@@ -90,14 +90,29 @@ class AuthService extends ChangeNotifier {
 
   bool get emailVerified => _user?.emailVerified ?? false;
 
-  Future<String?> register(String name, String email, String password, String confirmPassword) async {
+  Future<String?> register({
+    required String name,
+    required String username,
+    required String email,
+    String? phone,
+    String? dateOfBirth,
+    String? country,
+    bool marketingOptIn = false,
+    required String password,
+    required String confirmPassword,
+  }) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       await _api.post('/auth/register.php', {
         'name': name,
+        'username': username,
         'email': email,
+        'phone': phone ?? '',
+        'date_of_birth': dateOfBirth ?? '',
+        'country': country ?? '',
+        'marketing_opt_in': marketingOptIn,
         'password': password,
         'confirm_password': confirmPassword,
       });

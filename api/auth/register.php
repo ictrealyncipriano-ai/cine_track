@@ -16,16 +16,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $input = json_decode(file_get_contents('php://input'), true);
 $name = trim($input['name'] ?? '');
+$username = trim($input['username'] ?? '');
 $email = strtolower(trim($input['email'] ?? ''));
+$phone = trim($input['phone'] ?? '');
+$dateOfBirth = trim($input['date_of_birth'] ?? '');
+$country = trim($input['country'] ?? '');
+$marketingOptIn = !empty($input['marketing_opt_in']);
 $password = $input['password'] ?? '';
 $confirmPassword = $input['confirm_password'] ?? '';
 
-if (empty($name) || empty($email) || empty($password)) {
-    jsonError('Name, email, and password are required');
+if (empty($name) || empty($username) || empty($email) || empty($password)) {
+    jsonError('Name, username, email, and password are required');
 }
 
 if (strlen($name) > 255) {
     jsonError('Name must not exceed 255 characters');
+}
+
+$username = strtolower($username);
+if (strlen($username) < 3 || strlen($username) > 50) {
+    jsonError('Username must be between 3 and 50 characters');
+}
+
+if (!preg_match('/^[a-z0-9_-]+$/', $username)) {
+    jsonError('Username may only contain letters, numbers, underscores, and dashes');
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -34,6 +48,25 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 if (strlen($email) > 255) {
     jsonError('Email must not exceed 255 characters');
+}
+
+if (!empty($phone) && !preg_match('/^\+?[\d\s\-()]{7,20}$/', $phone)) {
+    jsonError('Invalid phone number format');
+}
+
+if (!empty($dateOfBirth)) {
+    $dob = DateTime::createFromFormat('Y-m-d', $dateOfBirth);
+    if (!$dob || $dob->format('Y-m-d') !== $dateOfBirth) {
+        jsonError('Invalid date of birth format (use YYYY-MM-DD)');
+    }
+    $minAge = new DateTime('-13 years');
+    if ($dob > $minAge) {
+        jsonError('You must be at least 13 years old to register');
+    }
+}
+
+if (!empty($country) && strlen($country) > 100) {
+    jsonError('Country must not exceed 100 characters');
 }
 
 $passwordError = validatePassword($password);
@@ -50,6 +83,12 @@ checkRateLimit("register:$ip", 5, 5);
 
 $pdo = getDb();
 
+$stmt = $pdo->prepare('SELECT id FROM users WHERE username = ?');
+$stmt->execute([$username]);
+if ($stmt->fetch()) {
+    jsonError('Username already taken', 409);
+}
+
 $stmt = $pdo->prepare('SELECT id FROM users WHERE email = ?');
 $stmt->execute([$email]);
 if ($stmt->fetch()) {
@@ -58,8 +97,8 @@ if ($stmt->fetch()) {
 
 $hash = password_hash($password, PASSWORD_BCRYPT);
 
-$stmt = $pdo->prepare('INSERT INTO users (name, email, password, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())');
-$stmt->execute([$name, $email, $hash]);
+$stmt = $pdo->prepare('INSERT INTO users (name, username, email, phone, date_of_birth, country, marketing_opt_in, password, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())');
+$stmt->execute([$name, $username, $email, $phone ?: null, $dateOfBirth ?: null, $country ?: null, $marketingOptIn ? 1 : 0, $hash]);
 $userId = (int) $pdo->lastInsertId();
 
 $verificationToken = bin2hex(random_bytes(32));

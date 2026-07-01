@@ -28,8 +28,28 @@ class AuthProvider extends ChangeNotifier {
     return _authService.login(email, password, rememberMe: rememberMe);
   }
 
-  Future<String?> register(String name, String email, String password, String confirmPassword) async {
-    return _authService.register(name, email, password, confirmPassword);
+  Future<String?> register({
+    required String name,
+    required String username,
+    required String email,
+    String? phone,
+    String? dateOfBirth,
+    String? country,
+    bool marketingOptIn = false,
+    required String password,
+    required String confirmPassword,
+  }) async {
+    return _authService.register(
+      name: name,
+      username: username,
+      email: email,
+      phone: phone,
+      dateOfBirth: dateOfBirth,
+      country: country,
+      marketingOptIn: marketingOptIn,
+      password: password,
+      confirmPassword: confirmPassword,
+    );
   }
 
   Future<void> logout() async {

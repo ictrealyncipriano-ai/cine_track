@@ -103,7 +103,7 @@ if ($action === 'update_profile') {
         }
     }
 
-    $stmt = $pdo->prepare('SELECT id, name, email, email_verified_at FROM users WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, username, email, phone, date_of_birth, country, marketing_opt_in, email_verified_at FROM users WHERE id = ?');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
 
@@ -111,7 +111,12 @@ if ($action === 'update_profile') {
         'user' => [
             'id' => (int) $user['id'],
             'name' => $user['name'],
+            'username' => $user['username'],
             'email' => $user['email'],
+            'phone' => $user['phone'],
+            'date_of_birth' => $user['date_of_birth'],
+            'country' => $user['country'],
+            'marketing_opt_in' => (bool) $user['marketing_opt_in'],
             'email_verified' => $user['email_verified_at'] !== null,
         ],
     ]);

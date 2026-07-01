@@ -15,17 +15,76 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  int _passwordStrength = 0;
+
+  DateTime? _dateOfBirth;
+  String? _country;
   bool _acceptTerms = false;
+  bool _marketingOptIn = false;
+  int _passwordStrength = 0;
   String? _error;
+
+  static const _countries = [
+    'United States',
+    'Canada',
+    'United Kingdom',
+    'Australia',
+    'Germany',
+    'France',
+    'Spain',
+    'Italy',
+    'Netherlands',
+    'Sweden',
+    'Norway',
+    'Denmark',
+    'Finland',
+    'Switzerland',
+    'Austria',
+    'Belgium',
+    'Ireland',
+    'Portugal',
+    'Greece',
+    'Poland',
+    'Czech Republic',
+    'Japan',
+    'South Korea',
+    'China',
+    'India',
+    'Philippines',
+    'Indonesia',
+    'Malaysia',
+    'Thailand',
+    'Vietnam',
+    'Singapore',
+    'Brazil',
+    'Mexico',
+    'Argentina',
+    'Colombia',
+    'Chile',
+    'Peru',
+    'South Africa',
+    'Nigeria',
+    'Egypt',
+    'Kenya',
+    'New Zealand',
+    'Turkey',
+    'Russia',
+    'Ukraine',
+    'Israel',
+    'Saudi Arabia',
+    'United Arab Emirates',
+  ];
 
   @override
   void dispose() {
     _nameController.dispose();
+    _usernameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -40,10 +99,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     final auth = context.read<AuthProvider>();
     final error = await auth.register(
-      _nameController.text.trim(),
-      _emailController.text.trim().toLowerCase(),
-      _passwordController.text,
-      _confirmPasswordController.text,
+      name: _nameController.text.trim(),
+      username: _usernameController.text.trim(),
+      email: _emailController.text.trim().toLowerCase(),
+      phone: _phoneController.text.trim(),
+      dateOfBirth: _dateOfBirth != null
+          ? '${_dateOfBirth!.year.toString().padLeft(4, '0')}-${_dateOfBirth!.month.toString().padLeft(2, '0')}-${_dateOfBirth!.day.toString().padLeft(2, '0')}'
+          : null,
+      country: _country,
+      marketingOptIn: _marketingOptIn,
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
     );
 
     if (mounted) {
@@ -89,6 +155,62 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => _passwordStrength = strength);
   }
 
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final minDate = DateTime(now.year - 120, now.month, now.day);
+    final maxDate = DateTime(now.year - 13, now.month, now.day);
+
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _dateOfBirth ?? maxDate,
+      firstDate: minDate,
+      lastDate: maxDate,
+      builder: (context, child) => Theme(
+        data: Theme.of(context).copyWith(
+          colorScheme: ColorScheme.dark(
+            primary: Theme.of(context).colorScheme.primary,
+          ),
+        ),
+        child: child!,
+      ),
+    );
+
+    if (picked != null) {
+      setState(() => _dateOfBirth = picked);
+    }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+    Widget? suffix,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        suffixIcon: suffix,
+        filled: true,
+        fillColor: const Color(0xFF161B22),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+      ),
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      maxLength: null,
+      validator: validator,
+      onChanged: onChanged,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -118,44 +240,87 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 32),
-                  TextFormField(
+                  _buildTextField(
                     controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name',
-                      prefixIcon: const Icon(Icons.person_outlined),
-                      filled: true,
-                      fillColor: const Color(0xFF161B22),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    label: 'Name',
+                    icon: Icons.person_outlined,
                     validator: (v) =>
                         v != null && v.trim().isNotEmpty ? null : 'Name is required',
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
+                  _buildTextField(
+                    controller: _usernameController,
+                    label: 'Username',
+                    icon: Icons.alternate_email,
+                    validator: (v) {
+                      if (v == null || v.trim().length < 3) return 'Min 3 characters';
+                      if (v.trim().length > 50) return 'Max 50 characters';
+                      if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(v.trim())) {
+                        return 'Letters, numbers, _ and - only';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
                     controller: _emailController,
-                    decoration: InputDecoration(
-                      labelText: 'Email',
-                      prefixIcon: const Icon(Icons.email_outlined),
-                      filled: true,
-                      fillColor: const Color(0xFF161B22),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    label: 'Email',
+                    icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) =>
                         v != null && v.contains('@') ? null : 'Enter a valid email',
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
+                  _buildTextField(
+                    controller: _phoneController,
+                    label: 'Phone (optional)',
+                    icon: Icons.phone_outlined,
+                    keyboardType: TextInputType.phone,
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return null;
+                      if (!RegExp(r'^\+?[\d\s\-()]{7,20}$').hasMatch(v.trim())) {
+                        return 'Invalid phone number';
+                      }
+                      return null;
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  InkWell(
+                    onTap: _pickDate,
+                    borderRadius: BorderRadius.circular(12),
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: 'Date of Birth (optional)',
+                        prefixIcon: const Icon(Icons.calendar_today),
+                        suffixIcon: _dateOfBirth != null
+                            ? IconButton(
+                                icon: const Icon(Icons.clear, size: 18),
+                                onPressed: () => setState(() => _dateOfBirth = null),
+                              )
+                            : null,
+                        filled: true,
+                        fillColor: const Color(0xFF161B22),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      child: Text(
+                        _dateOfBirth != null
+                            ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
+                            : '',
+                        style: TextStyle(
+                          color: _dateOfBirth != null ? Colors.white : Colors.white38,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Password',
-                      prefixIcon: const Icon(Icons.lock_outlined),
+                      labelText: 'Country (optional)',
+                      prefixIcon: const Icon(Icons.language),
                       filled: true,
                       fillColor: const Color(0xFF161B22),
                       border: OutlineInputBorder(
@@ -163,8 +328,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         borderSide: BorderSide.none,
                       ),
                     ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        value: _country,
+                        isExpanded: true,
+                        dropdownColor: const Color(0xFF161B22),
+                        hint: const Text(
+                          'Select your country',
+                          style: TextStyle(color: Colors.white38),
+                        ),
+                        items: _countries.map((c) {
+                          return DropdownMenuItem(value: c, child: Text(c));
+                        }).toList(),
+                        onChanged: (v) => setState(() => _country = v),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildTextField(
+                    controller: _passwordController,
+                    label: 'Password',
+                    icon: Icons.lock_outlined,
                     obscureText: true,
-                    maxLength: 72,
                     onChanged: _onPasswordChanged,
                     validator: (v) {
                       if (v == null || v.length < 8) return 'Min 8 characters';
@@ -193,18 +378,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextFormField(
+                  _buildTextField(
                     controller: _confirmPasswordController,
-                    decoration: InputDecoration(
-                      labelText: 'Confirm Password',
-                      prefixIcon: const Icon(Icons.lock_outlined),
-                      filled: true,
-                      fillColor: const Color(0xFF161B22),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                    ),
+                    label: 'Confirm Password',
+                    icon: Icons.lock_outlined,
                     obscureText: true,
                     validator: (v) =>
                         v == _passwordController.text ? null : 'Passwords do not match',
@@ -227,6 +404,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           onTap: () => setState(() => _acceptTerms = !_acceptTerms),
                           child: Text(
                             'I agree to the Terms of Service and Privacy Policy',
+                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _marketingOptIn,
+                        onChanged: (v) => setState(() => _marketingOptIn = v ?? false),
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        checkColor: Colors.black,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _marketingOptIn = !_marketingOptIn),
+                          child: const Text(
+                            'Send me movie recommendations and updates via email',
                             style: TextStyle(color: Colors.white54, fontSize: 13),
                           ),
                         ),

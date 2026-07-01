@@ -5,7 +5,12 @@
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
+    phone VARCHAR(20) NULL,
+    date_of_birth DATE NULL,
+    country VARCHAR(100) NULL,
+    marketing_opt_in TINYINT(1) NOT NULL DEFAULT 0,
     password VARCHAR(255) NOT NULL,
     role VARCHAR(50) DEFAULT 'user',
     email_verified_at DATETIME NULL,
