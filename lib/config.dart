@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 
 class AppConfig {
   static const String tmdbApiKey = '6e7c39152f79deae9cf6c4160eb245fa';
-  static const String googleClientId = 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com';
   static const String tmdbBaseUrl = 'https://api.themoviedb.org/3';
   static const String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
 

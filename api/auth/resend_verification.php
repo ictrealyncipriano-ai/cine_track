@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-$email = trim($input['email'] ?? '');
+$email = strtolower(trim($input['email'] ?? ''));
 
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
     jsonError('A valid email is required');
@@ -53,6 +53,8 @@ try {
     $mail->addAddress($email, $user['name']);
     $mail->Subject = 'Verify your CineTrack email address';
     $mail->isHTML(true);
+    $appUrl = getAppUrl();
+    $verifyLink = $appUrl . '/auth/email_verify.php?user_id=' . $user['id'] . '&token=' . urlencode($verificationToken);
     $mail->Body = "
         <div style='font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;'>
             <h2 style='color: #FFC107;'>CineTrack</h2>
@@ -62,7 +64,7 @@ try {
                 <span style='font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #FFC107; background: #0D1117; padding: 16px 32px; border-radius: 12px; display: inline-block;'>{$verificationCode}</span>
             </p>
             <p style='text-align: center; margin: 24px 0;'>
-                <a href='http://localhost/cine_track/api/auth/email_verify.php?token=" . urlencode($verificationToken) . "'
+                <a href='{$verifyLink}'
                    style='background-color: #FFC107; color: #000; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;'>
                     Verify Email Address
                 </a>
@@ -70,7 +72,7 @@ try {
             <p style='color: #888; font-size: 13px;'>This code and link expire in 10 minutes. If you didn't request this, you can safely ignore this email.</p>
         </div>
     ";
-    $mail->AltBody = "Your verification code: {$verificationCode}\n\nOr click: http://localhost/cine_track/api/auth/email_verify.php?token=" . urlencode($verificationToken) . "\n\nThis code expires in 10 minutes.";
+    $mail->AltBody = "Your verification code: {$verificationCode}\n\nOr click: {$verifyLink}\n\nThis code expires in 10 minutes.";
     $mail->send();
 } catch (Exception $e) {
     jsonError('Failed to send email. Please try again later.', 500);

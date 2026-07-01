@@ -18,6 +18,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   int _passwordStrength = 0;
+  bool _acceptTerms = false;
   String? _error;
 
   @override
@@ -31,12 +32,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_acceptTerms) {
+      setState(() => _error = 'You must agree to the Terms of Service and Privacy Policy');
+      return;
+    }
 
     final auth = context.read<AuthProvider>();
     final error = await auth.register(
       _nameController.text.trim(),
-      _emailController.text.trim(),
+      _emailController.text.trim().toLowerCase(),
       _passwordController.text,
+      _confirmPasswordController.text,
     );
 
     if (mounted) {
@@ -157,9 +163,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       ),
                     ),
                     obscureText: true,
+                    maxLength: 72,
                     onChanged: _onPasswordChanged,
                     validator: (v) {
                       if (v == null || v.length < 8) return 'Min 8 characters';
+                      if (v.length > 72) return 'Max 72 characters';
                       if (!v.contains(RegExp(r'[A-Z]'))) return 'Needs an uppercase letter';
                       if (!v.contains(RegExp(r'[a-z]'))) return 'Needs a lowercase letter';
                       if (!v.contains(RegExp(r'[0-9]'))) return 'Needs a digit';
@@ -204,7 +212,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     const SizedBox(height: 12),
                     Text(_error!, style: const TextStyle(color: Colors.redAccent)),
                   ],
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _acceptTerms,
+                        onChanged: (v) => setState(() => _acceptTerms = v ?? false),
+                        activeColor: Theme.of(context).colorScheme.primary,
+                        checkColor: Colors.black,
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => _acceptTerms = !_acceptTerms),
+                          child: Text(
+                            'I agree to the Terms of Service and Privacy Policy',
+                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
                     height: 52,

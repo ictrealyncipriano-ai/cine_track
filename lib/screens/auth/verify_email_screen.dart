@@ -28,7 +28,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   Future<void> _resend() async {
     final auth = context.read<AuthProvider>();
-    final email = auth.user?['email'] as String?;
+    final email = auth.user?.email;
     if (email == null) return;
 
     final error = await auth.resendVerification(email);
@@ -50,7 +50,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   Future<void> _verifyCode() async {
     final auth = context.read<AuthProvider>();
-    final email = auth.user?['email'] as String?;
+    final email = auth.user?.email;
     if (email == null) return;
 
     final code = _codeController.text.trim();
@@ -89,7 +89,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
-    final email = auth.user?['email'] as String? ?? '';
+    final email = auth.user?.email ?? '';
 
     return Scaffold(
       body: SafeArea(

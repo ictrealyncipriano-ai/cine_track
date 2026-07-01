@@ -189,3 +189,24 @@ function logLoginAttempt(string $email, ?int $userId, bool $success, string $ip,
     $stmt = $pdo->prepare('INSERT INTO login_audit (email, user_id, success, ip, user_agent, provider) VALUES (?, ?, ?, ?, ?, ?)');
     $stmt->execute([$email, $userId, $success ? 1 : 0, $ip, $userAgent, $provider]);
 }
+
+function validatePassword(string $password): ?string {
+    if (strlen($password) < 8) return 'Password must be at least 8 characters';
+    if (strlen($password) > 72) return 'Password must not exceed 72 characters';
+    if (!preg_match('/[A-Z]/', $password)) return 'Password must contain at least one uppercase letter';
+    if (!preg_match('/[a-z]/', $password)) return 'Password must contain at least one lowercase letter';
+    if (!preg_match('/[0-9]/', $password)) return 'Password must contain at least one digit';
+    return null;
+}
+
+function getAppUrl(): string {
+    $envUrl = getenv('APP_URL');
+    if (!empty($envUrl)) {
+        return rtrim($envUrl, '/');
+    }
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+    $baseDir = dirname($scriptDir);
+    return $protocol . '://' . $host . $baseDir;
+}

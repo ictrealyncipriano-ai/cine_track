@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import '../models/user.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -6,10 +8,10 @@ class AuthProvider extends ChangeNotifier {
 
   AuthProvider(this._authService) {
     _authService.addListener(_onAuthChange);
-    _authService.checkAuth();
+    unawaited(_authService.checkAuth());
   }
 
-  Map<String, dynamic>? get user => _authService.user;
+  User? get user => _authService.user;
   bool get isAuthenticated => _authService.isAuthenticated;
   bool get isLoading => _authService.isLoading;
   bool get emailVerified => _authService.emailVerified;
@@ -26,16 +28,8 @@ class AuthProvider extends ChangeNotifier {
     return _authService.login(email, password, rememberMe: rememberMe);
   }
 
-  Future<String?> loginWithGoogle() async {
-    return _authService.loginWithGoogle();
-  }
-
-  Future<String?> loginWithApple() async {
-    return _authService.loginWithApple();
-  }
-
-  Future<String?> register(String name, String email, String password) async {
-    return _authService.register(name, email, password);
+  Future<String?> register(String name, String email, String password, String confirmPassword) async {
+    return _authService.register(name, email, password, confirmPassword);
   }
 
   Future<void> logout() async {

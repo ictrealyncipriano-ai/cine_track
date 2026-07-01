@@ -53,10 +53,12 @@ class CineTrackApp extends StatelessWidget {
             secondary: Color(0xFFFFC107),
             surface: Color(0xFF161B22),
           ),
-          fontFamily: 'Inter',
         ),
         home: Consumer<AuthProvider>(
           builder: (_, auth, _) {
+            if (auth.isLoading) {
+              return const _SplashScreen();
+            }
             if (auth.isAuthenticated) {
               if (!auth.emailVerified) {
                 return const VerifyEmailScreen();
@@ -66,6 +68,19 @@ class CineTrackApp extends StatelessWidget {
             return const LandingPage();
           },
         ),
+      ),
+    );
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
       ),
     );
   }

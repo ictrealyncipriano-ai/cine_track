@@ -18,6 +18,16 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
   String? _message;
   bool _sent = false;
   bool _verified = false;
+  int _cooldown = 0;
+
+  void _startCooldown() {
+    Future.doWhile(() async {
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return false;
+      setState(() => _cooldown--);
+      return _cooldown > 0;
+    });
+  }
 
   @override
   void dispose() {
@@ -29,19 +39,22 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
     final auth = context.read<AuthProvider>();
     final error = await auth.resendVerification(widget.email);
 
-    if (mounted) {
-      if (error != null) {
-        setState(() {
-          _message = error;
-          _sent = false;
-        });
-      } else {
-        setState(() {
-          _message = 'A new verification code has been sent.';
-          _sent = true;
-        });
+      if (mounted) {
+        if (error != null) {
+          setState(() {
+            _message = error;
+            _sent = false;
+            _cooldown = 0;
+          });
+        } else {
+          setState(() {
+            _message = 'A new verification code has been sent.';
+            _sent = true;
+            _cooldown = 60;
+          });
+          _startCooldown();
+        }
       }
-    }
   }
 
   Future<void> _verifyCode() async {
@@ -225,9 +238,9 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                     width: double.infinity,
                     height: 52,
                     child: OutlinedButton.icon(
-                      onPressed: _resend,
+                      onPressed: _cooldown > 0 ? null : _resend,
                       icon: const Icon(Icons.refresh),
-                      label: const Text('Resend Code'),
+                      label: Text(_cooldown > 0 ? 'Resend Code ($_cooldown)' : 'Resend Code'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white54,
                         side: const BorderSide(color: Colors.white24),

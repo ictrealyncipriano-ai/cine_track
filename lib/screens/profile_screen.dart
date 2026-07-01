@@ -44,8 +44,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _startEditing() {
     final user = context.read<AuthProvider>().user;
-    _nameController.text = user?['name'] as String? ?? '';
-    _emailController.text = user?['email'] as String? ?? '';
+    _nameController.text = user?.name ?? '';
+    _emailController.text = user?.email ?? '';
     setState(() {
       _editing = true;
       _profileError = null;
@@ -247,22 +247,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 20),
             if (!_editing) ...[
               Text(
-                user?['name'] as String? ?? 'User',
-                style: GoogleFonts.inter(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
+                user?.name ?? 'User',
+                style: GoogleFonts.montserrat(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 4),
               Text(
-                user?['email'] as String? ?? '',
+                user?.email ?? '',
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: Colors.white54,
                 ),
               ),
-              if (user?['email_verified'] == false) ...[
+              if (user?.emailVerified == false) ...[
                 const SizedBox(height: 4),
                 Text(
                   'Email not verified',

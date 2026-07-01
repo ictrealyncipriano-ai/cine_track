@@ -626,6 +626,13 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
             height: 42,
             child: ElevatedButton(
               onPressed: _userRating < 1 || _reviewSubmitting ? null : _submitReview,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFC107),
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: _reviewSubmitting
                   ? const SizedBox(
                       width: 18,
@@ -636,13 +643,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       rp.userReview != null ? 'Update Review' : 'Submit Review',
                       style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                     ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFFFC107),
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
             ),
           ),
         ],

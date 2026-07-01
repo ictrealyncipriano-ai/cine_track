@@ -19,7 +19,7 @@ $action = $input['action'] ?? '';
 
 if ($action === 'update_profile') {
     $name = trim($input['name'] ?? '');
-    $email = trim($input['email'] ?? '');
+    $email = strtolower(trim($input['email'] ?? ''));
 
     if (empty($name) || empty($email)) {
         jsonError('Name and email are required');
@@ -78,6 +78,8 @@ if ($action === 'update_profile') {
             $mail->addAddress($email, $name);
             $mail->Subject = 'Verify your new email address';
             $mail->isHTML(true);
+            $appUrl = getAppUrl();
+            $verifyLink = $appUrl . '/auth/email_verify.php?user_id=' . $userId . '&token=' . urlencode($verificationToken);
             $mail->Body = "
                 <div style='font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto;'>
                     <h2 style='color: #FFC107;'>CineTrack</h2>
@@ -87,7 +89,7 @@ if ($action === 'update_profile') {
                         <span style='font-size: 36px; font-weight: 700; letter-spacing: 8px; color: #FFC107; background: #0D1117; padding: 16px 32px; border-radius: 12px; display: inline-block;'>{$verificationCode}</span>
                     </p>
                     <p style='text-align: center; margin: 24px 0;'>
-                        <a href='http://localhost/cine_track/api/auth/email_verify.php?token=" . urlencode($verificationToken) . "'
+                        <a href='{$verifyLink}'
                            style='background-color: #FFC107; color: #000; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;'>
                             Verify Email Address
                         </a>
@@ -95,7 +97,7 @@ if ($action === 'update_profile') {
                     <p style='color: #888; font-size: 13px;'>This code and link expire in 10 minutes.</p>
                 </div>
             ";
-            $mail->AltBody = "Your verification code: {$verificationCode}\n\nOr click: http://localhost/cine_track/api/auth/email_verify.php?token=" . urlencode($verificationToken) . "\n\nThis code expires in 10 minutes.";
+            $mail->AltBody = "Your verification code: {$verificationCode}\n\nOr click: {$verifyLink}\n\nThis code expires in 10 minutes.";
             $mail->send();
         } catch (Exception $e) {
         }
@@ -124,20 +126,9 @@ if ($action === 'change_password') {
         jsonError('Current password and new password are required');
     }
 
-    if (strlen($newPassword) < 8) {
-        jsonError('New password must be at least 8 characters');
-    }
-
-    if (!preg_match('/[A-Z]/', $newPassword)) {
-        jsonError('New password must contain at least one uppercase letter');
-    }
-
-    if (!preg_match('/[a-z]/', $newPassword)) {
-        jsonError('New password must contain at least one lowercase letter');
-    }
-
-    if (!preg_match('/[0-9]/', $newPassword)) {
-        jsonError('New password must contain at least one digit');
+    $passwordError = validatePassword($newPassword);
+    if ($passwordError) {
+        jsonError($passwordError);
     }
 
     if ($newPassword !== $confirmPassword) {
