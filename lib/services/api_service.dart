@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
@@ -47,15 +48,23 @@ class ApiService {
   Future<Map<String, dynamic>> get(String endpoint) async {
     final headers = await _headers();
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$endpoint');
-    final response = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
-    return _handleResponse(response);
+    try {
+      final response = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw Exception('Server is taking too long. Please check your connection and try again.');
+    }
   }
 
   Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> body) async {
     final headers = await _headers();
     final uri = Uri.parse('${AppConfig.apiBaseUrl}$endpoint');
-    final response = await http.post(uri, headers: headers, body: jsonEncode(body)).timeout(const Duration(seconds: 30));
-    return _handleResponse(response);
+    try {
+      final response = await http.post(uri, headers: headers, body: jsonEncode(body)).timeout(const Duration(seconds: 30));
+      return _handleResponse(response);
+    } on TimeoutException {
+      throw Exception('Server is taking too long. Please check your connection and try again.');
+    }
   }
 
   Future<Map<String, dynamic>> delete(String endpoint, {Map<String, dynamic>? body}) async {
