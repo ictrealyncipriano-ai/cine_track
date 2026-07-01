@@ -7,18 +7,17 @@ class AppConfig {
   static const String imageBaseUrl = 'https://image.tmdb.org/t/p/w500';
 
   /// Sets the API base URL at build time:
-  ///   desktop/web:    `flutter build apk --dart-define=API_BASE_URL=http://localhost/cine_track/api`
-  ///   android emulator: `--dart-define=API_BASE_URL=http://10.0.2.2/cine_track/api`
-  ///   android device: `--dart-define=API_BASE_URL=http://YOUR_PC_IP/cine_track/api`
-  ///   production:     `--dart-define=API_BASE_URL=https://cine-track-delta.vercel.app/api`
+  ///   production (default): `flutter build apk`
+  ///   local dev (XAMPP):    `flutter build apk --dart-define=API_BASE_URL=http://10.0.2.2/cine_track/api --dart-define=ANDROID_EMULATOR=true`
+  ///   custom domain:        `flutter build apk --dart-define=API_BASE_URL=https://your-domain.com/api`
   static String get apiBaseUrl {
-    const local = 'http://localhost/cine_track/api';
+    const production = 'https://cine-track-delta.vercel.app/api';
     const emulator = 'http://10.0.2.2/cine_track/api';
     const fromEnv = String.fromEnvironment('API_BASE_URL', defaultValue: '');
     const useEmulator = bool.fromEnvironment('ANDROID_EMULATOR', defaultValue: false);
     if (fromEnv.isNotEmpty) return fromEnv;
     if (useEmulator) return emulator;
-    return local;
+    return production;
   }
 
   static const List<Map<String, String>> streamingSources = [
