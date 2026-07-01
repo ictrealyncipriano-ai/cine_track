@@ -84,6 +84,7 @@ CREATE TABLE IF NOT EXISTS watch_history (
     release_date VARCHAR(20) DEFAULT '',
     vote_average DECIMAL(3,1) DEFAULT 0.0,
     watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    watch_count INT DEFAULT 1 NOT NULL,
     INDEX idx_user_id (user_id),
     INDEX idx_user_watched (user_id, watched_at DESC)
 );

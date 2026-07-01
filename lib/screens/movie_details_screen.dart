@@ -10,7 +10,6 @@ import '../providers/movie_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/watchlist_provider.dart';
 import '../providers/reviews_provider.dart';
-import '../providers/history_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/rating_bar.dart';
 import 'stream_player_screen.dart';
@@ -351,7 +350,6 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        context.read<HistoryProvider>().addToHistory(movie);
                         Navigator.push(
                           context,
                           MaterialPageRoute(

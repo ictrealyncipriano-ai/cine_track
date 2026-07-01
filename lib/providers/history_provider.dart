@@ -104,6 +104,35 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
+  Future<void> removeFromHistory(int movieId) async {
+    try {
+      await _api.post('/history/delete.php', {'movie_id': movieId});
+      _history.removeWhere((m) => m.id == movieId);
+      _total = _history.length;
+      _hasMore = _history.length < _total;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = '$e';
+      debugPrint('removeFromHistory error: $e');
+      notifyListeners();
+    }
+  }
+
+  Future<void> clearHistory() async {
+    try {
+      await _api.post('/history/clear.php', {});
+      _history.clear();
+      _page = 1;
+      _hasMore = true;
+      _total = 0;
+      notifyListeners();
+    } catch (e) {
+      errorMessage = '$e';
+      debugPrint('clearHistory error: $e');
+      notifyListeners();
+    }
+  }
+
   void clearError() {
     errorMessage = null;
     notifyListeners();

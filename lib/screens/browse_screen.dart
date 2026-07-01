@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/movie_provider.dart';
+import '../providers/history_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/error_retry.dart';
+import 'movie_details_screen.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -57,6 +60,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
   @override
   Widget build(BuildContext context) {
     final mp = context.watch<MovieProvider>();
+    final hp = context.watch<HistoryProvider>();
+    final recentlyWatched = hp.recentlyWatched;
 
     return SafeArea(
       child: RefreshIndicator(
@@ -77,6 +82,83 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 ),
               ),
             ),
+            if (recentlyWatched.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.history, size: 18, color: Color(0xFFFFC107)),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Recently Watched',
+                            style: GoogleFonts.inter(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: 180,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        itemCount: recentlyWatched.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          final movie = recentlyWatched[index];
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MovieDetailsScreen(movie: movie),
+                                ),
+                              );
+                            },
+                            child: SizedBox(
+                              width: 110,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: movie.posterUrl != null
+                                          ? CachedNetworkImage(
+                                              imageUrl: movie.posterUrl!,
+                                              width: 110,
+                                              fit: BoxFit.cover,
+                                              placeholder: (_, __) => Container(color: const Color(0xFF161B22)),
+                                              errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white24),
+                                            )
+                                          : Container(color: const Color(0xFF161B22), child: const Icon(Icons.movie, color: Colors.white24)),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    movie.title,
+                                    style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                  ],
+                ),
+              ),
             if (mp.genres.isNotEmpty)
               SliverToBoxAdapter(
                 child: SizedBox(

@@ -3,9 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:provider/provider.dart';
 import '../config.dart';
 import '../helpers/open_url.dart';
 import '../models/movie.dart';
+import '../providers/history_provider.dart';
 
 class StreamPlayerScreen extends StatefulWidget {
   final Movie movie;
@@ -28,6 +30,11 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<HistoryProvider>().addToHistory(widget.movie);
+      }
+    });
     _openSourceOnWeb();
     Timer(const Duration(seconds: 4), () {
       if (mounted && _progress < 1) {
