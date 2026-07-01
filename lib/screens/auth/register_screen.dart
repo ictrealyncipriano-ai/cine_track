@@ -434,7 +434,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: auth.isLoading ? null : _submit,
+                      onPressed: (!_acceptTerms || auth.isLoading) ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                         foregroundColor: Colors.black,
