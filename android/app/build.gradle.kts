@@ -12,6 +12,11 @@ android {
     namespace = "com.example.cine_track"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
+    externalNativeBuild {
+        cmake {
+            version = "3.31.6"
+        }
+    }
     setProperty("archivesBaseName", "cine_track")
 
     compileOptions {

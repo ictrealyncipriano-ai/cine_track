@@ -2,16 +2,16 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config.dart';
 
 class ApiService {
   static const String _tokenKey = 'auth_token';
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
 
   Future<String?> getToken() async {
     try {
-      return await _secureStorage.read(key: _tokenKey);
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString(_tokenKey);
     } catch (e) {
       debugPrint('getToken error: $e');
       return null;
@@ -20,7 +20,8 @@ class ApiService {
 
   Future<void> saveToken(String token) async {
     try {
-      await _secureStorage.write(key: _tokenKey, value: token);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_tokenKey, token);
     } catch (e) {
       debugPrint('saveToken error: $e');
     }
@@ -28,7 +29,8 @@ class ApiService {
 
   Future<void> deleteToken() async {
     try {
-      await _secureStorage.delete(key: _tokenKey);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_tokenKey);
     } catch (e) {
       debugPrint('deleteToken error: $e');
     }
