@@ -80,8 +80,22 @@ class AuthProvider extends ChangeNotifier {
     return _authService.verifyEmailCode(email, code);
   }
 
-  Future<String?> updateProfile(String name, String email) async {
-    return _authService.updateProfile(name, email);
+  Future<String?> updateProfile({
+    required String name,
+    required String email,
+    String? phone,
+    String? dateOfBirth,
+    String? country,
+    bool? marketingOptIn,
+  }) async {
+    return _authService.updateProfile(
+      name: name,
+      email: email,
+      phone: phone,
+      dateOfBirth: dateOfBirth,
+      country: country,
+      marketingOptIn: marketingOptIn,
+    );
   }
 
   Future<String?> changePassword(String currentPassword, String newPassword, String confirmPassword) async {

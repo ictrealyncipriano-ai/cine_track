@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
 import 'landing_page.dart';
 import 'sessions_screen.dart';
@@ -16,6 +17,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _editing = false;
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _dobController = TextEditingController();
+  String? _selectedCountry;
+  bool _marketingOptIn = false;
 
   final _cpController = TextEditingController();
   final _npController = TextEditingController();
@@ -31,10 +36,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _pwSuccess;
   String? _deleteError;
 
+  static const List<String> _countries = [
+    'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
+    'Argentina', 'Armenia', 'Australia', 'Austria', 'Azerbaijan',
+    'Bahamas', 'Bangladesh', 'Belarus', 'Belgium', 'Brazil',
+    'Canada', 'Chile', 'China', 'Colombia', 'Croatia',
+    'Cuba', 'Czech Republic', 'Denmark', 'Egypt', 'Finland',
+    'France', 'Georgia', 'Germany', 'Greece', 'Hungary',
+    'Iceland', 'India', 'Indonesia', 'Iran', 'Iraq',
+    'Ireland', 'Israel', 'Italy', 'Japan', 'Kazakhstan',
+    'Kenya', 'Kuwait', 'Latvia', 'Lithuania', 'Luxembourg',
+    'Malaysia', 'Mexico', 'Monaco', 'Morocco', 'Nepal',
+    'Netherlands', 'New Zealand', 'Nigeria', 'North Korea', 'Norway',
+    'Pakistan', 'Palestine', 'Peru', 'Philippines', 'Poland',
+    'Portugal', 'Qatar', 'Romania', 'Russia', 'Rwanda',
+    'Saudi Arabia', 'Serbia', 'Singapore', 'Slovakia', 'Slovenia',
+    'Somalia', 'South Africa', 'South Korea', 'Spain', 'Sudan',
+    'Sweden', 'Switzerland', 'Syria', 'Taiwan', 'Tajikistan',
+    'Thailand', 'Tunisia', 'Turkey', 'Turkmenistan', 'Ukraine',
+    'United Arab Emirates', 'United Kingdom', 'United States', 'Uruguay', 'Uzbekistan',
+    'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zimbabwe',
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
+    _dobController.dispose();
     _cpController.dispose();
     _npController.dispose();
     _cnpController.dispose();
@@ -46,6 +75,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final user = context.read<AuthProvider>().user;
     _nameController.text = user?.name ?? '';
     _emailController.text = user?.email ?? '';
+    _phoneController.text = user?.phone ?? '';
+    _dobController.text = user?.dateOfBirth ?? '';
+    _selectedCountry = user?.country;
+    _marketingOptIn = user?.marketingOptIn ?? false;
     setState(() {
       _editing = true;
       _profileError = null;
@@ -56,6 +89,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveProfile() async {
     final name = _nameController.text.trim();
     final email = _emailController.text.trim();
+    final phone = _phoneController.text.trim();
+    final dob = _dobController.text.trim();
 
     if (name.isEmpty || email.isEmpty) return;
     if (!email.contains('@')) {
@@ -64,7 +99,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.updateProfile(name, email);
+    final error = await auth.updateProfile(
+      name: name,
+      email: email,
+      phone: phone.isNotEmpty ? phone : null,
+      dateOfBirth: dob.isNotEmpty ? dob : null,
+      country: _selectedCountry,
+      marketingOptIn: _marketingOptIn,
+    );
 
     if (mounted) {
       if (error != null) {
@@ -78,6 +120,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _profileError = null;
           _profileSuccess = 'Profile updated';
         });
+      }
+    }
+  }
+
+  Future<void> _pickDate() async {
+    final now = DateTime.now();
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.tryParse(_dobController.text) ?? now,
+      firstDate: DateTime(1900),
+      lastDate: now,
+    );
+    if (picked != null) {
+      _dobController.text = '${picked.year}-${picked.month.toString().padLeft(2, '0')}-${picked.day.toString().padLeft(2, '0')}';
+    }
+  }
+
+  Future<void> _resendVerification() async {
+    final auth = context.read<AuthProvider>();
+    final email = auth.user?.email ?? '';
+    if (email.isEmpty) return;
+    final error = await auth.resendVerification(email);
+    if (mounted) {
+      if (error != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Verification email sent'), backgroundColor: Colors.green),
+        );
       }
     }
   }
@@ -238,11 +311,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
             CircleAvatar(
               radius: 48,
               backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
-              child: Icon(
-                Icons.person,
-                size: 48,
-                color: Theme.of(context).colorScheme.primary,
-              ),
+              backgroundImage: user?.avatarUrl != null && user!.avatarUrl!.isNotEmpty
+                  ? CachedNetworkImageProvider(user.avatarUrl!)
+                  : null,
+              child: user?.avatarUrl == null || user!.avatarUrl!.isEmpty
+                  ? Icon(
+                      Icons.person,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.primary,
+                    )
+                  : null,
             ),
             const SizedBox(height: 20),
             if (!_editing) ...[
@@ -256,19 +334,99 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(height: 4),
               Text(
+                '@${user?.username ?? ''}',
+                style: GoogleFonts.inter(
+                  fontSize: 13,
+                  color: Colors.white38,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
                 user?.email ?? '',
                 style: GoogleFonts.inter(
                   fontSize: 14,
                   color: Colors.white54,
                 ),
               ),
-              if (user?.emailVerified == false) ...[
+              if (user?.phone != null && user!.phone!.isNotEmpty) ...[
                 const SizedBox(height: 4),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.phone, size: 13, color: Colors.white38),
+                    const SizedBox(width: 4),
+                    Text(
+                      user.phone!,
+                      style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ],
+              if (user?.dateOfBirth != null && user!.dateOfBirth!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.cake, size: 13, color: Colors.white38),
+                    const SizedBox(width: 4),
+                    Text(
+                      user.dateOfBirth!,
+                      style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ],
+              if (user?.country != null && user!.country!.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.public, size: 13, color: Colors.white38),
+                    const SizedBox(width: 4),
+                    Text(
+                      user.country!,
+                      style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ],
+              if (user?.marketingOptIn == true) ...[
+                const SizedBox(height: 2),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.email, size: 13, color: Colors.white38),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Marketing emails enabled',
+                      style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                    ),
+                  ],
+                ),
+              ],
+              if (user?.emailVerified == false) ...[
+                const SizedBox(height: 8),
                 Text(
                   'Email not verified',
                   style: GoogleFonts.inter(
                     fontSize: 12,
                     color: Colors.orangeAccent,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                SizedBox(
+                  height: 36,
+                  child: OutlinedButton.icon(
+                    onPressed: _resendVerification,
+                    icon: const Icon(Icons.send, size: 14),
+                    label: const Text('Resend Verification'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.orangeAccent,
+                      side: const BorderSide(color: Colors.orangeAccent),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -316,6 +474,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     borderSide: BorderSide.none,
                   ),
                 ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _phoneController,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: 'Phone',
+                  filled: true,
+                  fillColor: const Color(0xFF161B22),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _dobController,
+                readOnly: true,
+                onTap: _pickDate,
+                decoration: InputDecoration(
+                  labelText: 'Date of Birth',
+                  suffixIcon: const Icon(Icons.calendar_today, size: 18),
+                  filled: true,
+                  fillColor: const Color(0xFF161B22),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedCountry,
+                dropdownColor: const Color(0xFF161B22),
+                decoration: InputDecoration(
+                  labelText: 'Country',
+                  filled: true,
+                  fillColor: const Color(0xFF161B22),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+                items: _countries.map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 14)))).toList(),
+                onChanged: (v) => setState(() => _selectedCountry = v),
+              ),
+              const SizedBox(height: 16),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                title: Text(
+                  'Marketing emails',
+                  style: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
+                ),
+                subtitle: Text(
+                  'Receive recommendations and updates',
+                  style: GoogleFonts.inter(fontSize: 12, color: Colors.white38),
+                ),
+                value: _marketingOptIn,
+                activeThumbColor: Theme.of(context).colorScheme.primary,
+                onChanged: (v) => setState(() => _marketingOptIn = v),
               ),
               const SizedBox(height: 16),
               Row(

@@ -237,7 +237,14 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<String?> updateProfile(String name, String email) async {
+  Future<String?> updateProfile({
+    required String name,
+    required String email,
+    String? phone,
+    String? dateOfBirth,
+    String? country,
+    bool? marketingOptIn,
+  }) async {
     _isLoading = true;
     notifyListeners();
 
@@ -246,6 +253,10 @@ class AuthService extends ChangeNotifier {
         'action': 'update_profile',
         'name': name,
         'email': email,
+        'phone': phone,
+        'date_of_birth': dateOfBirth,
+        'country': country,
+        'marketing_opt_in': marketingOptIn,
       });
       _user = User.fromJson(data['user'] as Map<String, dynamic>);
       notifyListeners();

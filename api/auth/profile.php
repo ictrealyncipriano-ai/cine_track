@@ -20,6 +20,10 @@ $action = $input['action'] ?? '';
 if ($action === 'update_profile') {
     $name = trim($input['name'] ?? '');
     $email = strtolower(trim($input['email'] ?? ''));
+    $phone = $input['phone'] ?? null;
+    $dateOfBirth = $input['date_of_birth'] ?? null;
+    $country = $input['country'] ?? null;
+    $marketingOptIn = isset($input['marketing_opt_in']) ? ($input['marketing_opt_in'] ? 1 : 0) : null;
 
     if (empty($name) || empty($email)) {
         jsonError('Name and email are required');
@@ -57,8 +61,33 @@ if ($action === 'update_profile') {
         }
     }
 
-    $stmt = $pdo->prepare('UPDATE users SET name = ?, email = ?, updated_at = NOW()' . ($emailChanged ? ', email_verified_at = NULL' : '') . ' WHERE id = ?');
-    $stmt->execute([$name, $email, $userId]);
+    $updateFields = ['name = ?', 'email = ?', 'updated_at = NOW()'];
+    $params = [$name, $email];
+
+    if ($phone !== null) {
+        $updateFields[] = 'phone = ?';
+        $params[] = $phone;
+    }
+    if ($dateOfBirth !== null) {
+        $updateFields[] = 'date_of_birth = ?';
+        $params[] = $dateOfBirth;
+    }
+    if ($country !== null) {
+        $updateFields[] = 'country = ?';
+        $params[] = $country;
+    }
+    if ($marketingOptIn !== null) {
+        $updateFields[] = 'marketing_opt_in = ?';
+        $params[] = $marketingOptIn;
+    }
+
+    if ($emailChanged) {
+        $updateFields[] = 'email_verified_at = NULL';
+    }
+
+    $params[] = $userId;
+    $stmt = $pdo->prepare('UPDATE users SET ' . implode(', ', $updateFields) . ' WHERE id = ?');
+    $stmt->execute($params);
 
     if ($emailChanged) {
         $verificationToken = bin2hex(random_bytes(32));
