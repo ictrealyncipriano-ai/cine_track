@@ -3,11 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
 import 'landing_page.dart';
 import 'sessions_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final bool isGuest;
+  final VoidCallback? onSignIn;
+
+  const ProfileScreen({super.key, this.isGuest = false, this.onSignIn});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -300,6 +304,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+
+    if (widget.isGuest) {
+      return _buildGuestView();
+    }
+
     final user = auth.user;
 
     return SafeArea(
@@ -573,9 +582,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         child: const Text('Cancel'),
                       ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            if (!_editing) ...[
+              const SizedBox(height: 20),
+              Consumer<ThemeProvider>(
+                builder: (_, tp, __) => SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: tp.toggle,
+                    icon: Icon(tp.isDark ? Icons.light_mode : Icons.dark_mode, size: 18),
+                    label: Text(tp.isDark ? 'Light Mode' : 'Dark Mode'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      side: BorderSide(color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.5)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
                     ),
                   ),
-                ],
+                ),
               ),
             ],
             if (_profileError != null) ...[
@@ -783,6 +813,75 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
             const SizedBox(height: 32),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGuestView() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            const SizedBox(height: 60),
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Icon(
+                Icons.person_outline_rounded,
+                size: 48,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'You\'re browsing as a guest',
+              style: GoogleFonts.montserrat(
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Sign in to sync your favorites, watchlist, and history across all your devices.',
+              style: GoogleFonts.inter(
+                fontSize: 15,
+                color: Colors.white70,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              height: 56,
+              child: ElevatedButton(
+                onPressed: widget.onSignIn,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  elevation: 4,
+                ),
+                child: Text(
+                  'Sign In / Create Account',
+                  style: GoogleFonts.inter(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 40),
           ],
         ),
       ),

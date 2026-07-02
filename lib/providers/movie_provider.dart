@@ -11,6 +11,7 @@ class MovieProvider extends ChangeNotifier {
   List<Movie> _nowPlaying = [];
   List<Movie> _topRated = [];
   List<Movie> _upcoming = [];
+  List<Movie> _popular = [];
   List<Movie> _searchResults = [];
   List<Genre> _genres = [];
   List<Movie> _genreMovies = [];
@@ -23,6 +24,7 @@ class MovieProvider extends ChangeNotifier {
   int _nowPlayingPage = 1;
   int _topRatedPage = 1;
   int _upcomingPage = 1;
+  int _popularPage = 1;
   int _searchPage = 1;
   int _genrePage = 1;
 
@@ -30,6 +32,7 @@ class MovieProvider extends ChangeNotifier {
   bool _hasMoreNowPlaying = true;
   bool _hasMoreTopRated = true;
   bool _hasMoreUpcoming = true;
+  bool _hasMorePopular = true;
   bool _hasMoreSearch = true;
   bool _hasMoreGenre = true;
 
@@ -41,6 +44,7 @@ class MovieProvider extends ChangeNotifier {
   List<Movie> get nowPlaying => _nowPlaying;
   List<Movie> get topRated => _topRated;
   List<Movie> get upcoming => _upcoming;
+  List<Movie> get popular => _popular;
   List<Movie> get searchResults => _searchResults;
   List<Genre> get genres => _genres;
   List<Movie> get genreMovies => _genreMovies;
@@ -52,6 +56,7 @@ class MovieProvider extends ChangeNotifier {
   bool get hasMoreNowPlaying => _hasMoreNowPlaying;
   bool get hasMoreTopRated => _hasMoreTopRated;
   bool get hasMoreUpcoming => _hasMoreUpcoming;
+  bool get hasMorePopular => _hasMorePopular;
   bool get hasMoreSearch => _hasMoreSearch;
   bool get hasMoreGenre => _hasMoreGenre;
 
@@ -187,6 +192,39 @@ class MovieProvider extends ChangeNotifier {
     await fetchUpcoming(reset: false);
   }
 
+  Future<void> fetchPopular({bool reset = true}) async {
+    if (reset) {
+      _popularPage = 1;
+      _hasMorePopular = true;
+    }
+    _isLoading = reset;
+    _isLoadingMore = !reset;
+    _error = null;
+    notifyListeners();
+
+    try {
+      final results = await _tmdbService.getPopular(page: _popularPage);
+      if (reset) {
+        _popular = results;
+      } else {
+        _popular.addAll(results);
+      }
+      _hasMorePopular = results.length >= 20;
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      _isLoadingMore = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMorePopular() async {
+    if (_isLoadingMore || !_hasMorePopular) return;
+    _popularPage++;
+    await fetchPopular(reset: false);
+  }
+
   Future<Movie> fetchMovieDetails(int movieId) async {
     return _tmdbService.getMovieDetails(movieId);
   }
@@ -203,6 +241,10 @@ class MovieProvider extends ChangeNotifier {
     return _tmdbService.getSimilarMovies(movieId);
   }
 
+  Future<List<Movie>> fetchRecommendations(int movieId) async {
+    return _tmdbService.getRecommendations(movieId);
+  }
+
   Future<TrailerVideo?> fetchMovieTeaser(int movieId) async {
     final videos = await _tmdbService.getMovieVideos(movieId);
     return videos.cast<TrailerVideo?>().firstWhere(
@@ -214,7 +256,7 @@ class MovieProvider extends ChangeNotifier {
     );
   }
 
-  Future<void> search(String query) async {
+  Future<void> search(String query, {int? genreId, int? year, String? sortBy}) async {
     _currentSearchQuery = query;
 
     if (query.isEmpty) {
@@ -232,7 +274,7 @@ class MovieProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _searchResults = await _tmdbService.searchMovies(query);
+      _searchResults = await _tmdbService.searchMovies(query, genreId: genreId, year: year, sortBy: sortBy);
       _hasMoreSearch = _searchResults.length >= 20;
     } catch (e) {
       _error = e.toString();

@@ -28,6 +28,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   Movie? _detailed;
   List<CastMember> _cast = [];
   List<Movie> _similarMovies = [];
+  List<Movie> _recommendedMovies = [];
   TrailerVideo? _teaser;
   int _userRating = 0;
   final _reviewController = TextEditingController();
@@ -40,6 +41,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     _fetchDetails();
     _fetchCredits();
     _fetchSimilar();
+    _fetchRecommendations();
     _fetchReviews();
     _fetchTeaser();
   }
@@ -78,6 +80,17 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       final similar = await tmdb.fetchSimilarMovies(widget.movie.id);
       if (mounted) {
         setState(() => _similarMovies = similar);
+      }
+    } catch (_) {
+    }
+  }
+
+  Future<void> _fetchRecommendations() async {
+    try {
+      final tmdb = context.read<MovieProvider>();
+      final recommended = await tmdb.fetchRecommendations(widget.movie.id);
+      if (mounted) {
+        setState(() => _recommendedMovies = recommended);
       }
     } catch (_) {
     }
@@ -438,6 +451,28 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           return SizedBox(
                             width: 140,
                             child: MovieCard(movie: _similarMovies[index]),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                  if (_recommendedMovies.isNotEmpty) ...[
+                    const SizedBox(height: 28),
+                    Text(
+                      'Recommendations',
+                      style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      height: 200,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _recommendedMovies.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        itemBuilder: (context, index) {
+                          return SizedBox(
+                            width: 140,
+                            child: MovieCard(movie: _recommendedMovies[index]),
                           );
                         },
                       ),

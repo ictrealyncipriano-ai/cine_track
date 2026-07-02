@@ -18,6 +18,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   final ScrollController _scrollController = ScrollController();
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _sortBy = 'recent';
 
   @override
   void initState() {
@@ -149,6 +150,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         ),
                       ),
                     const Spacer(),
+                    if (!hp.isEmpty)
+                      PopupMenuButton<String>(
+                        initialValue: _sortBy,
+                        onSelected: (v) {
+                          setState(() => _sortBy = v);
+                          context.read<HistoryProvider>().fetchHistory(sortBy: v);
+                        },
+                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
+                        color: const Color(0xFF161B22),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                        ],
+                      ),
                     if (!hp.isEmpty)
                       GestureDetector(
                         onTap: () => _confirmClearAll(context),

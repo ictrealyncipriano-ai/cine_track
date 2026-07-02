@@ -15,6 +15,13 @@ $page = max(1, (int) ($_GET['page'] ?? 1));
 $perPage = max(1, min(50, (int) ($_GET['per_page'] ?? 20)));
 $offset = ($page - 1) * $perPage;
 
+$sortBy = $_GET['sort_by'] ?? 'recent';
+$orderClause = match ($sortBy) {
+  'title' => 'ORDER BY title ASC',
+  'rating' => 'ORDER BY vote_average DESC',
+  default => 'ORDER BY watched_at DESC',
+};
+
 try {
     $pdo = getDb();
 
@@ -22,7 +29,7 @@ try {
     $countStmt->execute([$userId]);
     $total = (int) $countStmt->fetch()['total'];
 
-    $stmt = $pdo->prepare("SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at, watch_count FROM watch_history WHERE user_id = ? ORDER BY watched_at DESC LIMIT $perPage OFFSET $offset");
+    $stmt = $pdo->prepare("SELECT movie_id, title, overview, poster_path, backdrop_path, release_date, vote_average, watched_at, watch_count FROM watch_history WHERE user_id = ? $orderClause LIMIT $perPage OFFSET $offset");
     $stmt->execute([$userId]);
     $history = $stmt->fetchAll();
 

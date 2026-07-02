@@ -15,6 +15,7 @@ class WatchlistScreen extends StatefulWidget {
 class _WatchlistScreenState extends State<WatchlistScreen> {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
+  String _sortBy = 'recent';
 
   @override
   void initState() {
@@ -74,13 +75,29 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    if (!wp.isEmpty)
+                      if (!wp.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           '(${watchlist.length})',
                           style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
                         ),
+                      ),
+                    const Spacer(),
+                    if (!wp.isEmpty)
+                      PopupMenuButton<String>(
+                        initialValue: _sortBy,
+                        onSelected: (v) {
+                          setState(() => _sortBy = v);
+                          context.read<WatchlistProvider>().fetchWatchlist(sortBy: v);
+                        },
+                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
+                        color: const Color(0xFF161B22),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                        ],
                       ),
                   ],
                 ),
@@ -139,9 +156,9 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= watchlist.length) {
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index >= watchlist.length) {
                         return const Center(
                           child: SizedBox(
                             width: 24,

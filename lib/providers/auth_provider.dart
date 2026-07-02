@@ -1,19 +1,29 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService;
+  bool _isGuest = false;
 
   AuthProvider(this._authService) {
     _authService.addListener(_onAuthChange);
+    _loadGuestPref();
     unawaited(_authService.checkAuth());
+  }
+
+  Future<void> _loadGuestPref() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isGuest = prefs.getBool('guest_mode') ?? false;
+    notifyListeners();
   }
 
   User? get user => _authService.user;
   bool get isAuthenticated => _authService.isAuthenticated;
   bool get isLoading => _authService.isLoading;
+  bool get isGuest => _isGuest;
   bool get emailVerified => _authService.emailVerified;
 
   Future<void> checkAuth() async {
@@ -21,6 +31,23 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void _onAuthChange() {
+    if (_authService.isAuthenticated) {
+      _isGuest = false;
+    }
+    notifyListeners();
+  }
+
+  Future<void> enterGuestMode() async {
+    _isGuest = true;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('guest_mode', true);
+    notifyListeners();
+  }
+
+  Future<void> exitGuestMode() async {
+    _isGuest = false;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('guest_mode');
     notifyListeners();
   }
 

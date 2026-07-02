@@ -12,6 +12,7 @@ class HistoryProvider extends ChangeNotifier {
   bool _hasMore = true;
   bool _isLoadingMore = false;
   int _total = 0;
+  String _sortBy = 'recent';
 
   HistoryProvider(this._api, this._authService) {
     _authService.addListener(_onAuthChanged);
@@ -64,7 +65,8 @@ class HistoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchHistory() async {
+  Future<void> fetchHistory({String? sortBy}) async {
+    if (sortBy != null) _sortBy = sortBy;
     _page = 1;
     _hasMore = true;
     isLoading = true;
@@ -72,7 +74,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.get('/history/list.php?page=1&per_page=20');
+      final data = await _api.get('/history/list.php?page=1&per_page=20&sort_by=$_sortBy');
       final list = data['history'] as List<dynamic>;
       _total = data['total'] as int? ?? list.length;
       _history.clear();
@@ -96,7 +98,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.get('/history/list.php?page=$_page&per_page=20');
+      final data = await _api.get('/history/list.php?page=$_page&per_page=20&sort_by=$_sortBy');
       final list = data['history'] as List<dynamic>;
       _total = data['total'] as int? ?? 0;
       for (final item in list) {

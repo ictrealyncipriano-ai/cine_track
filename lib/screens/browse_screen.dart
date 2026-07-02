@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import '../models/movie.dart';
 import '../providers/movie_provider.dart';
 import '../providers/history_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/error_retry.dart';
 import 'movie_details_screen.dart';
+import 'see_all_screen.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -54,6 +56,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
       mp.fetchNowPlaying(),
       mp.fetchTopRated(),
       mp.fetchUpcoming(),
+      mp.fetchPopular(),
     ]);
   }
 
@@ -204,10 +207,16 @@ class _BrowseScreenState extends State<BrowseScreen> {
             if (mp.selectedGenreId != null)
               _buildGenreGrid(mp)
             else ...[
-              _buildSection(context, 'Trending Now', mp.trending, mp.isLoading),
-              _buildSection(context, 'Now Playing', mp.nowPlaying, mp.isLoading),
-              _buildSection(context, 'Coming Soon', mp.upcoming, mp.isLoading),
-              _buildSection(context, 'Top Rated', mp.topRated, mp.isLoading),
+              _buildSection(context, 'Trending Now', mp.trending, mp.isLoading, mp,
+                  onLoadMore: () => _navigateToSeeAll('Trending Now', mp.trending, mp.loadMoreTrending, mp.hasMoreTrending, mp.isLoadingMore), hasMore: mp.hasMoreTrending),
+              _buildSection(context, 'Now Playing', mp.nowPlaying, mp.isLoading, mp,
+                  onLoadMore: () => _navigateToSeeAll('Now Playing', mp.nowPlaying, mp.loadMoreNowPlaying, mp.hasMoreNowPlaying, mp.isLoadingMore), hasMore: mp.hasMoreNowPlaying),
+              _buildSection(context, 'Popular', mp.popular, mp.isLoading, mp,
+                  onLoadMore: () => _navigateToSeeAll('Popular', mp.popular, mp.loadMorePopular, mp.hasMorePopular, mp.isLoadingMore), hasMore: mp.hasMorePopular),
+              _buildSection(context, 'Coming Soon', mp.upcoming, mp.isLoading, mp,
+                  onLoadMore: () => _navigateToSeeAll('Coming Soon', mp.upcoming, mp.loadMoreUpcoming, mp.hasMoreUpcoming, mp.isLoadingMore), hasMore: mp.hasMoreUpcoming),
+              _buildSection(context, 'Top Rated', mp.topRated, mp.isLoading, mp,
+                  onLoadMore: () => _navigateToSeeAll('Top Rated', mp.topRated, mp.loadMoreTopRated, mp.hasMoreTopRated, mp.isLoadingMore), hasMore: mp.hasMoreTopRated),
             ],
             if (mp.error != null && mp.selectedGenreId == null)
               SliverToBoxAdapter(
@@ -309,21 +318,54 @@ class _BrowseScreenState extends State<BrowseScreen> {
     );
   }
 
+  void _navigateToSeeAll(String title, List<dynamic> movies, VoidCallback loadMore, bool hasMore, bool isLoadingMore) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => SeeAllScreen(
+          title: title,
+          movies: List<Movie>.from(movies),
+          loadMore: loadMore,
+          hasMore: hasMore,
+          isLoadingMore: isLoadingMore,
+        ),
+      ),
+    );
+  }
+
   Widget _buildSection(
-      BuildContext context, String title, List<dynamic> movies, bool isLoading) {
+      BuildContext context, String title, List<dynamic> movies, bool isLoading,
+      MovieProvider mp, {VoidCallback? onLoadMore, bool hasMore = false}) {
     return SliverToBoxAdapter(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Text(
-              title,
-              style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            child: Row(
+              children: [
+                Text(
+                  title,
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+                const Spacer(),
+                if (hasMore)
+                  GestureDetector(
+                    onTap: onLoadMore,
+                    child: Text(
+                      'See All >',
+                      style: GoogleFonts.inter(
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
           if (isLoading && movies.isEmpty)

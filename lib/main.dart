@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
+
   runZonedGuarded(() {
     FlutterError.onError = (details) {
       FlutterError.presentError(details);
@@ -24,7 +28,7 @@ void main() {
         ),
       );
     };
-    runApp(const CineTrackApp());
+    runApp(CineTrackApp(onboardingDone: onboardingDone));
   }, (error, stack) {
     debugPrint('Unhandled error: $error\n$stack');
   });

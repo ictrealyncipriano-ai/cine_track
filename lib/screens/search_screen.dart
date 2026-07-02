@@ -16,6 +16,11 @@ class _SearchScreenState extends State<SearchScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
   Timer? _debounce;
+  int? _filterGenreId;
+  int? _filterYear;
+  String _filterSortBy = 'popularity.desc';
+
+  static const List<int> _years = [2026, 2025, 2024, 2023, 2022, 2021, 2020, 2019, 2018, 2017, 2016, 2015, 2010, 2000, 1990, 1980];
 
   @override
   void initState() {
@@ -44,8 +49,12 @@ class _SearchScreenState extends State<SearchScreen> {
   void _onSearchChanged(String query) {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      context.read<MovieProvider>().search(query.trim());
+      context.read<MovieProvider>().search(query.trim(), genreId: _filterGenreId, year: _filterYear, sortBy: _filterSortBy);
     });
+  }
+
+  void _onFilterChanged() {
+    context.read<MovieProvider>().search(_controller.text.trim(), genreId: _filterGenreId, year: _filterYear, sortBy: _filterSortBy);
   }
 
   @override
@@ -59,7 +68,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: TextField(
               controller: _controller,
               onChanged: _onSearchChanged,
@@ -86,6 +95,66 @@ class _SearchScreenState extends State<SearchScreen> {
               style: const TextStyle(color: Colors.white),
             ),
           ),
+          if (mp.genres.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 36,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: mp.genres.length,
+                        separatorBuilder: (_, __) => const SizedBox(width: 6),
+                        itemBuilder: (context, index) {
+                          final genre = mp.genres[index];
+                          final selected = _filterGenreId == genre.id;
+                          return FilterChip(
+                            label: Text(genre.name, style: TextStyle(fontSize: 12, color: selected ? Colors.black : Colors.white70)),
+                            selected: selected,
+                            onSelected: (_) {
+                              setState(() => _filterGenreId = selected ? null : genre.id);
+                              _onFilterChanged();
+                            },
+                            backgroundColor: const Color(0xFF161B22),
+                            selectedColor: Theme.of(context).colorScheme.primary,
+                            checkmarkColor: Colors.black,
+                            side: BorderSide.none,
+                            visualDensity: VisualDensity.compact,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  PopupMenuButton<int>(
+                    icon: Icon(Icons.calendar_today, size: 18, color: _filterYear != null ? Theme.of(context).colorScheme.primary : Colors.white54),
+                    tooltip: 'Filter by year',
+                    color: const Color(0xFF161B22),
+                    onSelected: (y) {
+                      setState(() => _filterYear = y == _filterYear ? null : y);
+                      _onFilterChanged();
+                    },
+                    itemBuilder: (_) => _years.map((y) => PopupMenuItem(value: y, child: Text('$y', style: TextStyle(color: _filterYear == y ? Theme.of(context).colorScheme.primary : Colors.white70)))).toList(),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.sort, size: 18, color: _filterSortBy != 'popularity.desc' ? Theme.of(context).colorScheme.primary : Colors.white54),
+                    tooltip: 'Sort by',
+                    color: const Color(0xFF161B22),
+                    onSelected: (s) {
+                      setState(() => _filterSortBy = s);
+                      _onFilterChanged();
+                    },
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'popularity.desc', child: Text('Popular', style: TextStyle(color: _filterSortBy == 'popularity.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                      PopupMenuItem(value: 'vote_average.desc', child: Text('Rating', style: TextStyle(color: _filterSortBy == 'vote_average.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                      PopupMenuItem(value: 'release_date.desc', child: Text('Newest', style: TextStyle(color: _filterSortBy == 'release_date.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           Expanded(
             child: _buildContent(results, isLoading, isLoadingMore, _controller.text),
           ),

@@ -15,6 +15,7 @@ class FavoritesScreen extends StatefulWidget {
 class _FavoritesScreenState extends State<FavoritesScreen> {
   bool _initialized = false;
   final ScrollController _scrollController = ScrollController();
+  String _sortBy = 'recent';
 
   @override
   void initState() {
@@ -74,13 +75,29 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         color: Colors.white,
                       ),
                     ),
-                    if (!fp.isEmpty)
+                      if (!fp.isEmpty)
                       Padding(
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           '(${favorites.length})',
                           style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
                         ),
+                      ),
+                    const Spacer(),
+                    if (!fp.isEmpty)
+                      PopupMenuButton<String>(
+                        initialValue: _sortBy,
+                        onSelected: (v) {
+                          setState(() => _sortBy = v);
+                          context.read<FavoritesProvider>().fetchFavorites(sortBy: v);
+                        },
+                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
+                        color: const Color(0xFF161B22),
+                        itemBuilder: (_) => [
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                        ],
                       ),
                   ],
                 ),
@@ -139,9 +156,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
                   ),
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      if (index >= favorites.length) {
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index >= favorites.length) {
                         return const Center(
                           child: SizedBox(
                             width: 24,

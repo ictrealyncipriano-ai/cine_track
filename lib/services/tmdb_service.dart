@@ -48,9 +48,15 @@ class TmdbService {
   Future<List<Movie>> getUpcoming({int page = 1}) =>
       _fetchMovies('/movie/upcoming', page: page);
 
-  Future<List<Movie>> searchMovies(String query, {int page = 1}) =>
+  Future<List<Movie>> getPopular({int page = 1}) =>
+      _fetchMovies('/movie/popular', page: page);
+
+  Future<List<Movie>> searchMovies(String query, {int page = 1, int? genreId, int? year, String? sortBy}) =>
       _fetchMovies('/search/movie', page: page, extraParams: {
         'query': query,
+        if (genreId != null) 'with_genres': genreId.toString(),
+        if (year != null) 'year': year.toString(),
+        if (sortBy != null) 'sort_by': sortBy,
       });
 
   Future<List<Genre>> getGenres() async {
