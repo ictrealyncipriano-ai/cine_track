@@ -21,12 +21,16 @@ if (empty($input['movie_id'])) {
     jsonError('movie_id is required');
 }
 
-$pdo = getDb();
-$stmt = $pdo->prepare('DELETE FROM watch_history WHERE user_id = ? AND movie_id = ?');
-$stmt->execute([$userId, (int) $input['movie_id']]);
+try {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('DELETE FROM watch_history WHERE user_id = ? AND movie_id = ?');
+    $stmt->execute([$userId, (int) $input['movie_id']]);
 
-if ($stmt->rowCount() === 0) {
-    jsonError('History entry not found', 404);
+    if ($stmt->rowCount() === 0) {
+        jsonError('History entry not found', 404);
+    }
+
+    jsonResponse(['success' => true]);
+} catch (\PDOException $e) {
+    jsonError('Failed to delete history entry', 500);
 }
-
-jsonResponse(['success' => true]);

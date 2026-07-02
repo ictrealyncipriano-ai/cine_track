@@ -2,6 +2,13 @@
 
 require_once __DIR__ . '/env.php';
 
+set_exception_handler(function (\Throwable $e): void {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['error' => 'Internal server error']);
+    exit;
+});
+
 function getDb(): PDO {
     static $pdo = null;
     if ($pdo === null) {

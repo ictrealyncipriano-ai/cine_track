@@ -27,6 +27,23 @@ class HistoryProvider extends ChangeNotifier {
   bool isLoading = true;
   String? errorMessage;
 
+  String _friendlyError(dynamic e) {
+    final msg = e.toString();
+    if (msg.contains('status 500') || msg.contains('Internal server error')) {
+      return 'Something went wrong on our end. Please try again.';
+    }
+    if (msg.contains('Timeout') || msg.contains('taking too long')) {
+      return 'Request timed out. Please check your connection.';
+    }
+    if (msg.contains('status 401') || msg.contains('Unauthorized')) {
+      return 'Session expired. Please log in again.';
+    }
+    if (msg.contains('status 404')) {
+      return 'History entry not found.';
+    }
+    return 'Something went wrong. Please try again.';
+  }
+
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       _page = 1;
@@ -64,7 +81,7 @@ class HistoryProvider extends ChangeNotifier {
       }
       _hasMore = _history.length < _total;
     } catch (e) {
-      errorMessage = '$e';
+      errorMessage = _friendlyError(e);
       debugPrint('fetchHistory error: $e');
     } finally {
       isLoading = false;
@@ -88,7 +105,7 @@ class HistoryProvider extends ChangeNotifier {
       _hasMore = _history.length < _total;
     } catch (e) {
       _page--;
-      errorMessage = '$e';
+      errorMessage = _friendlyError(e);
       debugPrint('loadMoreHistory error: $e');
     } finally {
       _isLoadingMore = false;
@@ -112,7 +129,7 @@ class HistoryProvider extends ChangeNotifier {
       _hasMore = _history.length < _total;
       notifyListeners();
     } catch (e) {
-      errorMessage = '$e';
+      errorMessage = _friendlyError(e);
       debugPrint('removeFromHistory error: $e');
       notifyListeners();
     }
@@ -127,7 +144,7 @@ class HistoryProvider extends ChangeNotifier {
       _total = 0;
       notifyListeners();
     } catch (e) {
-      errorMessage = '$e';
+      errorMessage = _friendlyError(e);
       debugPrint('clearHistory error: $e');
       notifyListeners();
     }
