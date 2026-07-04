@@ -45,10 +45,6 @@ class _CineTrackAppState extends State<CineTrackApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (!_onboardingDone) {
-      return OnboardingScreen(onComplete: _completeOnboarding);
-    }
-
     final apiService = ApiService();
     final authService = AuthService(apiService);
 
@@ -84,7 +80,9 @@ class _CineTrackAppState extends State<CineTrackApp> {
             theme: AppTheme.dark,
             darkTheme: AppTheme.dark,
             themeMode: themeProvider.themeMode,
-            home: Consumer<AuthProvider>(
+            home: !_onboardingDone
+                ? OnboardingScreen(onComplete: _completeOnboarding)
+                : Consumer<AuthProvider>(
               builder: (_, auth, __) {
                 if (auth.isLoading) {
                   return const _SplashScreen();

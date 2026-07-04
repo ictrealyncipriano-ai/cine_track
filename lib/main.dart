@@ -14,15 +14,18 @@ void main() async {
       debugPrint('FlutterError: ${details.exception}');
     };
     ErrorWidget.builder = (details) {
-      return Material(
-        color: const Color(0xFF0D1117),
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Text(
-              'Something went wrong. Please restart the app.',
-              style: const TextStyle(color: Colors.white70, fontSize: 16),
-              textAlign: TextAlign.center,
+      return const Directionality(
+        textDirection: TextDirection.ltr,
+        child: ColoredBox(
+          color: Color(0xFF0D1117),
+          child: Center(
+            child: Padding(
+              padding: EdgeInsets.all(24),
+              child: Text(
+                'Something went wrong. Please restart the app.',
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         ),

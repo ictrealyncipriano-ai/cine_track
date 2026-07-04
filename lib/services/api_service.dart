@@ -87,7 +87,7 @@ class ApiService {
       try {
         final decoded = jsonDecode(response.body);
         final data = decoded is Map<String, dynamic> ? decoded : <String, dynamic>{};
-        throw Exception(data['error'] ?? 'Request failed');
+        throw Exception('status ${response.statusCode}: ${data['error'] ?? 'Request failed'}');
       } on FormatException {
         throw Exception('Request failed with status ${response.statusCode}: ${response.body}');
       }
