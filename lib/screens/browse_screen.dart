@@ -113,7 +113,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                         scrollDirection: Axis.horizontal,
                         padding: const EdgeInsets.symmetric(horizontal: 20),
                         itemCount: recentlyWatched.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final movie = recentlyWatched[index];
                           return GestureDetector(
@@ -138,8 +138,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
                                               imageUrl: movie.posterUrl!,
                                               width: 110,
                                               fit: BoxFit.cover,
-                                              placeholder: (_, __) => Container(color: const Color(0xFF161B22)),
-                                              errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white24),
+                                              placeholder: (_, _) => Container(color: const Color(0xFF161B22)),
+                                              errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white24),
                                             )
                                           : Container(color: const Color(0xFF161B22), child: const Icon(Icons.movie, color: Colors.white24)),
                                     ),
@@ -170,7 +170,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     itemCount: mp.genres.length,
-                    separatorBuilder: (_, __) => const SizedBox(width: 8),
+                    separatorBuilder: (_, _) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final genre = mp.genres[index];
                       final selected = mp.selectedGenreId == genre.id;
@@ -389,7 +389,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: movies.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 12),
+                separatorBuilder: (_, _) => const SizedBox(width: 12),
                 itemBuilder: (context, index) {
                   return SizedBox(
                     width: 140,

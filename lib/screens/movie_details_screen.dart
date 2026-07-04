@@ -169,8 +169,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ? CachedNetworkImage(
                       imageUrl: movie.backdropUrl!,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: const Color(0xFF161B22)),
-                      errorWidget: (_, __, ___) => Container(color: const Color(0xFF161B22)),
+                      placeholder: (_, _) => Container(color: const Color(0xFF161B22)),
+                      errorWidget: (_, _, _) => Container(color: const Color(0xFF161B22)),
                     )
                   : Container(color: const Color(0xFF161B22)),
             ),
@@ -193,8 +193,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                               ? CachedNetworkImage(
                                   imageUrl: movie.posterUrl!,
                                   fit: BoxFit.cover,
-                                  placeholder: (_, __) => Container(color: const Color(0xFF161B22)),
-                                  errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white38),
+                                  placeholder: (_, _) => Container(color: const Color(0xFF161B22)),
+                                  errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white38),
                                 )
                               : Container(color: const Color(0xFF161B22), child: const Icon(Icons.movie, color: Colors.white38)),
                         ),
@@ -395,7 +395,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _cast.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final member = _cast[index];
                           return SizedBox(
@@ -446,7 +446,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _similarMovies.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           return SizedBox(
                             width: 140,
@@ -468,7 +468,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _recommendedMovies.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           return SizedBox(
                             width: 140,
