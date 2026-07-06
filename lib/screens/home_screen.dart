@@ -3,12 +3,12 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/idle_timer_wrapper.dart';
-import '../widgets/profile_drawer.dart';
 import 'browse_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'watchlist_screen.dart';
 import 'history_screen.dart';
+import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -29,14 +28,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _checkGuestRedirect() {
     final auth = context.read<AuthProvider>();
-    if (auth.isGuest && _currentIndex >= 2 && _currentIndex <= 4) {
+    if (auth.isGuest && _currentIndex >= 2 && _currentIndex <= 3) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() => _currentIndex = 0);
       });
     }
   }
-
-  void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
 
   @override
   Widget build(BuildContext context) {
@@ -44,31 +41,22 @@ class _HomeScreenState extends State<HomeScreen> {
     final isGuest = auth.isGuest;
 
     return Scaffold(
-      key: _scaffoldKey,
-      drawer: ProfileDrawer(),
-      body: Column(
-        children: [
-          _buildTopBar(),
-          Expanded(
-            child: IdleTimerWrapper(
-              child: IndexedStack(
-                index: _currentIndex,
-                children: [
-                  const BrowseScreen(),
-                  const SearchScreen(),
-                  isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
-                  isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
-                  isGuest ? const _GuestGuardScreen() : const HistoryScreen(),
-                ],
-              ),
-            ),
-          ),
-        ],
+      body: IdleTimerWrapper(
+        child: IndexedStack(
+          index: _currentIndex,
+          children: [
+            const BrowseScreen(),
+            const SearchScreen(),
+            isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
+            isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
+            isGuest ? _buildGuestProfile() : const ProfileScreen(),
+          ],
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          if (isGuest && index >= 2 && index <= 4) {
+          if (isGuest && index >= 2 && index <= 3) {
             _showGuestPrompt(context);
             return;
           }
@@ -91,42 +79,16 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.bookmark),
             label: 'Watchlist',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.history),
-            activeIcon: Icon(Icons.history),
-            label: 'History',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
       ),
     );
   }
 
-  Widget _buildTopBar() {
-    const titles = ['Browse Movies', 'Search', 'Favorites', 'Watchlist', 'History'];
-
-    return Container(
-      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 4),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0D1117),
-        border: Border(bottom: BorderSide(color: Colors.white12)),
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            icon: const Icon(Icons.menu, color: Colors.white70),
-            onPressed: _openDrawer,
-          ),
-          Text(
-            titles[_currentIndex],
-            style: GoogleFonts.inter(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
+  Widget _buildGuestProfile() {
+    return ProfileScreen(isGuest: true, onSignIn: () {
+      context.read<AuthProvider>().exitGuestMode();
+    });
   }
 
   void _showGuestPrompt(BuildContext context) {
@@ -142,8 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 40,
-              height: 4,
+              width: 40, height: 4,
               decoration: BoxDecoration(
                 color: Colors.white24,
                 borderRadius: BorderRadius.circular(2),
@@ -155,24 +116,18 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Sign in to use this feature',
               style: GoogleFonts.inter(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+                fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Create an account or sign in to save favorites, build a watchlist, and track your history.',
-              style: GoogleFonts.inter(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
+              style: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
             SizedBox(
-              width: double.infinity,
-              height: 48,
+              width: double.infinity, height: 48,
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.pop(ctx);

@@ -74,7 +74,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
                 child: Text(
                   'Browse Movies',
                   style: GoogleFonts.inter(

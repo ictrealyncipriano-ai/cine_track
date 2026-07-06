@@ -68,7 +68,7 @@ class _SearchScreenState extends State<SearchScreen> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
             child: TextField(
               controller: _controller,
               onChanged: _onSearchChanged,
