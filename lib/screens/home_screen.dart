@@ -1,14 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/idle_timer_wrapper.dart';
+import '../widgets/profile_drawer.dart';
 import 'browse_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'watchlist_screen.dart';
 import 'history_screen.dart';
-import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -35,29 +38,37 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final isGuest = auth.isGuest;
 
     return Scaffold(
-      body: IdleTimerWrapper(
-        child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            const BrowseScreen(),
-            const SearchScreen(),
-            isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
-            isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
-            isGuest ? const _GuestGuardScreen() : const HistoryScreen(),
-            _buildProfileScreen(isGuest, auth),
-          ],
-        ),
+      key: _scaffoldKey,
+      drawer: ProfileDrawer(),
+      body: Stack(
+        children: [
+          IdleTimerWrapper(
+            child: IndexedStack(
+              index: _currentIndex,
+              children: [
+                const BrowseScreen(),
+                const SearchScreen(),
+                isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
+                isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
+                isGuest ? const _GuestGuardScreen() : const HistoryScreen(),
+              ],
+            ),
+          ),
+          _buildProfileButton(auth),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          if (isGuest && index >= 2 && index <= 4) {
+          if (isGuest && index >= 2 && index <= 3) {
             _showGuestPrompt(context);
             return;
           }
@@ -85,8 +96,41 @@ class _HomeScreenState extends State<HomeScreen> {
             activeIcon: Icon(Icons.history),
             label: 'History',
           ),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
+      ),
+    );
+  }
+
+  Widget _buildProfileButton(AuthProvider auth) {
+    final user = auth.user;
+    final isGuest = auth.isGuest && !auth.isAuthenticated;
+
+    return Positioned(
+      top: 12,
+      right: 16,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: _openDrawer,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white24, width: 2),
+            ),
+            child: ClipOval(
+              child: isGuest || user == null
+                  ? Icon(Icons.person_outline, size: 22, color: Colors.white70)
+                  : (user.avatarUrl != null && user.avatarUrl!.isNotEmpty
+                      ? (user.avatarUrl!.startsWith('data:')
+                          ? Image.memory(base64Decode(user.avatarUrl!.split(',')[1]), fit: BoxFit.cover)
+                          : CachedNetworkImage(imageUrl: user.avatarUrl!, fit: BoxFit.cover, placeholder: (_, __) => const Icon(Icons.person, size: 22, color: Colors.white54), errorWidget: (_, __, ___) => const Icon(Icons.person, size: 22, color: Colors.white54)))
+                      : const Icon(Icons.person, size: 22, color: Colors.white70)),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -136,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                  onPressed: () {
+                onPressed: () {
                   Navigator.pop(ctx);
                   context.read<AuthProvider>().exitGuestMode();
                 },
@@ -157,13 +201,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildProfileScreen(bool isGuest, AuthProvider auth) {
-    return ProfileScreen(
-      isGuest: isGuest,
-      onSignIn: () => auth.exitGuestMode(),
     );
   }
 }

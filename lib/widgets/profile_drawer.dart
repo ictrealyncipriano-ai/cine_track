@@ -87,9 +87,10 @@ class _ProfileDrawerState extends State<ProfileDrawer> {
               Navigator.pop(ctx);
               await context.read<AuthProvider>().logout();
               if (context.mounted) {
-                Navigator.pushReplacement(
+                Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(builder: (_) => const LandingPage()),
+                  (route) => false,
                 );
               }
             },
