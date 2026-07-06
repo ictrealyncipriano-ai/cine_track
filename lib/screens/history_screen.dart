@@ -355,8 +355,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             width: 80,
                                             height: 120,
                                             fit: BoxFit.cover,
-                                            placeholder: (_, __) => Container(color: const Color(0xFF0D1117)),
-                                            errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white24),
+                                            placeholder: (_, _) => Container(color: const Color(0xFF0D1117)),
+                                            errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white24),
                                           )
                                         : Container(color: const Color(0xFF0D1117), child: const Icon(Icons.movie, color: Colors.white24)),
                                   ),

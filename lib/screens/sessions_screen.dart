@@ -90,7 +90,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
                       child: ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: _sessions!.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
+                        separatorBuilder: (_, _) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final s = _sessions![index];
                           final isCurrent = s['is_current'] == true;

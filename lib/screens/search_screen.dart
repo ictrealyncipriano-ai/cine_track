@@ -106,7 +106,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: mp.genres.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 6),
+                        separatorBuilder: (_, _) => const SizedBox(width: 6),
                         itemBuilder: (context, index) {
                           final genre = mp.genres[index];
                           final selected = _filterGenreId == genre.id;

@@ -590,7 +590,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             if (!_editing) ...[
               const SizedBox(height: 20),
               Consumer<ThemeProvider>(
-                builder: (_, tp, __) => SizedBox(
+                builder: (_, tp, _) => SizedBox(
                   width: double.infinity,
                   height: 48,
                   child: OutlinedButton.icon(

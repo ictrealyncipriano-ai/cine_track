@@ -30,8 +30,8 @@ class MovieCard extends StatelessWidget {
                 width: double.infinity,
                 height: double.infinity,
                 fit: BoxFit.cover,
-                placeholder: (_, __) => Container(color: const Color(0xFF161B22)),
-                errorWidget: (_, __, ___) => const Icon(Icons.movie, color: Colors.white38),
+                placeholder: (_, _) => Container(color: const Color(0xFF161B22)),
+                errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white38),
               )
             else
               Container(color: const Color(0xFF161B22), child: const Icon(Icons.movie, color: Colors.white38)),

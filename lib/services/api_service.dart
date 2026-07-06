@@ -55,6 +55,8 @@ class ApiService {
       return _handleResponse(response);
     } on TimeoutException {
       throw Exception('Server is taking too long. Please check your connection and try again.');
+    } on http.ClientException {
+      throw Exception('Unable to connect to server. Please check your internet connection and try again.');
     }
   }
 
@@ -66,6 +68,8 @@ class ApiService {
       return _handleResponse(response);
     } on TimeoutException {
       throw Exception('Server is taking too long. Please check your connection and try again.');
+    } on http.ClientException {
+      throw Exception('Unable to connect to server. Please check your internet connection and try again.');
     }
   }
 
