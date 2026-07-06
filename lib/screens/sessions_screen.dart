@@ -18,7 +18,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSessions();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSessions());
   }
 
   Future<void> _loadSessions() async {
