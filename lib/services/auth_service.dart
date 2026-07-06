@@ -289,6 +289,26 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<String?> uploadAvatar(String base64Image, String mimeType) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _api.post('/auth/avatar.php', {
+        'image': base64Image,
+        'mime': mimeType,
+      });
+      _user = _user?.copyWith(avatarUrl: data['avatar_url'] as String?);
+      notifyListeners();
+      return null;
+    } catch (e) {
+      return e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<String?> deleteAccount(String password) async {
     _isLoading = true;
     notifyListeners();

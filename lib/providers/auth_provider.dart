@@ -129,6 +129,10 @@ class AuthProvider extends ChangeNotifier {
     return _authService.changePassword(currentPassword, newPassword, confirmPassword);
   }
 
+  Future<String?> uploadAvatar(String base64Image, String mimeType) async {
+    return _authService.uploadAvatar(base64Image, mimeType);
+  }
+
   Future<String?> deleteAccount(String password) async {
     return _authService.deleteAccount(password);
   }

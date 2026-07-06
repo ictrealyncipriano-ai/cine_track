@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../config.dart';
 import '../../providers/auth_provider.dart';
 import '../home_screen.dart';
 import 'register_screen.dart';
@@ -115,6 +116,64 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _showApiUrlDialog() {
+    final controller = TextEditingController(text: AppConfig.apiBaseUrl);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFF161B22),
+        title: const Text('API URL', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: AppConfig.apiBaseUrl,
+                hintStyle: const TextStyle(color: Colors.white24),
+                filled: true,
+                fillColor: const Color(0xFF0D1117),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'Enter a custom API base URL.\nThis is saved across app restarts.',
+              style: TextStyle(color: Colors.white38, fontSize: 12),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final url = controller.text.trim();
+              if (url.isNotEmpty) {
+                await AppConfig.setApiBaseUrl(url);
+                if (ctx.mounted) Navigator.pop(ctx);
+                if (mounted) {
+                  setState(() {});
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('API URL updated')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -135,15 +194,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     color: Theme.of(context).colorScheme.primary,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Welcome Back',
-                    style: GoogleFonts.montserrat(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                  GestureDetector(
+                    onLongPress: _showApiUrlDialog,
+                    child: Text(
+                      'Welcome Back',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 4),
+                  GestureDetector(
+                    onLongPress: _showApiUrlDialog,
+                    child: Text(
+                      AppConfig.apiBaseUrl,
+                      style: const TextStyle(color: Colors.white24, fontSize: 10),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
