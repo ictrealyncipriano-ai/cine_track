@@ -126,6 +126,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           ),
                         ),
                         GestureDetector(
+                          onTap: () {
+                            fp.clearError();
+                            fp.fetchFavorites();
+                          },
+                          child: const Icon(Icons.refresh, color: Colors.redAccent, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
                           onTap: () => fp.clearError(),
                           child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
                         ),

@@ -126,6 +126,14 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                           ),
                         ),
                         GestureDetector(
+                          onTap: () {
+                            wp.clearError();
+                            wp.fetchWatchlist();
+                          },
+                          child: const Icon(Icons.refresh, color: Colors.redAccent, size: 16),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
                           onTap: () => wp.clearError(),
                           child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
                         ),

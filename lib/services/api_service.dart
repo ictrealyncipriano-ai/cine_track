@@ -54,8 +54,10 @@ class ApiService {
       final response = await http.get(uri, headers: headers).timeout(const Duration(seconds: 30));
       return _handleResponse(response);
     } on TimeoutException {
+      debugPrint('ApiService.get timeout: $uri');
       throw Exception('Server is taking too long. Please check your connection and try again.');
-    } on http.ClientException {
+    } on http.ClientException catch (e) {
+      debugPrint('ApiService.get ClientException: $uri — $e');
       throw Exception('Unable to connect to server. Please check your internet connection and try again.');
     }
   }
@@ -67,8 +69,10 @@ class ApiService {
       final response = await http.post(uri, headers: headers, body: jsonEncode(body)).timeout(const Duration(seconds: 30));
       return _handleResponse(response);
     } on TimeoutException {
+      debugPrint('ApiService.post timeout: $uri');
       throw Exception('Server is taking too long. Please check your connection and try again.');
-    } on http.ClientException {
+    } on http.ClientException catch (e) {
+      debugPrint('ApiService.post ClientException: $uri — $e');
       throw Exception('Unable to connect to server. Please check your internet connection and try again.');
     }
   }
