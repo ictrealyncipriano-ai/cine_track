@@ -1,8 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/idle_timer_wrapper.dart';
 import '../widgets/profile_drawer.dart';
@@ -31,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _checkGuestRedirect() {
     final auth = context.read<AuthProvider>();
-    if (auth.isGuest && _currentIndex >= 2) {
+    if (auth.isGuest && _currentIndex >= 2 && _currentIndex <= 4) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         setState(() => _currentIndex = 0);
       });
@@ -48,27 +46,29 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       key: _scaffoldKey,
       drawer: ProfileDrawer(),
-      body: Stack(
+      body: Column(
         children: [
-          IdleTimerWrapper(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: [
-                const BrowseScreen(),
-                const SearchScreen(),
-                isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
-                isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
-                isGuest ? const _GuestGuardScreen() : const HistoryScreen(),
-              ],
+          _buildTopBar(),
+          Expanded(
+            child: IdleTimerWrapper(
+              child: IndexedStack(
+                index: _currentIndex,
+                children: [
+                  const BrowseScreen(),
+                  const SearchScreen(),
+                  isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
+                  isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
+                  isGuest ? const _GuestGuardScreen() : const HistoryScreen(),
+                ],
+              ),
             ),
           ),
-          _buildProfileButton(auth),
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
-          if (isGuest && index >= 2 && index <= 3) {
+          if (isGuest && index >= 2 && index <= 4) {
             _showGuestPrompt(context);
             return;
           }
@@ -101,36 +101,30 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProfileButton(AuthProvider auth) {
-    final user = auth.user;
-    final isGuest = auth.isGuest && !auth.isAuthenticated;
+  Widget _buildTopBar() {
+    const titles = ['Browse Movies', 'Search', 'Favorites', 'Watchlist', 'History'];
 
-    return Positioned(
-      top: 12,
-      right: 16,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20),
-          onTap: _openDrawer,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.white24, width: 2),
-            ),
-            child: ClipOval(
-              child: isGuest || user == null
-                  ? Icon(Icons.person_outline, size: 22, color: Colors.white70)
-                  : (user.avatarUrl != null && user.avatarUrl!.isNotEmpty
-                      ? (user.avatarUrl!.startsWith('data:')
-                          ? Image.memory(base64Decode(user.avatarUrl!.split(',')[1]), fit: BoxFit.cover)
-                          : CachedNetworkImage(imageUrl: user.avatarUrl!, fit: BoxFit.cover, placeholder: (_, __) => const Icon(Icons.person, size: 22, color: Colors.white54), errorWidget: (_, __, ___) => const Icon(Icons.person, size: 22, color: Colors.white54)))
-                      : const Icon(Icons.person, size: 22, color: Colors.white70)),
+    return Container(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 4),
+      decoration: const BoxDecoration(
+        color: Color(0xFF0D1117),
+        border: Border(bottom: BorderSide(color: Colors.white12)),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.menu, color: Colors.white70),
+            onPressed: _openDrawer,
+          ),
+          Text(
+            titles[_currentIndex],
+            style: GoogleFonts.inter(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
             ),
           ),
-        ),
+        ],
       ),
     );
   }
