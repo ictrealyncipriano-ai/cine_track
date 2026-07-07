@@ -41,11 +41,10 @@ class LandingPage extends StatelessWidget {
           child: Stack(
             children: [
               SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: padding, vertical: 32),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1200),
-                    child: Column(
+                child: ResponsiveContainer(
+                  maxWidth: 1200,
+                  padding: EdgeInsets.symmetric(horizontal: padding, vertical: 32),
+                  child: Column(
                       children: [
                         const SizedBox(height: 40),
                         _Logo(isDesk: isDesk),
@@ -150,7 +149,6 @@ class LandingPage extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
               Positioned(
                 top: 8,
                 right: padding,
@@ -225,7 +223,6 @@ class _FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
