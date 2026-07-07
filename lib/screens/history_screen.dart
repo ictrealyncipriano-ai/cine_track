@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/history_provider.dart';
 import '../widgets/empty_state.dart';
 import 'movie_details_screen.dart';
+import '../widgets/loading_shimmer.dart';
+import '../screens/home_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -63,45 +65,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
-  Future<void> _confirmDelete(BuildContext context, int movieId, String title) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
-        title: Text('Remove from history', style: GoogleFonts.inter(color: Colors.white)),
-        content: Text('Remove "$title" from your watch history?', style: GoogleFonts.inter(color: Colors.white70)),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white54)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Remove', style: GoogleFonts.inter(color: Colors.redAccent)),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && mounted) {
-      await context.read<HistoryProvider>().removeFromHistory(movieId);
-    }
-  }
-
   Future<void> _confirmClearAll(BuildContext context) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
-        title: Text('Clear all history', style: GoogleFonts.inter(color: Colors.white)),
-        content: Text('Are you sure you want to remove all watch history? This cannot be undone.', style: GoogleFonts.inter(color: Colors.white70)),
+        backgroundColor: Theme.of(context).cardColor,
+        title: Text('Clear all history', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text('Are you sure you want to remove all watch history? This cannot be undone.', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('Cancel', style: GoogleFonts.inter(color: Colors.white54)),
+            child: Text('Cancel', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: Text('Clear All', style: GoogleFonts.inter(color: Colors.redAccent)),
+            child: Text('Clear All', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -138,7 +116,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (!hp.isEmpty)
@@ -146,7 +124,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           '(${allHistory.length})',
-                          style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
+                          style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         ),
                       ),
                     const Spacer(),
@@ -157,12 +135,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           setState(() => _sortBy = v);
                           context.read<HistoryProvider>().fetchHistory(sortBy: v);
                         },
-                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
-                        color: const Color(0xFF161B22),
+                        icon: Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+                        color: Theme.of(context).cardColor,
                         itemBuilder: (_) => [
-                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
                         ],
                       ),
                     if (!hp.isEmpty)
@@ -175,21 +153,21 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                           ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.delete_sweep, size: 16, color: Colors.redAccent),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Clear All',
-                                style: GoogleFonts.inter(
-                                  fontSize: 12,
-                                  color: Colors.redAccent,
-                                  fontWeight: FontWeight.w500,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.delete_sweep, size: 16, color: Theme.of(context).colorScheme.error),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Clear All',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
+                              ],
+                            ),
                         ),
                       ),
                   ],
@@ -205,22 +183,22 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     child: TextField(
                       controller: _searchController,
                       onChanged: (v) => setState(() => _searchQuery = v),
-                      style: GoogleFonts.inter(fontSize: 14, color: Colors.white),
+                      style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurface),
                       decoration: InputDecoration(
                         hintText: 'Search history...',
-                        hintStyle: GoogleFonts.inter(fontSize: 14, color: Colors.white38),
-                        prefixIcon: const Icon(Icons.search, color: Colors.white38, size: 20),
+                        hintStyle: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+                        prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), size: 20),
                         suffixIcon: _searchQuery.isNotEmpty
                             ? GestureDetector(
                                 onTap: () {
                                   _searchController.clear();
                                   setState(() => _searchQuery = '');
                                 },
-                                child: const Icon(Icons.clear, color: Colors.white38, size: 18),
+                                child: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), size: 18),
                               )
                             : null,
                         filled: true,
-                        fillColor: const Color(0xFF161B22),
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
@@ -245,17 +223,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             hp.errorMessage!,
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.redAccent),
+                            style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                         GestureDetector(
                           onTap: () => hp.clearError(),
-                          child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 16),
                         ),
                       ],
                     ),
@@ -264,7 +242,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               ),
             if (hp.isLoading)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+                child: MovieListShimmer(),
               )
             else if (allHistory.isEmpty)
               SliverFillRemaining(
@@ -272,6 +250,13 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   icon: Icons.history,
                   title: 'No watch history yet',
                   subtitle: 'Movies you watch will appear here',
+                  actionLabel: 'Browse Movies',
+                  onAction: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    );
+                  },
                 ),
               )
             else if (displayList.isEmpty)
@@ -281,11 +266,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.search_off, size: 48, color: Colors.white24),
+                      Icon(Icons.search_off, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                       const SizedBox(height: 12),
                       Text(
                         'No results for "$_searchQuery"',
-                        style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
+                        style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         textAlign: TextAlign.center,
                       ),
                     ],
@@ -317,17 +302,48 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           key: ValueKey('history_${movie.id}'),
                           direction: DismissDirection.horizontal,
                           confirmDismiss: (direction) async {
-                            await _confirmDelete(context, movie.id, movie.title);
-                            return false;
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                backgroundColor: Theme.of(context).cardColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                title: Text('Remove from history', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface)),
+                                content: Text('Remove "${movie.title}" from your watch history?', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, false),
+                                    child: Text('Cancel', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
+                                  ),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    child: Text('Remove', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.error)),
+                                  ),
+                                ],
+                              ),
+                            );
+                            return confirmed == true;
+                          },
+                          onDismissed: (_) {
+                            context.read<HistoryProvider>().removeFromHistory(movie.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Removed "${movie.title}"'),
+                                duration: const Duration(seconds: 3),
+                                action: SnackBarAction(
+                                  label: 'Undo',
+                                  onPressed: () {},
+                                ),
+                              ),
+                            );
                           },
                           background: Container(
                             decoration: BoxDecoration(
-                              color: Colors.redAccent,
+                              color: Theme.of(context).colorScheme.error,
                               borderRadius: BorderRadius.circular(12),
                             ),
                             alignment: Alignment.centerRight,
                             padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(Icons.delete_outline, color: Colors.white, size: 24),
+                            child: Icon(Icons.delete_outline, color: Colors.white, size: 24),
                           ),
                           child: GestureDetector(
                             onTap: () {
@@ -340,7 +356,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                color: const Color(0xFF161B22),
+                                color: Theme.of(context).cardColor,
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               clipBehavior: Clip.antiAlias,
@@ -355,10 +371,10 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             width: 80,
                                             height: 120,
                                             fit: BoxFit.cover,
-                                            placeholder: (_, _) => Container(color: const Color(0xFF0D1117)),
-                                            errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white24),
+                                            placeholder: (_, _) => Container(color: Theme.of(context).scaffoldBackgroundColor),
+                                            errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                                           )
-                                        : Container(color: const Color(0xFF0D1117), child: const Icon(Icons.movie, color: Colors.white24)),
+                                        : Container(color: Theme.of(context).scaffoldBackgroundColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
                                   ),
                                   Expanded(
                                     child: Padding(
@@ -371,7 +387,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             style: GoogleFonts.inter(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.white,
+                                              color: Theme.of(context).colorScheme.onSurface,
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -381,20 +397,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                                             _formatDate(movie.watchedAt),
                                             style: GoogleFonts.inter(
                                               fontSize: 13,
-                                              color: Colors.white54,
+                                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                                             ),
                                           ),
                                           if (movie.watchCount > 1) ...[
                                             const SizedBox(height: 4),
                                             Row(
                                               children: [
-                                                const Icon(Icons.replay, size: 14, color: Color(0xFFFFC107)),
+                                                Icon(Icons.replay, size: 14, color: Theme.of(context).colorScheme.primary),
                                                 const SizedBox(width: 4),
                                                 Text(
                                                   'Watched ${movie.watchCount} times',
                                                   style: GoogleFonts.inter(
                                                     fontSize: 13,
-                                                    color: const Color(0xFFFFC107),
+                                                    color: Theme.of(context).colorScheme.primary,
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),

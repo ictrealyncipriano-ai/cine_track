@@ -33,7 +33,7 @@ class LandingPage extends StatelessWidget {
                 style: GoogleFonts.montserrat(
                   fontSize: 40,
                   fontWeight: FontWeight.w700,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: 1.2,
                 ),
               ),
@@ -42,7 +42,7 @@ class LandingPage extends StatelessWidget {
                 'Discover. Track. Watch.',
                 style: GoogleFonts.inter(
                   fontSize: 18,
-                  color: Colors.white70,
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w400,
                 ),
               ),
@@ -77,7 +77,7 @@ class LandingPage extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    foregroundColor: Colors.black,
+                    foregroundColor: Theme.of(context).colorScheme.onPrimary,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -104,8 +104,8 @@ class LandingPage extends StatelessWidget {
                     );
                   },
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white70,
-                    side: const BorderSide(color: Colors.white24),
+                    foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                    side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(16),
                     ),
@@ -172,7 +172,7 @@ class _FeatureCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white10),
       ),
@@ -200,7 +200,7 @@ class _FeatureCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -208,7 +208,7 @@ class _FeatureCard extends StatelessWidget {
                   description,
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: Colors.white54,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                   ),
                 ),
               ],

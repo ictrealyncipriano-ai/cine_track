@@ -106,7 +106,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                   style: GoogleFonts.montserrat(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -115,7 +115,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                     'We sent a verification code to',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.white54,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -137,7 +137,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 12,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     decoration: InputDecoration(
                       counterText: '',
@@ -146,10 +146,10 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 12,
-                        color: Colors.white12,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF161B22),
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -166,7 +166,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                     'Enter the 6-digit code from the email. The code expires in 10 minutes.',
                     style: GoogleFonts.inter(
                       fontSize: 12,
-                      color: Colors.white38,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -175,17 +175,17 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                     'You can now log in to your account.',
                     style: GoogleFonts.inter(
                       fontSize: 14,
-                      color: Colors.white54,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-                if (_message != null && !_verified) ...[
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (_message != null && !_verified) ...[
                   const SizedBox(height: 16),
                   Text(
                     _message!,
                     style: TextStyle(
-                      color: _sent ? Colors.greenAccent : Colors.redAccent,
+                      color: _sent ? Colors.greenAccent : Theme.of(context).colorScheme.error,
                       fontSize: 13,
                     ),
                     textAlign: TextAlign.center,
@@ -205,7 +205,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -226,7 +226,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                       label: const Text('Verify Code'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -242,8 +242,8 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                       icon: const Icon(Icons.refresh),
                       label: Text(_cooldown > 0 ? 'Resend Code ($_cooldown)' : 'Resend Code'),
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.white54,
-                        side: const BorderSide(color: Colors.white24),
+                        foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                        side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -259,7 +259,7 @@ class _VerificationSentScreenState extends State<VerificationSentScreen> {
                       child: Text.rich(
                         TextSpan(
                           text: 'Back to ',
-                          style: TextStyle(color: Colors.white38, fontSize: 14),
+                           style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 14),
                           children: [
                             TextSpan(
                               text: 'Sign In',

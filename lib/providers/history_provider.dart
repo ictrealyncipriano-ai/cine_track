@@ -21,6 +21,7 @@ class HistoryProvider extends ChangeNotifier {
   List<Movie> get history => List.unmodifiable(_history);
   List<Movie> get recentlyWatched =>
       _history.length > 10 ? _history.sublist(0, 10) : List.unmodifiable(_history);
+  int get totalCount => _total;
   bool get isEmpty => _history.isEmpty;
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;
@@ -74,7 +75,7 @@ class HistoryProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final data = await _api.get('/history/list.php?page=1&per_page=20&sort_by=$_sortBy');
+      final data = await _api.get('/history/list.php?page=1&per_page=10&sort_by=$_sortBy');
       final list = data['history'] as List<dynamic>;
       _total = data['total'] as int? ?? list.length;
       _history.clear();

@@ -62,9 +62,9 @@ class _HomeScreenState extends State<HomeScreen> {
           }
           setState(() => _currentIndex = index);
         },
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.white38,
+        unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
         type: BottomNavigationBarType.fixed,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Browse'),
@@ -94,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showGuestPrompt(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF161B22),
+      backgroundColor: Theme.of(context).cardColor,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
@@ -106,23 +106,23 @@ class _HomeScreenState extends State<HomeScreen> {
             Container(
               width: 40, height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
             const SizedBox(height: 20),
-            const Icon(Icons.lock_outline, size: 48, color: Color(0xFFFFC107)),
+            Icon(Icons.lock_outline, size: 48, color: Theme.of(context).colorScheme.primary),
             const SizedBox(height: 16),
             Text(
               'Sign in to use this feature',
               style: GoogleFonts.inter(
-                fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white,
+                fontSize: 18, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'Create an account or sign in to save favorites, build a watchlist, and track your history.',
-              style: GoogleFonts.inter(fontSize: 14, color: Colors.white70),
+              style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -134,8 +134,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   context.read<AuthProvider>().exitGuestMode();
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFC107),
-                  foregroundColor: Colors.black,
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -159,15 +159,15 @@ class _GuestGuardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.lock_outline, size: 64, color: Colors.white24),
-          SizedBox(height: 16),
+          Icon(Icons.lock_outline, size: 64, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
+          const SizedBox(height: 16),
           Text(
             'Sign in to access this feature',
-            style: TextStyle(color: Colors.white54, fontSize: 16),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 16),
           ),
         ],
       ),

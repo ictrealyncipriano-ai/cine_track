@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/favorites_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/loading_shimmer.dart';
+import '../screens/home_screen.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
@@ -72,7 +74,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                       if (!fp.isEmpty)
@@ -80,7 +82,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           '(${favorites.length})',
-                          style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
+                          style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         ),
                       ),
                     const Spacer(),
@@ -91,12 +93,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           setState(() => _sortBy = v);
                           context.read<FavoritesProvider>().fetchFavorites(sortBy: v);
                         },
-                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
-                        color: const Color(0xFF161B22),
+                        icon: Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+                        color: Theme.of(context).cardColor,
                         itemBuilder: (_) => [
-                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
                         ],
                       ),
                   ],
@@ -117,12 +119,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             fp.errorMessage!,
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.redAccent),
+                            style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                         GestureDetector(
@@ -130,12 +132,12 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                             fp.clearError();
                             fp.fetchFavorites();
                           },
-                          child: const Icon(Icons.refresh, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.refresh, color: Theme.of(context).colorScheme.error, size: 16),
                         ),
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () => fp.clearError(),
-                          child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 16),
                         ),
                       ],
                     ),
@@ -144,22 +146,29 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
               ),
             if (fp.isLoading)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+                child: MovieGridShimmer(crossAxisCount: 3),
               )
             else if (favorites.isEmpty)
               SliverFillRemaining(
                 child: EmptyState(
                   icon: Icons.favorite_outline,
                   title: 'No favorites yet',
-                  subtitle: 'Tap the heart icon on any movie to save it here',
+                  subtitle: 'Movies you favorite will appear here',
+                  actionLabel: 'Browse Movies',
+                  onAction: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    );
+                  },
                 ),
               )
             else
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
                     childAspectRatio: 0.6,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,

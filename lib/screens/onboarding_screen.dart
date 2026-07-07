@@ -55,7 +55,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final isLast = _currentPage == _pages.length - 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -67,7 +67,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Text(
                     'Skip',
                     style: GoogleFonts.inter(
-                      color: Colors.white54,
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                       fontSize: 14,
                     ),
                   ),
@@ -94,7 +94,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   decoration: BoxDecoration(
                     color: _currentPage == i
                         ? page.color
-                        : Colors.white24,
+                        : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                     borderRadius: BorderRadius.circular(4),
                   ),
                 );
@@ -127,8 +127,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         );
       },
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFFC107),
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -148,8 +148,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return ElevatedButton(
       onPressed: widget.onComplete,
       style: ElevatedButton.styleFrom(
-        backgroundColor: const Color(0xFFFFC107),
-        foregroundColor: Colors.black,
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -186,7 +186,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             style: GoogleFonts.montserrat(
               fontSize: 28,
               fontWeight: FontWeight.w700,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.onSurface,
               letterSpacing: 0.5,
             ),
             textAlign: TextAlign.center,
@@ -196,7 +196,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             page.description,
             style: GoogleFonts.inter(
               fontSize: 16,
-              color: Colors.white70,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
               height: 1.5,
             ),
             textAlign: TextAlign.center,

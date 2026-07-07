@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -15,8 +14,8 @@ class AvatarPicker extends StatelessWidget {
       onClosing: () {},
       builder: (_) => Container(
         padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: Color(0xFF161B22),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
           borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
         ),
         child: Column(
@@ -25,7 +24,7 @@ class AvatarPicker extends StatelessWidget {
             Container(
               width: 40, height: 4,
               decoration: BoxDecoration(
-                color: Colors.white24,
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -35,7 +34,7 @@ class AvatarPicker extends StatelessWidget {
               style: GoogleFonts.montserrat(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 24),
@@ -57,7 +56,7 @@ class AvatarPicker extends StatelessWidget {
               context,
               icon: Icons.delete_outline,
               label: 'Remove Current Photo',
-              color: Colors.redAccent,
+              color: Theme.of(context).colorScheme.error,
               onTap: () {
                 Navigator.pop(context);
                 onPicked('', '');
@@ -68,7 +67,7 @@ class AvatarPicker extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
               child: Text(
                 'Cancel',
-                style: GoogleFonts.inter(color: Colors.white54),
+                style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
               ),
             ),
           ],
@@ -78,14 +77,15 @@ class AvatarPicker extends StatelessWidget {
   }
 
   Widget _option(BuildContext context, {required IconData icon, required String label, VoidCallback? onTap, Color? color}) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
         onPressed: onTap,
-        icon: Icon(icon, color: color ?? Colors.white70),
-        label: Text(label, style: GoogleFonts.inter(color: color ?? Colors.white70)),
+        icon: Icon(icon, color: color ?? theme.colorScheme.onSurface.withValues(alpha: 0.7)),
+        label: Text(label, style: GoogleFonts.inter(color: color ?? theme.colorScheme.onSurface.withValues(alpha: 0.7))),
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: (color ?? Colors.white24).withValues(alpha: 0.3)),
+          side: BorderSide(color: (color ?? theme.colorScheme.onSurface).withValues(alpha: 0.3)),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           padding: const EdgeInsets.symmetric(vertical: 14),
         ),
@@ -107,16 +107,16 @@ class AvatarPicker extends StatelessWidget {
 
       final bytes = await picked.readAsBytes();
       final base64 = base64Encode(bytes);
-      final mimeType = picked.path.endsWith('.png') ? 'image/png'
-          : picked.path.endsWith('.webp') ? 'image/webp'
-          : picked.path.endsWith('.gif') ? 'image/gif'
+      final mimeType = picked.name.endsWith('.png') ? 'image/png'
+          : picked.name.endsWith('.webp') ? 'image/webp'
+          : picked.name.endsWith('.gif') ? 'image/gif'
           : 'image/jpeg';
 
       onPicked(base64, mimeType);
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: Colors.redAccent),
+          SnackBar(content: Text('Failed to pick image: $e'), backgroundColor: Theme.of(context).colorScheme.error),
         );
       }
     }

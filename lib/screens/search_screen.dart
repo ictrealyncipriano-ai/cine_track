@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/movie_provider.dart';
 import '../widgets/movie_card.dart';
+import '../widgets/loading_shimmer.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -74,11 +75,11 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: _onSearchChanged,
               decoration: InputDecoration(
                 hintText: 'Search movies...',
-                hintStyle: const TextStyle(color: Colors.white38),
-                prefixIcon: const Icon(Icons.search, color: Colors.white38),
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+                prefixIcon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, color: Colors.white38),
+                        icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         onPressed: () {
                           _controller.clear();
                           context.read<MovieProvider>().search('');
@@ -86,19 +87,21 @@ class _SearchScreenState extends State<SearchScreen> {
                       )
                     : null,
                 filled: true,
-                fillColor: const Color(0xFF161B22),
+                fillColor: Theme.of(context).cardColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
               ),
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             ),
           ),
           if (mp.genres.isNotEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Row(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
                 children: [
                   Expanded(
                     child: SizedBox(
@@ -111,15 +114,15 @@ class _SearchScreenState extends State<SearchScreen> {
                           final genre = mp.genres[index];
                           final selected = _filterGenreId == genre.id;
                           return FilterChip(
-                            label: Text(genre.name, style: TextStyle(fontSize: 12, color: selected ? Colors.black : Colors.white70)),
+                            label: Text(genre.name, style: TextStyle(fontSize: 12, color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
                             selected: selected,
                             onSelected: (_) {
                               setState(() => _filterGenreId = selected ? null : genre.id);
                               _onFilterChanged();
                             },
-                            backgroundColor: const Color(0xFF161B22),
+                            backgroundColor: Theme.of(context).cardColor,
                             selectedColor: Theme.of(context).colorScheme.primary,
-                            checkmarkColor: Colors.black,
+                            checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                             side: BorderSide.none,
                             visualDensity: VisualDensity.compact,
                           );
@@ -129,30 +132,31 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                   const SizedBox(width: 8),
                   PopupMenuButton<int>(
-                    icon: Icon(Icons.calendar_today, size: 18, color: _filterYear != null ? Theme.of(context).colorScheme.primary : Colors.white54),
+                    icon: Icon(Icons.calendar_today, size: 18, color: _filterYear != null ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                     tooltip: 'Filter by year',
-                    color: const Color(0xFF161B22),
+                    color: Theme.of(context).cardColor,
                     onSelected: (y) {
                       setState(() => _filterYear = y == _filterYear ? null : y);
                       _onFilterChanged();
                     },
-                    itemBuilder: (_) => _years.map((y) => PopupMenuItem(value: y, child: Text('$y', style: TextStyle(color: _filterYear == y ? Theme.of(context).colorScheme.primary : Colors.white70)))).toList(),
+                    itemBuilder: (_) => _years.map((y) => PopupMenuItem(value: y, child: Text('$y', style: TextStyle(color: _filterYear == y ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))))).toList(),
                   ),
                   PopupMenuButton<String>(
-                    icon: Icon(Icons.sort, size: 18, color: _filterSortBy != 'popularity.desc' ? Theme.of(context).colorScheme.primary : Colors.white54),
+                    icon: Icon(Icons.sort, size: 18, color: _filterSortBy != 'popularity.desc' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                     tooltip: 'Sort by',
-                    color: const Color(0xFF161B22),
+                    color: Theme.of(context).cardColor,
                     onSelected: (s) {
                       setState(() => _filterSortBy = s);
                       _onFilterChanged();
                     },
                     itemBuilder: (_) => [
-                      PopupMenuItem(value: 'popularity.desc', child: Text('Popular', style: TextStyle(color: _filterSortBy == 'popularity.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                      PopupMenuItem(value: 'vote_average.desc', child: Text('Rating', style: TextStyle(color: _filterSortBy == 'vote_average.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                      PopupMenuItem(value: 'release_date.desc', child: Text('Newest', style: TextStyle(color: _filterSortBy == 'release_date.desc' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                      PopupMenuItem(value: 'popularity.desc', child: Text('Popular', style: TextStyle(color: _filterSortBy == 'popularity.desc' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                      PopupMenuItem(value: 'vote_average.desc', child: Text('Rating', style: TextStyle(color: _filterSortBy == 'vote_average.desc' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                      PopupMenuItem(value: 'release_date.desc', child: Text('Newest', style: TextStyle(color: _filterSortBy == 'release_date.desc' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
                     ],
                   ),
                 ],
+              ),
               ),
             ),
           Expanded(
@@ -172,11 +176,11 @@ class _SearchScreenState extends State<SearchScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.search, size: 64, color: Colors.white24),
+              Icon(Icons.search, size: 64, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
               const SizedBox(height: 16),
               Text(
                 'Search millions of movies',
-                style: GoogleFonts.inter(fontSize: 16, color: Colors.white54),
+                style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
               ),
             ],
           ),
@@ -185,7 +189,9 @@ class _SearchScreenState extends State<SearchScreen> {
     }
 
     if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return MovieGridShimmer(
+        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
+      );
     }
 
     if (results.isEmpty) {
@@ -194,7 +200,7 @@ class _SearchScreenState extends State<SearchScreen> {
           padding: const EdgeInsets.all(32),
           child: Text(
             'No results for "$query"',
-            style: GoogleFonts.inter(fontSize: 16, color: Colors.white54),
+            style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
           ),
         ),
       );
@@ -216,8 +222,8 @@ class _SearchScreenState extends State<SearchScreen> {
       child: GridView.builder(
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
           childAspectRatio: 0.6,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,

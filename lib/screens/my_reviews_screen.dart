@@ -4,6 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../services/api_service.dart';
 import '../config.dart';
+import '../models/movie.dart';
+import '../widgets/loading_shimmer.dart';
+import '../screens/home_screen.dart';
+import '../widgets/empty_state.dart';
+import 'movie_details_screen.dart';
 
 class MyReviewsScreen extends StatefulWidget {
   const MyReviewsScreen({super.key});
@@ -42,9 +47,9 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         title: Text('My Reviews', style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -57,16 +62,16 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
+      return const MovieListShimmer();
     }
     if (_error != null) {
       return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.white24),
+            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
             const SizedBox(height: 16),
-            Text('Failed to load reviews', style: GoogleFonts.inter(color: Colors.white54)),
+            Text('Failed to load reviews', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
             const SizedBox(height: 16),
             OutlinedButton(
               onPressed: _fetchReviews,
@@ -77,17 +82,17 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
       );
     }
     if (_reviews.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(Icons.rate_review_outlined, size: 64, color: Colors.white24),
-            const SizedBox(height: 16),
-            Text('No reviews yet', style: GoogleFonts.inter(fontSize: 16, color: Colors.white54)),
-            const SizedBox(height: 8),
-            Text('Rate and review movies to see them here', style: GoogleFonts.inter(fontSize: 13, color: Colors.white24)),
-          ],
-        ),
+      return EmptyState(
+        icon: Icons.rate_review_outlined,
+        title: 'No reviews yet',
+        subtitle: 'Your reviews will appear here',
+        actionLabel: 'Discover Movies',
+        onAction: () {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const HomeScreen()),
+          );
+        },
       );
     }
 
@@ -109,15 +114,33 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
     final reviewText = review['review_text'] as String? ?? '';
     final createdAt = review['created_at'] as String? ?? '';
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF161B22),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Material(
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Row(
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => MovieDetailsScreen(
+                  movie: Movie(
+                    id: review['movie_id'] as int,
+                    title: review['movie_title'] as String? ?? '',
+                    overview: '',
+                    releaseDate: '',
+                    voteAverage: 0.0,
+                    posterPath: review['movie_poster'] as String?,
+                  ),
+                ),
+              ),
+            );
+          },
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
@@ -127,13 +150,13 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                       imageUrl: posterUrl,
                       width: 56, height: 84,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: const Color(0xFF0D1117), width: 56, height: 84),
-                      errorWidget: (_, __, ___) => Container(color: const Color(0xFF0D1117), width: 56, height: 84, child: const Icon(Icons.movie, color: Colors.white24)),
+                      placeholder: (_, __) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84),
+                      errorWidget: (_, __, ___) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
                     )
                   : Container(
-                      color: const Color(0xFF0D1117),
+                      color: Theme.of(context).scaffoldBackgroundColor,
                       width: 56, height: 84,
-                      child: const Icon(Icons.movie, color: Colors.white24),
+                      child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                     ),
             ),
             const SizedBox(width: 12),
@@ -143,7 +166,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                 children: [
                   Text(
                     review['movie_title'] as String? ?? 'Unknown',
-                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                    style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -155,13 +178,13 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                         return Icon(
                           filled ? Icons.star : Icons.star_border,
                           size: 16,
-                          color: filled ? const Color(0xFFFFC107) : Colors.white24,
+                          color: filled ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
                         );
                       }),
                       const SizedBox(width: 8),
                       Text(
                         '$rating/10',
-                        style: GoogleFonts.inter(fontSize: 11, color: Colors.white38),
+                        style: GoogleFonts.inter(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                       ),
                     ],
                   ),
@@ -169,7 +192,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                     const SizedBox(height: 6),
                     Text(
                       reviewText,
-                      style: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
+                      style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -177,13 +200,15 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                   const SizedBox(height: 6),
                   Text(
                     _formatDate(createdAt),
-                    style: GoogleFonts.inter(fontSize: 10, color: Colors.white24),
+                    style: GoogleFonts.inter(fontSize: 10, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                   ),
                 ],
               ),
             ),
           ],
         ),
+      ),
+      ),
       ),
     );
   }

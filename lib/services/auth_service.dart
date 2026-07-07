@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/foundation.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
@@ -44,25 +42,8 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<Map<String, dynamic>> _getDeviceInfo() async {
-    final info = DeviceInfoPlugin();
-    try {
-      if (Platform.isAndroid) {
-        final android = await info.androidInfo;
-        return {
-          'platform': 'android',
-          'model': android.model,
-          'os_version': android.version.release,
-        };
-      } else if (Platform.isIOS) {
-        final ios = await info.iosInfo;
-        return {
-          'platform': 'ios',
-          'model': ios.model,
-          'os_version': ios.systemVersion,
-        };
-      }
-    } catch (_) {}
-    return {'platform': kIsWeb ? 'web' : 'unknown'};
+    if (kIsWeb) return {'platform': 'web'};
+    return {'platform': 'unknown'};
   }
 
   Future<String?> login(String email, String password, {bool rememberMe = true}) async {

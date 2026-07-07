@@ -1,17 +1,3 @@
-# Flutter
-build/
-.dart_tool/
-.packages
-pubspec.lock
-pubspec.yaml
-lib/
-android/
-ios/
-web/
-test/
-*.dart
-*.yaml
-
 # Git
 .git/
 .gitignore
@@ -21,7 +7,6 @@ node_modules/
 .opencode/
 migrations/
 *.sql
-*.md
 *.txt
 README.md
 AGENTS.md

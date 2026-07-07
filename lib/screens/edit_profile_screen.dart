@@ -19,6 +19,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   bool _marketingOptIn = false;
   String? _error;
   String? _success;
+  bool _showSuccessOverlay = false;
 
   static const List<String> _countries = [
     'Afghanistan', 'Albania', 'Algeria', 'Andorra', 'Angola',
@@ -102,10 +103,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (error != null) {
         setState(() => _error = error);
       } else {
-        setState(() => _success = 'Profile updated');
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) Navigator.pop(context);
+        setState(() {
+          _success = null;
+          _showSuccessOverlay = true;
         });
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) Navigator.pop(context);
       }
     }
   }
@@ -115,10 +118,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
 
+    if (_showSuccessOverlay) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, size: 80, color: Colors.greenAccent),
+              const SizedBox(height: 16),
+              Text('Profile updated!', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
@@ -136,7 +155,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 decoration: InputDecoration(
                   labelText: 'Name',
                   filled: true,
-                  fillColor: const Color(0xFF161B22),
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -149,7 +168,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   helperText: 'Changing email will require re-verification',
                   helperStyle: GoogleFonts.inter(fontSize: 11, color: Colors.orangeAccent),
                   filled: true,
-                  fillColor: const Color(0xFF161B22),
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -160,7 +179,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 decoration: InputDecoration(
                   labelText: 'Phone',
                   filled: true,
-                  fillColor: const Color(0xFF161B22),
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
@@ -173,18 +192,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   labelText: 'Date of Birth',
                   suffixIcon: const Icon(Icons.calendar_today, size: 18),
                   filled: true,
-                  fillColor: const Color(0xFF161B22),
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
                 initialValue: _selectedCountry,
-                dropdownColor: const Color(0xFF161B22),
+                dropdownColor: Theme.of(context).cardColor,
                 decoration: InputDecoration(
                   labelText: 'Country',
                   filled: true,
-                  fillColor: const Color(0xFF161B22),
+                  fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
                 items: _countries.map((c) => DropdownMenuItem(value: c, child: Text(c, style: const TextStyle(fontSize: 14)))).toList(),
@@ -193,8 +212,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               const SizedBox(height: 16),
               SwitchListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text('Marketing emails', style: GoogleFonts.inter(fontSize: 14, color: Colors.white70)),
-                subtitle: Text('Receive recommendations and updates', style: GoogleFonts.inter(fontSize: 12, color: Colors.white38)),
+                title: Text('Marketing emails', style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+                subtitle: Text('Receive recommendations and updates', style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
                 value: _marketingOptIn,
                 activeThumbColor: Theme.of(context).colorScheme.primary,
                 onChanged: (v) => setState(() => _marketingOptIn = v),
@@ -208,7 +227,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ],
               if (_error != null) ...[
                 const SizedBox(height: 12),
-                Text(_error!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
               ],
               if (_success != null) ...[
                 const SizedBox(height: 12),
@@ -224,7 +243,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         onPressed: auth.isLoading ? null : _save,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Theme.of(context).colorScheme.primary,
-                          foregroundColor: Colors.black,
+                          foregroundColor: Theme.of(context).colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('Save'),
@@ -238,8 +257,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                       child: OutlinedButton(
                         onPressed: () => Navigator.pop(context),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.white54,
-                          side: const BorderSide(color: Colors.white24),
+                          foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                          side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         ),
                         child: const Text('Cancel'),

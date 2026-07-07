@@ -9,6 +9,7 @@ import '../widgets/movie_card.dart';
 import '../widgets/error_retry.dart';
 import 'movie_details_screen.dart';
 import 'see_all_screen.dart';
+import '../widgets/loading_shimmer.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -80,7 +81,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -94,14 +95,14 @@ class _BrowseScreenState extends State<BrowseScreen> {
                       padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
                       child: Row(
                         children: [
-                          const Icon(Icons.history, size: 18, color: Color(0xFFFFC107)),
+                          Icon(Icons.history, size: 18, color: Theme.of(context).colorScheme.primary),
                           const SizedBox(width: 6),
                           Text(
                             'Recently Watched',
                             style: GoogleFonts.inter(
                               fontSize: 18,
                               fontWeight: FontWeight.w600,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ],
@@ -138,16 +139,16 @@ class _BrowseScreenState extends State<BrowseScreen> {
                                               imageUrl: movie.posterUrl!,
                                               width: 110,
                                               fit: BoxFit.cover,
-                                              placeholder: (_, _) => Container(color: const Color(0xFF161B22)),
-                                              errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white24),
+                                              placeholder: (_, _) => Container(color: Theme.of(context).cardColor),
+                                              errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                                             )
-                                          : Container(color: const Color(0xFF161B22), child: const Icon(Icons.movie, color: Colors.white24)),
+                                          : Container(color: Theme.of(context).cardColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
                                     ),
                                   ),
                                   const SizedBox(height: 6),
                                   Text(
                                     movie.title,
-                                    style: GoogleFonts.inter(fontSize: 12, color: Colors.white70),
+                                    style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -178,7 +179,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                         label: Text(
                           genre.name,
                           style: TextStyle(
-                            color: selected ? Colors.black : Colors.white70,
+                            color: selected ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
@@ -191,9 +192,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
                             mp.discoverByGenre(genre.id);
                           }
                         },
-                        backgroundColor: const Color(0xFF161B22),
+                        backgroundColor: Theme.of(context).cardColor,
                         selectedColor: Theme.of(context).colorScheme.primary,
-                        checkmarkColor: Colors.black,
+                        checkmarkColor: Theme.of(context).colorScheme.onPrimary,
                         side: BorderSide.none,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -247,12 +248,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Widget _buildGenreGrid(MovieProvider mp) {
     if (mp.isLoading && mp.genreMovies.isEmpty) {
-      return SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
+      return const SliverFillRemaining(
+        child: MovieGridShimmer(crossAxisCount: 3),
       );
     }
 
@@ -273,15 +270,15 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 style: GoogleFonts.inter(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
             ),
           if (mp.genreMovies.isEmpty && !mp.isLoading)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text('No movies found',
-                  style: TextStyle(color: Colors.white38)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
             )
             else
             Padding(
@@ -349,19 +346,23 @@ class _BrowseScreenState extends State<BrowseScreen> {
                   style: GoogleFonts.inter(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const Spacer(),
                 if (hasMore)
-                  GestureDetector(
+                  InkWell(
+                    borderRadius: BorderRadius.circular(12),
                     onTap: onLoadMore,
-                    child: Text(
-                      'See All >',
-                      style: GoogleFonts.inter(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.w500,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      child: Text(
+                        'See All >',
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
@@ -369,18 +370,15 @@ class _BrowseScreenState extends State<BrowseScreen> {
             ),
           ),
           if (isLoading && movies.isEmpty)
-            SizedBox(
-              height: 200,
-              child: Center(
-                child: CircularProgressIndicator(
-                    color: Theme.of(context).colorScheme.primary),
-              ),
+            const SizedBox(
+              height: 230,
+              child: MovieRowShimmer(),
             )
           else if (movies.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Text('No movies available',
-                  style: TextStyle(color: Colors.white38)),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
             )
           else
             SizedBox(

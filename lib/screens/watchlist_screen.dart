@@ -4,6 +4,8 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/watchlist_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/empty_state.dart';
+import '../widgets/loading_shimmer.dart';
+import '../screens/home_screen.dart';
 
 class WatchlistScreen extends StatefulWidget {
   const WatchlistScreen({super.key});
@@ -72,7 +74,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                       style: GoogleFonts.inter(
                         fontSize: 26,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                       if (!wp.isEmpty)
@@ -80,7 +82,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                         padding: const EdgeInsets.only(left: 8),
                         child: Text(
                           '(${watchlist.length})',
-                          style: GoogleFonts.inter(fontSize: 16, color: Colors.white38),
+                          style: GoogleFonts.inter(fontSize: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         ),
                       ),
                     const Spacer(),
@@ -91,12 +93,12 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                           setState(() => _sortBy = v);
                           context.read<WatchlistProvider>().fetchWatchlist(sortBy: v);
                         },
-                        icon: const Icon(Icons.sort, size: 20, color: Colors.white54),
-                        color: const Color(0xFF161B22),
+                        icon: Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+                        color: Theme.of(context).cardColor,
                         itemBuilder: (_) => [
-                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Colors.white70))),
-                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Colors.white70))),
+                          PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'title', child: Text('Title A-Z', style: TextStyle(color: _sortBy == 'title' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
+                          PopupMenuItem(value: 'rating', child: Text('Rating', style: TextStyle(color: _sortBy == 'rating' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
                         ],
                       ),
                   ],
@@ -117,12 +119,12 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                        Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
                             wp.errorMessage!,
-                            style: GoogleFonts.inter(fontSize: 13, color: Colors.redAccent),
+                            style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.error),
                           ),
                         ),
                         GestureDetector(
@@ -130,12 +132,12 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                             wp.clearError();
                             wp.fetchWatchlist();
                           },
-                          child: const Icon(Icons.refresh, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.refresh, color: Theme.of(context).colorScheme.error, size: 16),
                         ),
                         const SizedBox(width: 8),
                         GestureDetector(
                           onTap: () => wp.clearError(),
-                          child: const Icon(Icons.close, color: Colors.redAccent, size: 16),
+                          child: Icon(Icons.close, color: Theme.of(context).colorScheme.error, size: 16),
                         ),
                       ],
                     ),
@@ -144,22 +146,29 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
               ),
             if (wp.isLoading)
               const SliverFillRemaining(
-                child: Center(child: CircularProgressIndicator()),
+                child: MovieGridShimmer(crossAxisCount: 3),
               )
             else if (watchlist.isEmpty)
               SliverFillRemaining(
                 child: EmptyState(
                   icon: Icons.bookmark_outline,
-                  title: 'No watchlist items yet',
-                  subtitle: 'Tap the bookmark icon on any movie to save it here',
+                  title: 'No watchlist yet',
+                  subtitle: 'Movies you save will appear here',
+                  actionLabel: 'Browse Movies',
+                  onAction: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const HomeScreen()),
+                    );
+                  },
                 ),
               )
             else
               SliverPadding(
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
                     childAspectRatio: 0.6,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,

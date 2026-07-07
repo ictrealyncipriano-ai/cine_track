@@ -26,6 +26,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _acceptTerms = false;
   bool _marketingOptIn = false;
   int _passwordStrength = 0;
+  bool _obscurePassword = true;
+  bool _obscureConfirm = true;
+  bool _showSuccess = false;
   String? _error;
 
   static const _countries = [
@@ -116,12 +119,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (error != null) {
         setState(() => _error = error);
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (_) => VerificationSentScreen(email: _emailController.text.trim()),
-          ),
-        );
+        setState(() => _showSuccess = true);
+        await Future.delayed(const Duration(seconds: 1));
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => VerificationSentScreen(email: _emailController.text.trim()),
+            ),
+          );
+        }
       }
     }
   }
@@ -197,7 +204,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         prefixIcon: Icon(icon),
         suffixIcon: suffix,
         filled: true,
-        fillColor: const Color(0xFF161B22),
+        fillColor: Theme.of(context).cardColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide.none,
@@ -214,6 +221,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+
+    if (_showSuccess) {
+      return Scaffold(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, size: 80, color: Colors.greenAccent),
+              const SizedBox(height: 16),
+              Text('Account created!', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       body: SafeArea(
@@ -236,7 +259,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: GoogleFonts.montserrat(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 32),
@@ -299,7 +322,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               )
                             : null,
                         filled: true,
-                        fillColor: const Color(0xFF161B22),
+                        fillColor: Theme.of(context).cardColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
@@ -310,7 +333,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ? '${_dateOfBirth!.month}/${_dateOfBirth!.day}/${_dateOfBirth!.year}'
                             : '',
                         style: TextStyle(
-                          color: _dateOfBirth != null ? Colors.white : Colors.white38,
+                          color: _dateOfBirth != null ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                           fontSize: 16,
                         ),
                       ),
@@ -322,7 +345,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       labelText: 'Country (optional)',
                       prefixIcon: const Icon(Icons.language),
                       filled: true,
-                      fillColor: const Color(0xFF161B22),
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -332,10 +355,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: DropdownButton<String>(
                         value: _country,
                         isExpanded: true,
-                        dropdownColor: const Color(0xFF161B22),
-                        hint: const Text(
+                        dropdownColor: Theme.of(context).cardColor,
+                        hint: Text(
                           'Select your country',
-                          style: TextStyle(color: Colors.white38),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         ),
                         items: _countries.map((c) {
                           return DropdownMenuItem(value: c, child: Text(c));
@@ -349,7 +372,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _passwordController,
                     label: 'Password',
                     icon: Icons.lock_outlined,
-                    obscureText: true,
+                    obscureText: _obscurePassword,
+                    suffix: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                      ),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
                     onChanged: _onPasswordChanged,
                     validator: (v) {
                       if (v == null || v.length < 8) return 'Min 8 characters';
@@ -382,13 +411,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     controller: _confirmPasswordController,
                     label: 'Confirm Password',
                     icon: Icons.lock_outlined,
-                    obscureText: true,
+                    obscureText: _obscureConfirm,
+                    suffix: IconButton(
+                      icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                      ),
+                      onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
+                    ),
                     validator: (v) =>
                         v == _passwordController.text ? null : 'Passwords do not match',
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                   ],
                   const SizedBox(height: 8),
                   Row(
@@ -397,14 +432,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         value: _acceptTerms,
                         onChanged: (v) => setState(() => _acceptTerms = v ?? false),
                         activeColor: Theme.of(context).colorScheme.primary,
-                        checkColor: Colors.black,
+                        checkColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       Expanded(
                         child: GestureDetector(
                           onTap: () => setState(() => _acceptTerms = !_acceptTerms),
                           child: Text(
                             'I agree to the Terms of Service and Privacy Policy',
-                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13),
                           ),
                         ),
                       ),
@@ -416,14 +451,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         value: _marketingOptIn,
                         onChanged: (v) => setState(() => _marketingOptIn = v ?? false),
                         activeColor: Theme.of(context).colorScheme.primary,
-                        checkColor: Colors.black,
+                        checkColor: Theme.of(context).colorScheme.onPrimary,
                       ),
                       Expanded(
                         child: GestureDetector(
                           onTap: () => setState(() => _marketingOptIn = !_marketingOptIn),
-                          child: const Text(
+                          child: Text(
                             'Send me movie recommendations and updates via email',
-                            style: TextStyle(color: Colors.white54, fontSize: 13),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13),
                           ),
                         ),
                       ),
@@ -437,7 +472,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: (!_acceptTerms || auth.isLoading) ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -464,7 +499,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: Text.rich(
                       TextSpan(
                         text: 'Already have an account? ',
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 14),
                         children: [
                           TextSpan(
                             text: 'Sign In',

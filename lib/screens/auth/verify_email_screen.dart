@@ -110,7 +110,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   style: GoogleFonts.montserrat(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -118,7 +118,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   'Please verify your email address to access all features.',
                   style: GoogleFonts.inter(
                     fontSize: 14,
-                    color: Colors.white54,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -136,7 +136,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   Text(
                     _message!,
                     style: TextStyle(
-                      color: _sent || _verified ? Colors.greenAccent : Colors.redAccent,
+                      color: _sent || _verified ? Colors.greenAccent : Theme.of(context).colorScheme.error,
                       fontSize: 13,
                     ),
                     textAlign: TextAlign.center,
@@ -153,7 +153,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       fontSize: 32,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 12,
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                     decoration: InputDecoration(
                       counterText: '',
@@ -162,10 +162,10 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                         fontSize: 32,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 12,
-                        color: Colors.white12,
+                        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
                       ),
                       filled: true,
-                      fillColor: const Color(0xFF161B22),
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -178,7 +178,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   const SizedBox(height: 4),
                   Text(
                     'Enter the 6-digit code from the email',
-                    style: TextStyle(color: Colors.white38, fontSize: 12),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -192,7 +192,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     label: const Text('Resend Verification Email'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Colors.black,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -216,7 +216,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                       label: const Text('Verify Code'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -242,7 +242,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     label: const Text("I've Verified — Sign In"),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.greenAccent.shade700,
-                      foregroundColor: Colors.white,
+                      foregroundColor: Theme.of(context).colorScheme.onSurface,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -266,8 +266,8 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     icon: const Icon(Icons.logout),
                     label: const Text('Sign Out'),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colors.redAccent,
-                      side: const BorderSide(color: Colors.redAccent),
+                      foregroundColor: Theme.of(context).colorScheme.error,
+                      side: BorderSide(color: Theme.of(context).colorScheme.error),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

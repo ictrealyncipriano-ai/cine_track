@@ -19,6 +19,7 @@ class WatchlistProvider extends ChangeNotifier {
   }
 
   List<Movie> get watchlist => List.unmodifiable(_watchlist);
+  int get totalCount => _total;
   bool get isEmpty => _watchlist.isEmpty;
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;

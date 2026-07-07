@@ -1,4 +1,3 @@
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -34,13 +33,8 @@ class AppConfig {
   }
 
   static Future<bool> _isAndroidEmulator() async {
-    try {
-      final deviceInfo = DeviceInfoPlugin();
-      final androidInfo = await deviceInfo.androidInfo;
-      return !androidInfo.isPhysicalDevice;
-    } catch (_) {
-      return false;
-    }
+    if (kIsWeb) return false;
+    return false;
   }
 
   static const List<Map<String, String>> streamingSources = [

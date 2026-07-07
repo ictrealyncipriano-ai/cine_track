@@ -38,7 +38,7 @@ class RatingBar extends StatelessWidget {
                     ? Icons.star_half
                     : Icons.star_border,
             size: starSize,
-            color: filled || half ? const Color(0xFFFFC107) : Colors.white24,
+            color: filled || half ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
           ),
         );
       }),
@@ -105,7 +105,7 @@ class _InteractiveRatingBarState extends State<_InteractiveRatingBar> {
                   margin: const EdgeInsets.symmetric(horizontal: 2),
                   decoration: BoxDecoration(
                     color: starValue <= _hoverRating
-                        ? const Color(0xFFFFC107).withValues(alpha: 0.2)
+                        ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.2)
                         : Colors.transparent,
                     borderRadius: BorderRadius.circular(4),
                   ),
@@ -114,8 +114,8 @@ class _InteractiveRatingBarState extends State<_InteractiveRatingBar> {
                       '$starValue',
                       style: TextStyle(
                         color: starValue <= _hoverRating
-                            ? const Color(0xFFFFC107)
-                            : Colors.white38,
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
                         fontSize: 13,
                         fontWeight: starValue <= _hoverRating
                             ? FontWeight.w700
@@ -132,7 +132,7 @@ class _InteractiveRatingBarState extends State<_InteractiveRatingBar> {
         Text(
           _rating > 0 ? '$_rating / 10' : 'Tap to rate',
           style: TextStyle(
-            color: _rating > 0 ? const Color(0xFFFFC107) : Colors.white38,
+            color: _rating > 0 ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
             fontSize: 12,
           ),
         ),

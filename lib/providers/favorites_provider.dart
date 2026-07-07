@@ -19,6 +19,7 @@ class FavoritesProvider extends ChangeNotifier {
   }
 
   List<Movie> get favorites => List.unmodifiable(_favorites);
+  int get totalCount => _total;
   bool get isEmpty => _favorites.isEmpty;
   bool get hasMore => _hasMore;
   bool get isLoadingMore => _isLoadingMore;

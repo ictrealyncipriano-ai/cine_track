@@ -7,6 +7,8 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/history_provider.dart';
+import '../providers/favorites_provider.dart';
+import '../providers/watchlist_provider.dart';
 import '../widgets/avatar_picker.dart';
 import 'edit_profile_screen.dart';
 import 'history_screen.dart';
@@ -34,7 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _cnpController = TextEditingController();
   int _newPasswordStrength = 0;
   String? _pwError;
-  String? _pwSuccess;
+  bool _showCurrentPassword = false;
+  bool _showNewPassword = false;
+  bool _showConfirmPassword = false;
 
   @override
   void initState() {
@@ -70,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(error ?? 'Avatar updated'),
-                backgroundColor: error != null ? Colors.redAccent : Colors.green,
+                backgroundColor: error != null ? Theme.of(context).colorScheme.error : Colors.green,
               ),
             );
           }
@@ -83,10 +87,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
-        content: Text('Are you sure you want to sign out?', style: GoogleFonts.inter(color: Colors.white54)),
+        title: Text('Sign Out', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text('Are you sure you want to sign out?', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -104,7 +108,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               }
             },
-            child: const Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+            child: Text('Sign Out', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -118,16 +122,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialogState) => AlertDialog(
-          backgroundColor: const Color(0xFF161B22),
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: const Text('Delete Account', style: TextStyle(color: Colors.white)),
+          title: Text('Delete Account', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 'This action cannot be undone. All your data will be permanently deleted.',
-                style: GoogleFonts.inter(fontSize: 13, color: Colors.white54),
+                style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -136,7 +140,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 decoration: InputDecoration(
                   labelText: 'Enter your password to confirm',
                   filled: true,
-                  fillColor: const Color(0xFF0D1117),
+                  fillColor: Theme.of(context).scaffoldBackgroundColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -145,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               if (deleteError != null) ...[
                 const SizedBox(height: 8),
-                Text(deleteError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12)),
+                Text(deleteError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 12)),
               ],
             ],
           ),
@@ -169,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   );
                 }
               },
-              child: const Text('Delete', style: TextStyle(color: Colors.redAccent)),
+              child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
             ),
           ],
         ),
@@ -181,10 +185,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Clear Cache', style: TextStyle(color: Colors.white)),
-        content: Text('Clear cached images and data?', style: GoogleFonts.inter(color: Colors.white54)),
+        title: Text('Clear Cache', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text('Clear cached images and data?', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -200,7 +204,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               }
             },
-            child: const Text('Clear', style: TextStyle(color: Colors.redAccent)),
+            child: Text('Clear', style: TextStyle(color: Theme.of(context).colorScheme.error)),
           ),
         ],
       ),
@@ -211,9 +215,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Language', style: TextStyle(color: Colors.white)),
+        title: Text('Language', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -235,8 +239,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _langOption(BuildContext ctx, String name, bool selected) {
     return ListTile(
-      leading: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? const Color(0xFFFFC107) : Colors.white38),
-      title: Text(name, style: GoogleFonts.inter(color: selected ? Colors.white : Colors.white54)),
+      leading: Icon(selected ? Icons.radio_button_checked : Icons.radio_button_off, color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+      title: Text(name, style: GoogleFonts.inter(color: selected ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
       onTap: () {
         Navigator.pop(ctx);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -250,9 +254,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('About', style: TextStyle(color: Colors.white)),
+        title: Text('About', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -261,13 +265,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Image.asset('assets/images/logo.png', height: 64),
             ),
             const SizedBox(height: 16),
-            Text('CineTrack', style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white)),
+            Text('CineTrack', style: GoogleFonts.montserrat(fontSize: 20, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface)),
             const SizedBox(height: 4),
-            Text('v$_appVersion', style: GoogleFonts.inter(color: Colors.white54)),
+            Text('v$_appVersion', style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
             const SizedBox(height: 16),
             Text(
               'Track your movies, build watchlists, and discover new favorites.',
-              style: GoogleFonts.inter(color: Colors.white54, fontSize: 13),
+              style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13),
               textAlign: TextAlign.center,
             ),
           ],
@@ -303,7 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final error = await context.read<AuthProvider>().changePassword(cp, np, cnp);
     if (mounted) {
       if (error != null) {
-        setState(() { _pwError = error; _pwSuccess = null; });
+        setState(() => _pwError = error);
       } else {
         _cpController.clear();
         _npController.clear();
@@ -311,8 +315,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         setState(() {
           _cpExpanded = false;
           _pwError = null;
-          _pwSuccess = 'Password changed successfully';
         });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password changed successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
       }
     }
   }
@@ -361,22 +370,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 24),
             Text(
               'You\'re browsing as a guest',
-              style: GoogleFonts.montserrat(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.white),
+              style: GoogleFonts.montserrat(fontSize: 22, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
             ),
-            const SizedBox(height: 12),
-            Text(
-              'Sign in to sync your favorites, watchlist, and history across all your devices.',
-              style: GoogleFonts.inter(fontSize: 15, color: Colors.white70, height: 1.5),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 20),
+            _guestFeatureCard(Icons.favorite, 'Save Favorites', 'Bookmark movies you love for quick access', Theme.of(context).colorScheme.primary),
+            const SizedBox(height: 10),
+            _guestFeatureCard(Icons.bookmark, 'Build Watchlist', 'Plan what to watch next', const Color(0xFF58A6FF)),
+            const SizedBox(height: 10),
+            _guestFeatureCard(Icons.history, 'Track History', 'Keep a record of every movie you watch', const Color(0xFF3FB950)),
+            const SizedBox(height: 24),
             SizedBox(
               width: double.infinity, height: 56,
               child: ElevatedButton(
                 onPressed: widget.onSignIn,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Colors.black,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   elevation: 4,
                 ),
@@ -390,10 +399,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               label: theme.isDark ? 'Light Mode' : 'Dark Mode',
               trailing: Switch(
                 value: !theme.isDark,
-                activeTrackColor: const Color(0xFFFFC107),
-                activeThumbColor: Colors.black,
-                inactiveTrackColor: Colors.white24,
-                inactiveThumbColor: Colors.white54,
+                activeTrackColor: Theme.of(context).colorScheme.primary,
+                activeThumbColor: Theme.of(context).colorScheme.onPrimary,
+                inactiveTrackColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
+                inactiveThumbColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                 onChanged: (_) => theme.toggle(),
               ),
               onTap: () => theme.toggle(),
@@ -401,14 +410,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
             _settingsItem(
               icon: Icons.language,
               label: 'Language',
-              trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+              trailing: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
               onTap: _showLanguageDialog,
             ),
             _settingsItem(
               icon: Icons.info_outline,
               label: 'About',
               trailing: _appVersion != null
-                  ? Text('v$_appVersion', style: GoogleFonts.inter(fontSize: 11, color: Colors.white38))
+                  ? Text('v$_appVersion', style: GoogleFonts.inter(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)))
                   : null,
               onTap: _showAboutDialog,
             ),
@@ -419,10 +428,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _guestFeatureCard(IconData icon, String title, String description, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.2)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44, height: 44,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 22, color: color),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+                const SizedBox(height: 2),
+                Text(description, style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildAuthView(BuildContext context, AuthProvider auth) {
     final user = auth.user;
     final theme = context.watch<ThemeProvider>();
     final hp = context.watch<HistoryProvider>();
+    final fp = context.watch<FavoritesProvider>();
+    final wp = context.watch<WatchlistProvider>();
     final recentHistory = hp.recentlyWatched;
 
     return SafeArea(
@@ -436,6 +481,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             children: [
               _buildProfileHeader(user, auth),
               const SizedBox(height: 24),
+              _buildStatsRow(fp, wp, hp),
+              const SizedBox(height: 24),
               _buildHistorySection(recentHistory, hp),
               const SizedBox(height: 24),
               _sectionHeader('Settings'),
@@ -444,10 +491,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 label: theme.isDark ? 'Light Mode' : 'Dark Mode',
                 trailing: Switch(
                   value: !theme.isDark,
-                  activeTrackColor: const Color(0xFFFFC107),
-                  activeThumbColor: Colors.black,
-                  inactiveTrackColor: Colors.white24,
-                  inactiveThumbColor: Colors.white54,
+                  activeTrackColor: Theme.of(context).colorScheme.primary,
+                  activeThumbColor: Theme.of(context).colorScheme.onPrimary,
+                  inactiveTrackColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24),
+                  inactiveThumbColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                   onChanged: (_) => theme.toggle(),
                 ),
                 onTap: () => theme.toggle(),
@@ -456,19 +503,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _settingsItem(
                 icon: Icons.rate_review_outlined,
                 label: 'My Reviews',
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+                trailing: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MyReviewsScreen())),
               ),
               _settingsItem(
                 icon: Icons.language,
                 label: 'Language',
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+                trailing: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 onTap: _showLanguageDialog,
               ),
               _settingsItem(
                 icon: Icons.notifications_outlined,
                 label: 'Notifications',
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+                trailing: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Notification settings coming soon'), backgroundColor: Colors.orangeAccent),
                 ),
@@ -476,7 +523,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _settingsItem(
                 icon: Icons.devices,
                 label: 'Manage Sessions',
-                trailing: const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+                trailing: Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SessionsScreen())),
               ),
               _settingsItem(
@@ -488,12 +535,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: Icons.info_outline,
                 label: 'About',
                 trailing: _appVersion != null
-                    ? Text('v$_appVersion', style: GoogleFonts.inter(fontSize: 11, color: Colors.white38))
+                    ? Text('v$_appVersion', style: GoogleFonts.inter(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)))
                     : null,
                 onTap: _showAboutDialog,
               ),
               const SizedBox(height: 24),
-              const Divider(color: Colors.white12),
+              Divider(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity, height: 48,
@@ -502,8 +549,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: const Icon(Icons.logout, size: 18),
                   label: const Text('Sign Out'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.white54,
-                    side: const BorderSide(color: Colors.white24),
+                    foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                    side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
@@ -516,8 +563,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   icon: const Icon(Icons.delete_forever, size: 18),
                   label: const Text('Delete Account'),
                   style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.redAccent,
-                    side: const BorderSide(color: Colors.redAccent),
+                    foregroundColor: Theme.of(context).colorScheme.error,
+                    side: BorderSide(color: Theme.of(context).colorScheme.error),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                 ),
@@ -548,11 +595,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFC107),
+                    color: Theme.of(context).colorScheme.primary,
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFF0D1117), width: 2),
+                    border: Border.all(color: Theme.of(context).scaffoldBackgroundColor, width: 2),
                   ),
-                  child: const Icon(Icons.camera_alt, size: 16, color: Colors.black),
+                  child: Icon(Icons.camera_alt, size: 16, color: Theme.of(context).colorScheme.onPrimary),
                 ),
               ),
             ],
@@ -561,15 +608,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SizedBox(height: 16),
         Text(
           user?.name ?? 'User',
-          style: GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.w700, color: Colors.white),
+          style: GoogleFonts.montserrat(fontSize: 24, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
         ),
         const SizedBox(height: 4),
-        Text('@${user?.username ?? ''}', style: GoogleFonts.inter(fontSize: 13, color: Colors.white38)),
-        const SizedBox(height: 4),
-        Text(user?.email ?? '', style: GoogleFonts.inter(fontSize: 14, color: Colors.white54)),
+        Text('@${user?.username ?? ''}', style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              _infoRow(Icons.email_outlined, user?.email ?? ''),
+              if (user?.phone != null && user!.phone!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: _infoRow(Icons.phone_outlined, user.phone!),
+                ),
+              if (user?.dateOfBirth != null && user!.dateOfBirth!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: _infoRow(Icons.cake_outlined, user.dateOfBirth!),
+                ),
+              if (user?.country != null && user!.country!.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: _infoRow(Icons.public_outlined, user.country!),
+                ),
+              if (user?.marketingOptIn == true)
+                Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: _infoRow(Icons.email_outlined, 'Marketing emails enabled', iconColor: const Color(0xFF3FB950)),
+                ),
+            ],
+          ),
+        ),
         if (user?.emailVerified == false) ...[
-          const SizedBox(height: 8),
-          Text('Email not verified', style: GoogleFonts.inter(fontSize: 12, color: Colors.orangeAccent)),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text('Email not verified', style: GoogleFonts.inter(fontSize: 12, color: Colors.orangeAccent)),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () => _resendVerification(auth, user?.email ?? ''),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orangeAccent.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: Colors.orangeAccent.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    'Resend',
+                    style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orangeAccent),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ],
         const SizedBox(height: 20),
         SizedBox(
@@ -589,23 +688,83 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _infoRow(IconData icon, String text, {Color? iconColor}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(icon, size: 14, color: iconColor ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+        const SizedBox(width: 6),
+        Text(text, style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+      ],
+    );
+  }
+
+  Future<void> _resendVerification(AuthProvider auth, String email) async {
+    final error = await auth.resendVerification(email);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error ?? 'Verification email sent'),
+          backgroundColor: error != null ? Theme.of(context).colorScheme.error : Colors.green,
+        ),
+      );
+    }
+  }
+
+  Widget _buildStatsRow(FavoritesProvider fp, WatchlistProvider wp, HistoryProvider hp) {
+    return Row(
+      children: [
+        Expanded(child: _statCard(Icons.favorite, '${fp.totalCount}', 'Favorites', Theme.of(context).colorScheme.primary)),
+        const SizedBox(width: 12),
+        Expanded(child: _statCard(Icons.bookmark, '${wp.totalCount}', 'Watchlist', const Color(0xFF58A6FF))),
+        const SizedBox(width: 12),
+        Expanded(child: _statCard(Icons.history, '${hp.totalCount}', 'History', const Color(0xFF3FB950))),
+      ],
+    );
+  }
+
+  Widget _statCard(IconData icon, String count, String label, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, size: 22, color: color),
+          const SizedBox(height: 8),
+          Text(
+            count,
+            style: GoogleFonts.montserrat(fontSize: 22, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onSurface),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: GoogleFonts.inter(fontSize: 11, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildHistorySection(List recentHistory, HistoryProvider hp) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.history, size: 16, color: Colors.white54),
+            Icon(Icons.history, size: 16, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
             const SizedBox(width: 6),
             Text(
               'Watch History',
-              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+              style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface),
             ),
             if (!hp.isEmpty) ...[
               const SizedBox(width: 6),
               Text(
                 '(${hp.history.length})',
-                style: GoogleFonts.inter(fontSize: 13, color: Colors.white38),
+                style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
               ),
             ],
             const Spacer(),
@@ -624,100 +783,180 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         const SizedBox(height: 12),
-        if (hp.isLoading)
-          const Center(child: Padding(
-            padding: EdgeInsets.all(24),
-            child: CircularProgressIndicator(),
-          ))
-        else if (recentHistory.isEmpty)
+        if (recentHistory.isNotEmpty)
+          SizedBox(
+            height: 230,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: recentHistory.length > 5 ? 5 : recentHistory.length,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final movie = recentHistory[index];
+                return SizedBox(
+                  width: 140,
+                  child: _historyCard(movie),
+                );
+              },
+            ),
+          )
+        else if (hp.isLoading)
+          SizedBox(
+            height: 230,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              itemCount: 3,
+              separatorBuilder: (_, _) => const SizedBox(width: 12),
+              itemBuilder: (context, index) => _historyCardSkeleton(),
+            ),
+          )
+        else
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(vertical: 24),
             decoration: BoxDecoration(
-              color: const Color(0xFF161B22),
+              color: Theme.of(context).cardColor,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               children: [
-                const Icon(Icons.history, size: 32, color: Colors.white24),
+                Icon(Icons.history, size: 32, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 const SizedBox(height: 8),
-                Text('No watch history yet', style: GoogleFonts.inter(fontSize: 13, color: Colors.white38)),
+                Text('No watch history yet', style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
               ],
             ),
-          )
-        else
-          Column(
-            children: recentHistory.take(5).toList().map((movie) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => MovieDetailsScreen(movie: movie),
-                    ),
-                  );
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF161B22),
-                    borderRadius: BorderRadius.circular(12),
+          ),
+      ],
+    );
+  }
+
+  Widget _historyCard(movie) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => MovieDetailsScreen(movie: movie),
+          ),
+        );
+      },
+      child: Hero(
+        tag: 'movie_poster_${movie.id}',
+        child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Stack(
+          children: [
+            if (movie.posterUrl != null)
+              CachedNetworkImage(
+                imageUrl: movie.posterUrl!,
+                width: double.infinity,
+                height: double.infinity,
+                fit: BoxFit.cover,
+                placeholder: (_, _) => Container(color: Theme.of(context).cardColor),
+                errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+              )
+            else
+              Container(color: Theme.of(context).cardColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38))),
+            Positioned(
+              bottom: 0, left: 0, right: 0,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                    colors: [Colors.black87, Colors.transparent],
                   ),
-                  clipBehavior: Clip.antiAlias,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      movie.title,
+                      style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      _formatDate(movie.watchedAt),
+                      style: GoogleFonts.inter(fontSize: 10, color: Colors.white70),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (movie.watchCount > 1)
+              Positioned(
+                top: 8, left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      SizedBox(
-                        width: 64, height: 96,
-                        child: movie.posterUrl != null
-                            ? CachedNetworkImage(
-                                imageUrl: movie.posterUrl!,
-                                width: 64, height: 96,
-                                fit: BoxFit.cover,
-                                placeholder: (_, _) => Container(color: const Color(0xFF0D1117)),
-                                errorWidget: (_, _, _) => const Icon(Icons.movie, color: Colors.white24),
-                              )
-                            : Container(color: const Color(0xFF0D1117), child: const Icon(Icons.movie, color: Colors.white24)),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.all(12),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                movie.title,
-                                style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
-                                maxLines: 1, overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _formatDate(movie.watchedAt),
-                                style: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
-                              ),
-                              if (movie.watchCount > 1) ...[
-                                const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    const Icon(Icons.replay, size: 12, color: Color(0xFFFFC107)),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      'Watched ${movie.watchCount} times',
-                                      style: GoogleFonts.inter(fontSize: 12, color: const Color(0xFFFFC107)),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ],
-                          ),
-                        ),
+                      Icon(Icons.replay, size: 12, color: Theme.of(context).colorScheme.onPrimary),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${movie.watchCount}',
+                        style: GoogleFonts.inter(fontSize: 11, fontWeight: FontWeight.w700, color: Theme.of(context).colorScheme.onPrimary),
                       ),
                     ],
                   ),
                 ),
               ),
-            )).toList(),
-          ),
-      ],
+          ],
+        ),
+      ),
+      ),
+    );
+  }
+
+  Widget _historyCardSkeleton() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        width: 140,
+        decoration: BoxDecoration(color: Theme.of(context).cardColor),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.04),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                ),
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 10, width: 100,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    height: 8, width: 70,
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.05),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -727,7 +966,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _settingsItem(
           icon: Icons.lock_outline,
           label: 'Change Password',
-          trailing: Icon(_cpExpanded ? Icons.expand_less : Icons.expand_more, size: 18, color: Colors.white24),
+          trailing: Icon(_cpExpanded ? Icons.expand_less : Icons.expand_more, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
           onTap: () => setState(() => _cpExpanded = !_cpExpanded),
         ),
         if (_cpExpanded) ...[
@@ -738,18 +977,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _cpController,
-                  obscureText: true,
+                  obscureText: !_showCurrentPassword,
                   decoration: InputDecoration(
                     labelText: 'Current Password',
                     filled: true,
-                    fillColor: const Color(0xFF161B22),
+                    fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: Icon(_showCurrentPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showCurrentPassword = !_showCurrentPassword),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _npController,
-                  obscureText: true,
+                  obscureText: !_showNewPassword,
                   onChanged: (v) {
                     int s = 0;
                     if (v.length >= 8) s++;
@@ -761,8 +1004,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   decoration: InputDecoration(
                     labelText: 'New Password',
                     filled: true,
-                    fillColor: const Color(0xFF161B22),
+                    fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: Icon(_showNewPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showNewPassword = !_showNewPassword),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -771,7 +1018,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: LinearProgressIndicator(
                     value: _newPasswordStrength / 4,
                     minHeight: 4,
-                    backgroundColor: Colors.white10,
+                    backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.10),
                     valueColor: AlwaysStoppedAnimation(_strengthColor()),
                   ),
                 ),
@@ -782,12 +1029,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 12),
                 TextFormField(
                   controller: _cnpController,
-                  obscureText: true,
+                  obscureText: !_showConfirmPassword,
                   decoration: InputDecoration(
                     labelText: 'Confirm New Password',
                     filled: true,
-                    fillColor: const Color(0xFF161B22),
+                    fillColor: Theme.of(context).cardColor,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    suffixIcon: IconButton(
+                      icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -800,7 +1051,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           onPressed: context.read<AuthProvider>().isLoading ? null : _changePassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Colors.black,
+                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text('Update'),
@@ -812,10 +1063,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: SizedBox(
                         height: 44,
                         child: OutlinedButton(
-                          onPressed: () => setState(() { _cpExpanded = false; _pwError = null; _pwSuccess = null; }),
+                          onPressed: () => setState(() { _cpExpanded = false; _pwError = null; }),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.white54,
-                            side: const BorderSide(color: Colors.white24),
+                            foregroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                            side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                           child: const Text('Cancel'),
@@ -826,12 +1077,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 if (_pwError != null) ...[
                   const SizedBox(height: 8),
-                  Text(_pwError!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                  Text(_pwError!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
                 ],
-                if (_pwSuccess != null) ...[
-                  const SizedBox(height: 8),
-                  Text(_pwSuccess!, style: const TextStyle(color: Colors.greenAccent, fontSize: 13)),
-                ],
+
               ],
             ),
           ),
@@ -847,7 +1095,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title,
         style: GoogleFonts.inter(
           fontSize: 11, fontWeight: FontWeight.w600,
-          color: Colors.white38, letterSpacing: 1.2,
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), letterSpacing: 1.2,
         ),
       ),
     );
@@ -862,9 +1110,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }) {
     return ListTile(
       dense: true,
-      leading: Icon(icon, size: 20, color: color ?? Colors.white54),
-      title: Text(label, style: GoogleFonts.inter(fontSize: 14, color: color ?? Colors.white70)),
-      trailing: trailing ?? const Icon(Icons.chevron_right, size: 18, color: Colors.white24),
+      leading: Icon(icon, size: 20, color: color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+      title: Text(label, style: GoogleFonts.inter(fontSize: 14, color: color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7))),
+      trailing: trailing ?? Icon(Icons.chevron_right, size: 18, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
       onTap: onTap,
       contentPadding: EdgeInsets.zero,
     );

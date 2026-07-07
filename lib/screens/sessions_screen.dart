@@ -51,7 +51,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
 
     if (error != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(error), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text(error), backgroundColor: Theme.of(context).colorScheme.error),
       );
     } else {
       _loadSessions();
@@ -61,9 +61,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1117),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         title: Text('Sessions', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         centerTitle: true,
       ),
@@ -76,7 +76,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(_error!, style: const TextStyle(color: Colors.redAccent)),
+                        Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
                         const SizedBox(height: 16),
                         ElevatedButton(onPressed: _loadSessions, child: const Text('Retry')),
                       ],
@@ -84,7 +84,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
                   ),
                 )
               : _sessions == null || _sessions!.isEmpty
-                  ? const Center(child: Text('No sessions found', style: TextStyle(color: Colors.white54)))
+                  ? Center(child: Text('No sessions found', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54))))
                   : RefreshIndicator(
                       onRefresh: _loadSessions,
                       child: ListView.separated(
@@ -103,7 +103,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
                           return Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF161B22),
+                              color: Theme.of(context).cardColor,
                               borderRadius: BorderRadius.circular(12),
                               border: isCurrent ? Border.all(color: Colors.greenAccent.withValues(alpha: 0.3)) : null,
                             ),
@@ -120,7 +120,7 @@ class _SessionsScreenState extends State<SessionsScreen> {
                                             style: GoogleFonts.inter(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
-                                              color: Colors.white,
+                                              color: Theme.of(context).colorScheme.onSurface,
                                             ),
                                           ),
                                           if (isCurrent) ...[
@@ -146,23 +146,23 @@ class _SessionsScreenState extends State<SessionsScreen> {
                                       const SizedBox(height: 6),
                                       Text(
                                         'Created: $createdAt',
-                                        style: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
+                                        style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
                                       ),
                                       Text(
                                         'Expires: $expiresAt',
-                                        style: GoogleFonts.inter(fontSize: 12, color: Colors.white38),
+                                        style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                                       ),
                                       if (deviceInfo != null) ...[
                                         const SizedBox(height: 2),
                                         Text(
                                           '${deviceInfo['platform'] ?? '?'} · ${deviceInfo['model'] ?? '?'} · ${deviceInfo['os_version'] ?? '?'}',
-                                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white24),
+                                          style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                                         ),
                                       ],
                                       if (ipAddress.isNotEmpty)
                                         Text(
                                           ipAddress,
-                                          style: GoogleFonts.inter(fontSize: 12, color: Colors.white24),
+                                          style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                                         ),
                                     ],
                                   ),
@@ -173,11 +173,11 @@ class _SessionsScreenState extends State<SessionsScreen> {
                                     child: TextButton(
                                       onPressed: () => _revokeSession(id),
                                       style: TextButton.styleFrom(
-                                        foregroundColor: Colors.redAccent,
+                                        foregroundColor: Theme.of(context).colorScheme.error,
                                         padding: const EdgeInsets.symmetric(horizontal: 12),
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(8),
-                                          side: const BorderSide(color: Colors.redAccent),
+                                          side: BorderSide(color: Theme.of(context).colorScheme.error),
                                         ),
                                       ),
                                       child: Text('Revoke', style: GoogleFonts.inter(fontSize: 13)),

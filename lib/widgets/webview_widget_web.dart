@@ -20,7 +20,7 @@ class WebViewWidget extends StatelessWidget {
           ..style.height = '100%'
           ..allow = 'fullscreen; autoplay; encrypted-media'
           ..referrerPolicy = 'no-referrer';
-        try { iframe.sandbox.value = ''; } catch (_) {}
+        try { iframe.sandbox?.value = ''; } catch (_) {}
         return iframe;
       });
     } catch (_) {}

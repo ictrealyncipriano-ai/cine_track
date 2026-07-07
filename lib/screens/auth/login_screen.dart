@@ -20,6 +20,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   final _codeController = TextEditingController();
   bool _rememberMe = true;
+  bool _obscurePassword = true;
   String? _error;
   bool _emailNotVerified = false;
   bool _resendSent = false;
@@ -121,19 +122,19 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
-        title: const Text('API URL', style: TextStyle(color: Colors.white)),
+        backgroundColor: Theme.of(context).cardColor,
+        title: Text('API URL', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: controller,
-              style: const TextStyle(color: Colors.white),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
               decoration: InputDecoration(
                 hintText: AppConfig.apiBaseUrl,
-                hintStyle: const TextStyle(color: Colors.white24),
+                hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                 filled: true,
-                fillColor: const Color(0xFF0D1117),
+                fillColor: Theme.of(context).scaffoldBackgroundColor,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: BorderSide.none,
@@ -141,9 +142,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
+            Text(
               'Enter a custom API base URL.\nThis is saved across app restarts.',
-              style: TextStyle(color: Colors.white38, fontSize: 12),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ],
@@ -201,7 +202,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       style: GoogleFonts.montserrat(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
-                        color: Colors.white,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -210,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onLongPress: _showApiUrlDialog,
                     child: Text(
                       AppConfig.apiBaseUrl,
-                      style: const TextStyle(color: Colors.white24, fontSize: 10),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24), fontSize: 10),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -221,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Email',
                       prefixIcon: const Icon(Icons.email_outlined),
                       filled: true,
-                      fillColor: const Color(0xFF161B22),
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
@@ -237,14 +238,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     decoration: InputDecoration(
                       labelText: 'Password',
                       prefixIcon: const Icon(Icons.lock_outlined),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
+                          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
+                        ),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
                       filled: true,
-                      fillColor: const Color(0xFF161B22),
+                      fillColor: Theme.of(context).cardColor,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: BorderSide.none,
                       ),
                     ),
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     validator: (v) =>
                         v != null && v.length >= 8 ? null : 'Min 8 characters',
                   ),
@@ -273,18 +280,18 @@ class _LoginScreenState extends State<LoginScreen> {
                         value: _rememberMe,
                         onChanged: (v) => setState(() => _rememberMe = v ?? true),
                         fillColor: WidgetStateProperty.resolveWith((states) =>
-                            _rememberMe ? Theme.of(context).colorScheme.primary : Colors.white24),
-                        checkColor: Colors.black,
-                        side: const BorderSide(color: Colors.white24),
+                            _rememberMe ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
+                        checkColor: Theme.of(context).colorScheme.onPrimary,
+                        side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
                       Text('Remember me',
-                          style: TextStyle(color: Colors.white54, fontSize: 13)),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13)),
                     ],
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 4),
-                    Text(_error!, style: const TextStyle(color: Colors.redAccent, fontSize: 13)),
+                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
                     if (_emailNotVerified) ...[
                       const SizedBox(height: 4),
                       TextButton(
@@ -326,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             fontSize: 32,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 12,
-                            color: Colors.white,
+                            color: Theme.of(context).colorScheme.onSurface,
                           ),
                           decoration: InputDecoration(
                             counterText: '',
@@ -335,10 +342,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               fontSize: 32,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 12,
-                              color: Colors.white12,
+                              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12),
                             ),
                             filled: true,
-                            fillColor: const Color(0xFF161B22),
+                            fillColor: Theme.of(context).cardColor,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                               borderSide: BorderSide.none,
@@ -351,7 +358,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Enter the 6-digit code from the email',
-                          style: TextStyle(color: Colors.white38, fontSize: 12),
+                          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 8),
@@ -362,7 +369,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             onPressed: _verifying ? null : _verifyCode,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Theme.of(context).colorScheme.primary,
-                              foregroundColor: Colors.black,
+                              foregroundColor: Theme.of(context).colorScheme.onPrimary,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -388,7 +395,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       onPressed: auth.isLoading ? null : _submit,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
-                        foregroundColor: Colors.black,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimary,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -415,7 +422,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text.rich(
                       TextSpan(
                         text: "Don't have an account? ",
-                        style: TextStyle(color: Colors.white54, fontSize: 14),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 14),
                         children: [
                           TextSpan(
                             text: 'Sign Up',

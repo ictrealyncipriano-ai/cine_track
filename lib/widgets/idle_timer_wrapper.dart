@@ -50,12 +50,12 @@ class _IdleTimerWrapperState extends State<IdleTimerWrapper> {
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
-        backgroundColor: const Color(0xFF161B22),
+        backgroundColor: Theme.of(context).cardColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Session Expiring', style: TextStyle(color: Colors.white)),
-        content: const Text(
+        title: Text('Session Expiring', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        content: Text(
           'Your session will expire in 2 minutes due to inactivity.\n\nTap "Stay Logged In" to continue.',
-          style: TextStyle(color: Colors.white54),
+          style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
         ),
         actions: [
           TextButton(
