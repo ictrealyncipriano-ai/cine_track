@@ -9,8 +9,12 @@ $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot"
 ## All Builds (Emulator, Physical Device, Production)
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot"
-flutter build apk --release --no-tree-shake-icons
+flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
 ```
+
+The `--android-skip-build-dependency-validation` flag is required because:
+- `objective_c` (transitive via `google_fonts` → `path_provider` → `path_provider_foundation`) has a native asset hook that crashes the Dart kernel compiler on Windows (STATUS_ACCESS_VIOLATION). This hook is only needed for iOS/macOS but Flutter's build system attempts to compile it for all platforms.
+- The `jni` plugin (transitive via `google_fonts` → `path_provider` → `path_provider_android`) requests NDK 28.x, while the project pins NDK 27.x. The flag bypasses this version check.
 
 The API URL is now determined **automatically at runtime**:
 - **Android Emulator** → auto-detected, uses `http://10.0.2.2/cine_track/api`

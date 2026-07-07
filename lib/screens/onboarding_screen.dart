@@ -13,34 +13,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
-  final List<_OnboardingPage> _pages = const [
+  List<_OnboardingPage> _pages(BuildContext context) => [
     _OnboardingPage(
       icon: Icons.explore_rounded,
       title: 'Discover Movies',
       description:
           'Browse thousands of movies from TMDB. Search by genre, year, or popularity to find your next favorite film.',
-      color: Color(0xFFFFC107),
+      color: Theme.of(context).colorScheme.primary,
     ),
     _OnboardingPage(
       icon: Icons.bookmark_rounded,
       title: 'Track Favorites',
       description:
           'Save movies to your favorites, build a watchlist, and keep track of everything you\'ve watched.',
-      color: Color(0xFF7C4DFF),
+      color: Theme.of(context).colorScheme.secondary,
     ),
     _OnboardingPage(
       icon: Icons.play_circle_fill_rounded,
       title: 'Start Watching',
       description:
           'Stream movies built-in, read reviews, rate films, and explore recommendations tailored just for you.',
-      color: Color(0xFF4CAF50),
+      color: Theme.of(context).colorScheme.tertiary,
     ),
     _OnboardingPage(
       icon: Icons.person_rounded,
       title: 'Sign In or Explore',
       description:
           'Create an account to sync across devices, or browse as a guest and start watching right away.',
-      color: Color(0xFFE91E63),
+      color: Theme.of(context).colorScheme.primary,
     ),
   ];
 
@@ -52,7 +52,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _currentPage == _pages.length - 1;
+    final pages = _pages(context);
+    final isLast = _currentPage == pages.length - 1;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -77,15 +78,15 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: PageView.builder(
                 controller: _pageController,
                 onPageChanged: (i) => setState(() => _currentPage = i),
-                itemCount: _pages.length,
-                itemBuilder: (_, i) => _buildSlide(_pages[i]),
+                itemCount: pages.length,
+                itemBuilder: (_, i) => _buildSlide(pages[i]),
               ),
             ),
             const SizedBox(height: 24),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(_pages.length, (i) {
-                final page = _pages[i];
+              children: List.generate(pages.length, (i) {
+                final page = pages[i];
                 return AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
                   width: _currentPage == i ? 24 : 8,
@@ -213,7 +214,7 @@ class _OnboardingPage {
   final String description;
   final Color color;
 
-  const _OnboardingPage({
+  _OnboardingPage({
     required this.icon,
     required this.title,
     required this.description,

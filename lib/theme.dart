@@ -7,6 +7,7 @@ class AppTheme {
 
   static ThemeData get dark {
     return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: const Color(0xFF0D1117),
       colorScheme: const ColorScheme.dark(
@@ -102,9 +103,8 @@ class AppTheme {
           return Colors.white24;
         }),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
+      pageTransitionsTheme: PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
@@ -113,11 +113,12 @@ class AppTheme {
 
   static ThemeData get light {
     return ThemeData(
+      useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFF0EFED),
-      colorScheme: const ColorScheme.light(
-        primary: Color(0xFFFFA000),
-        secondary: Color(0xFFFFA000),
+      colorScheme: ColorScheme.light(
+        primary: primary,
+        secondary: primary,
         surface: Color(0xFFFFFFFF),
         error: Colors.redAccent,
       ),
@@ -130,9 +131,9 @@ class AppTheme {
         titleTextStyle: GoogleFonts.montserrat(fontSize: 18, fontWeight: FontWeight.w600, color: const Color(0xFF2C2C2C)),
         iconTheme: const IconThemeData(color: Color(0xFF2C2C2C)),
       ),
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-        backgroundColor: Color(0xFFF8F8F8),
-        selectedItemColor: Color(0xFFB8860B),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: const Color(0xFFF8F8F8),
+        selectedItemColor: primary,
         unselectedItemColor: Colors.black38,
       ),
       textTheme: GoogleFonts.interTextTheme(ThemeData.light().textTheme).apply(
@@ -209,9 +210,8 @@ class AppTheme {
           return Colors.black26;
         }),
       ),
-      pageTransitionsTheme: const PageTransitionsTheme(
+      pageTransitionsTheme: PageTransitionsTheme(
         builders: {
-          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),

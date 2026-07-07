@@ -86,6 +86,26 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 ),
               ),
             ),
+            if (mp.error != null && mp.selectedGenreId == null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: ErrorRetry(
+                    message: mp.error!,
+                    onRetry: _onRefresh,
+                  ),
+                ),
+              ),
+            if (mp.error != null && mp.selectedGenreId != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                  child: ErrorRetry(
+                    message: mp.error!,
+                    onRetry: () => mp.discoverByGenre(mp.selectedGenreId!),
+                  ),
+                ),
+              ),
             if (recentlyWatched.isNotEmpty)
               SliverToBoxAdapter(
                 child: Column(
@@ -117,42 +137,46 @@ class _BrowseScreenState extends State<BrowseScreen> {
                         separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           final movie = recentlyWatched[index];
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => MovieDetailsScreen(movie: movie),
-                                ),
-                              );
-                            },
-                            child: SizedBox(
-                              width: 110,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: movie.posterUrl != null
-                                          ? CachedNetworkImage(
-                                              imageUrl: movie.posterUrl!,
-                                              width: 110,
-                                              fit: BoxFit.cover,
-                                              placeholder: (_, _) => Container(color: Theme.of(context).cardColor),
-                                              errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
-                                            )
-                                          : Container(color: Theme.of(context).cardColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
+                          return Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(10),
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => MovieDetailsScreen(movie: movie),
+                                  ),
+                                );
+                              },
+                              child: SizedBox(
+                                width: 110,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10),
+                                        child: movie.posterUrl != null
+                                            ? CachedNetworkImage(
+                                                imageUrl: movie.posterUrl!,
+                                                width: 110,
+                                                fit: BoxFit.cover,
+                                                placeholder: (_, _) => Container(color: Theme.of(context).cardColor),
+                                                errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
+                                              )
+                                            : Container(color: Theme.of(context).cardColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
+                                      ),
                                     ),
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    movie.title,
-                                    style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
+                                    const SizedBox(height: 6),
+                                    Text(
+                                      movie.title,
+                                      style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           );
@@ -219,26 +243,6 @@ class _BrowseScreenState extends State<BrowseScreen> {
               _buildSection(context, 'Top Rated', mp.topRated, mp.isLoading, mp,
                   onLoadMore: () => _navigateToSeeAll('Top Rated', mp.topRated, mp.loadMoreTopRated, mp.hasMoreTopRated, mp.isLoadingMore), hasMore: mp.hasMoreTopRated),
             ],
-            if (mp.error != null && mp.selectedGenreId == null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ErrorRetry(
-                    message: mp.error!,
-                    onRetry: _onRefresh,
-                  ),
-                ),
-              ),
-            if (mp.error != null && mp.selectedGenreId != null)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: ErrorRetry(
-                    message: mp.error!,
-                    onRetry: () => mp.discoverByGenre(mp.selectedGenreId!),
-                  ),
-                ),
-              ),
             const SliverToBoxAdapter(child: SizedBox(height: 24)),
           ],
         ),
@@ -247,6 +251,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
   }
 
   Widget _buildGenreGrid(MovieProvider mp) {
+    final screenWidth = MediaQuery.of(context).size.width;
     if (mp.isLoading && mp.genreMovies.isEmpty) {
       return const SliverFillRemaining(
         child: MovieGridShimmer(crossAxisCount: 3),
@@ -287,8 +292,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate:
-                    const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
+                    SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: screenWidth > 900 ? 5 : screenWidth > 600 ? 4 : 3,
                   childAspectRatio: 0.6,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,

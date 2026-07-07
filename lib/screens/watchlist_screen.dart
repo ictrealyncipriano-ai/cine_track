@@ -153,7 +153,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                 child: EmptyState(
                   icon: Icons.bookmark_outline,
                   title: 'No watchlist yet',
-                  subtitle: 'Movies you save will appear here',
+                  subtitle: 'Browse movies and tap the bookmark icon to save them for later',
                   actionLabel: 'Browse Movies',
                   onAction: () {
                     Navigator.pushReplacement(
@@ -168,7 +168,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
+                    crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
                     childAspectRatio: 0.6,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,

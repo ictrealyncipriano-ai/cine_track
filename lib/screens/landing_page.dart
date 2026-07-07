@@ -146,6 +146,19 @@ class LandingPage extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  'Guest mode: browse and search only. Sign in to save favorites, build watchlists, and track history.',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
+                    height: 1.4,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
               const SizedBox(height: 32),
             ],
           ),

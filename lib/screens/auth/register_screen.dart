@@ -290,8 +290,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     label: 'Email',
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
-                    validator: (v) =>
-                        v != null && v.contains('@') ? null : 'Enter a valid email',
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return 'Enter a valid email';
+                      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                      return emailRegex.hasMatch(v.trim()) ? null : 'Enter a valid email';
+                    },
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
@@ -377,6 +380,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                       ),
+                      tooltip: _obscurePassword ? 'Show password' : 'Hide password',
                       onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                     onChanged: _onPasswordChanged,
@@ -416,6 +420,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                         color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                       ),
+                      tooltip: _obscureConfirm ? 'Show password' : 'Hide password',
                       onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                     ),
                     validator: (v) =>

@@ -34,6 +34,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
   final _reviewController = TextEditingController();
   bool _showReviewForm = false;
   bool _reviewSubmitting = false;
+  String? _fetchError;
+
 
   @override
   void initState() {
@@ -54,12 +56,14 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
 
   Future<void> _fetchDetails() async {
     try {
+      setState(() => _fetchError = null);
       final tmdb = context.read<MovieProvider>();
       final details = await tmdb.fetchMovieDetails(widget.movie.id);
       if (mounted) {
         setState(() => _detailed = details);
       }
-    } catch (_) {
+    } catch (e) {
+      if (mounted) setState(() => _fetchError = 'Failed to load movie details');
     }
   }
 
@@ -70,7 +74,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       if (mounted) {
         setState(() => _cast = cast.take(15).toList());
       }
-    } catch (_) {
+    } catch (e) {
+      if (mounted) setState(() => _fetchError = _fetchError ?? 'Failed to load cast');
     }
   }
 
@@ -81,7 +86,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       if (mounted) {
         setState(() => _similarMovies = similar);
       }
-    } catch (_) {
+    } catch (e) {
+      if (mounted) setState(() => _fetchError = _fetchError ?? 'Failed to load similar movies');
     }
   }
 
@@ -92,7 +98,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       if (mounted) {
         setState(() => _recommendedMovies = recommended);
       }
-    } catch (_) {
+    } catch (e) {
+      if (mounted) setState(() => _fetchError = _fetchError ?? 'Failed to load recommendations');
     }
   }
 
@@ -103,8 +110,18 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
       if (mounted) {
         setState(() => _teaser = teaser);
       }
-    } catch (_) {
+    } catch (e) {
+      if (mounted) setState(() => _fetchError = _fetchError ?? 'Failed to load trailer');
     }
+  }
+
+  Future<void> _retryFetch() async {
+    setState(() => _fetchError = null);
+    _fetchDetails();
+    _fetchCredits();
+    _fetchSimilar();
+    _fetchRecommendations();
+    _fetchTeaser();
   }
 
   Future<void> _fetchReviews() async {
@@ -283,6 +300,35 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                     movie.overview.isNotEmpty ? movie.overview : 'No overview available.',
                     style: GoogleFonts.inter(fontSize: 14, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7), height: 1.5),
                   ),
+                  if (_fetchError != null)
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.error.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Theme.of(context).colorScheme.error.withValues(alpha: 0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error_outline, color: Theme.of(context).colorScheme.error, size: 18),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _fetchError!,
+                              style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.error),
+                            ),
+                          ),
+                          TextButton.icon(
+                            onPressed: _retryFetch,
+                            icon: const Icon(Icons.refresh, size: 16),
+                            label: Text('Retry', style: GoogleFonts.inter(fontSize: 12)),
+                            style: TextButton.styleFrom(foregroundColor: Theme.of(context).colorScheme.error),
+                          ),
+                        ],
+                      ),
+                    ),
                   const SizedBox(height: 24),
                   if (_teaser != null) ...[
                     SizedBox(
@@ -306,7 +352,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                           style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF1A1A2E),
+                          backgroundColor: Theme.of(context).cardColor,
                           foregroundColor: Theme.of(context).colorScheme.primary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -329,8 +375,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             icon: Icon(isFav ? Icons.favorite : Icons.favorite_outline, size: 18),
                             label: Text(isFav ? 'Favorited' : 'Favorite'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isFav ? Theme.of(context).colorScheme.error : Theme.of(context).cardColor,
-                              foregroundColor: isFav ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              backgroundColor: isFav ? Theme.of(context).colorScheme.primary : Theme.of(context).cardColor,
+                              foregroundColor: isFav ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -349,8 +395,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                             icon: Icon(isWl ? Icons.bookmark : Icons.bookmark_outline, size: 18),
                             label: Text(isWl ? 'Saved' : 'Watchlist'),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: isWl ? const Color(0xFF7C4DFF) : Theme.of(context).cardColor,
-                              foregroundColor: isWl ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                              backgroundColor: isWl ? Theme.of(context).colorScheme.primary : Theme.of(context).cardColor,
+                              foregroundColor: isWl ? Theme.of(context).colorScheme.onPrimary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),

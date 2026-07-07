@@ -94,6 +94,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                           context.read<FavoritesProvider>().fetchFavorites(sortBy: v);
                         },
                         icon: Icon(Icons.sort, size: 20, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54)),
+                        tooltip: 'Sort favorites',
                         color: Theme.of(context).cardColor,
                         itemBuilder: (_) => [
                           PopupMenuItem(value: 'recent', child: Text('Recent', style: TextStyle(color: _sortBy == 'recent' ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)))),
@@ -153,7 +154,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 child: EmptyState(
                   icon: Icons.favorite_outline,
                   title: 'No favorites yet',
-                  subtitle: 'Movies you favorite will appear here',
+                  subtitle: 'Search for movies and tap the heart icon to add your favorites',
                   actionLabel: 'Browse Movies',
                   onAction: () {
                     Navigator.pushReplacement(
@@ -168,7 +169,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
+                    crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
                     childAspectRatio: 0.6,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,

@@ -499,7 +499,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onTap: () => theme.toggle(),
               ),
-              _buildChangePasswordSection(),
+              _buildChangePasswordSection(auth),
               _settingsItem(
                 icon: Icons.rate_review_outlined,
                 label: 'My Reviews',
@@ -830,20 +830,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _historyCard(movie) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MovieDetailsScreen(movie: movie),
-          ),
-        );
-      },
-      child: Hero(
-        tag: 'movie_poster_${movie.id}',
-        child: ClipRRect(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        child: Stack(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MovieDetailsScreen(movie: movie),
+            ),
+          );
+        },
+        child: Hero(
+          tag: 'movie_poster_${movie.id}',
+          child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Stack(
           children: [
             if (movie.posterUrl != null)
               CachedNetworkImage(
@@ -911,6 +914,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
       ),
+      ),
     );
   }
 
@@ -960,7 +964,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildChangePasswordSection() {
+  Widget _buildChangePasswordSection(AuthProvider auth) {
     return Column(
       children: [
         _settingsItem(
@@ -985,6 +989,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     suffixIcon: IconButton(
                       icon: Icon(_showCurrentPassword ? Icons.visibility_off : Icons.visibility),
+                      tooltip: _showCurrentPassword ? 'Hide current password' : 'Show current password',
                       onPressed: () => setState(() => _showCurrentPassword = !_showCurrentPassword),
                     ),
                   ),
@@ -1008,6 +1013,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     suffixIcon: IconButton(
                       icon: Icon(_showNewPassword ? Icons.visibility_off : Icons.visibility),
+                      tooltip: _showNewPassword ? 'Hide new password' : 'Show new password',
                       onPressed: () => setState(() => _showNewPassword = !_showNewPassword),
                     ),
                   ),
@@ -1037,6 +1043,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                     suffixIcon: IconButton(
                       icon: Icon(_showConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                      tooltip: _showConfirmPassword ? 'Hide confirm password' : 'Show confirm password',
                       onPressed: () => setState(() => _showConfirmPassword = !_showConfirmPassword),
                     ),
                   ),
@@ -1048,13 +1055,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: SizedBox(
                         height: 44,
                         child: ElevatedButton(
-                          onPressed: context.read<AuthProvider>().isLoading ? null : _changePassword,
+                          onPressed: auth.isLoading ? null : _changePassword,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).colorScheme.primary,
                             foregroundColor: Theme.of(context).colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           ),
-                          child: const Text('Update'),
+                          child: auth.isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('Update'),
                         ),
                       ),
                     ),

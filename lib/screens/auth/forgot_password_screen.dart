@@ -130,8 +130,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       enabled: !_emailSent,
                     ),
                     keyboardType: TextInputType.emailAddress,
-                    validator: (v) =>
-                        v != null && v.contains('@') ? null : 'Enter a valid email',
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return 'Enter a valid email';
+                      final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                      return emailRegex.hasMatch(v.trim()) ? null : 'Enter a valid email';
+                    },
                   ),
                   if (_emailSent) ...[
                     const SizedBox(height: 24),

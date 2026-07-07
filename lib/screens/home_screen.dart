@@ -7,7 +7,6 @@ import 'browse_screen.dart';
 import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'watchlist_screen.dart';
-import 'history_screen.dart';
 import 'profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {

@@ -80,6 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 suffixIcon: _controller.text.isNotEmpty
                     ? IconButton(
                         icon: Icon(Icons.clear, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
+                        tooltip: 'Clear search',
                         onPressed: () {
                           _controller.clear();
                           context.read<MovieProvider>().search('');
@@ -223,7 +224,7 @@ class _SearchScreenState extends State<SearchScreen> {
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
+          crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
           childAspectRatio: 0.6,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,
