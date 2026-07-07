@@ -59,6 +59,11 @@ GoRouter createAppRouter() {
       return null;
     },
     routes: [
+      // ── Root redirect ──
+      GoRoute(
+        path: '/',
+        redirect: (_, __) => '/landing',
+      ),
       // ── Standalone routes ──
       GoRoute(
         path: '/onboarding',

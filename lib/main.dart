@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'config.dart';
@@ -7,6 +8,7 @@ import 'config.dart';
 void main() {
   runZonedGuarded(() async {
     WidgetsFlutterBinding.ensureInitialized();
+    usePathUrlStrategy();
     await AppConfig.initialize();
     final prefs = await SharedPreferences.getInstance();
     final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
