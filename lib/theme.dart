@@ -108,6 +108,24 @@ class AppTheme {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
       ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: const Color(0xFF0D1117),
+        indicatorColor: primary.withValues(alpha: 0.2),
+        labelType: NavigationRailLabelType.all,
+        minWidth: 72,
+        groupAlignment: -1.0,
+        selectedLabelTextStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.white),
+        unselectedLabelTextStyle: GoogleFonts.inter(fontSize: 12, color: Colors.white54),
+      ),
+      tooltipTheme: TooltipThemeData(
+        preferBelow: false,
+        waitDuration: const Duration(milliseconds: 300),
+        textStyle: GoogleFonts.inter(fontSize: 12, color: Colors.white),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2C),
+          borderRadius: BorderRadius.circular(6),
+        ),
+      ),
     );
   }
 
@@ -214,6 +232,24 @@ class AppTheme {
         builders: {
           TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
         },
+      ),
+      navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: const Color(0xFFF8F8F8),
+        indicatorColor: primary.withValues(alpha: 0.2),
+        labelType: NavigationRailLabelType.all,
+        minWidth: 72,
+        groupAlignment: -1.0,
+        selectedLabelTextStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFF2C2C2C)),
+        unselectedLabelTextStyle: GoogleFonts.inter(fontSize: 12, color: Colors.black54),
+      ),
+      tooltipTheme: TooltipThemeData(
+        preferBelow: false,
+        waitDuration: const Duration(milliseconds: 300),
+        textStyle: GoogleFonts.inter(fontSize: 12, color: Colors.white),
+        decoration: BoxDecoration(
+          color: const Color(0xFF555555),
+          borderRadius: BorderRadius.circular(6),
+        ),
       ),
     );
   }

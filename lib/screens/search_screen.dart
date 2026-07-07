@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../providers/movie_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/loading_shimmer.dart';
+import '../helpers/responsive.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -66,7 +67,9 @@ class _SearchScreenState extends State<SearchScreen> {
     final isLoadingMore = mp.isLoadingMore;
 
     return SafeArea(
-      child: Column(
+      child: ResponsiveContainer(
+        maxWidth: 1200,
+        child: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
@@ -165,6 +168,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -191,7 +195,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
     if (isLoading) {
       return MovieGridShimmer(
-        crossAxisCount: MediaQuery.of(context).size.width > 600 ? 4 : 3,
+        crossAxisCount: Responsive.movieGridColumns(context),
       );
     }
 
@@ -224,7 +228,7 @@ class _SearchScreenState extends State<SearchScreen> {
         controller: _scrollController,
         padding: const EdgeInsets.all(16),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
+          crossAxisCount: Responsive.movieGridColumns(context),
           childAspectRatio: 0.6,
           crossAxisSpacing: 10,
           mainAxisSpacing: 10,

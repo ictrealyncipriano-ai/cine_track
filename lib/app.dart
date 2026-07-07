@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/auth_provider.dart';
@@ -8,6 +10,7 @@ import 'providers/watchlist_provider.dart';
 import 'providers/reviews_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/theme_provider.dart';
+import 'router/app_router.dart';
 import 'theme.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/landing_page.dart';
@@ -28,6 +31,7 @@ class CineTrackApp extends StatefulWidget {
 
 class _CineTrackAppState extends State<CineTrackApp> {
   late bool _onboardingDone;
+  GoRouter? _router;
 
   @override
   void initState() {
@@ -41,6 +45,12 @@ class _CineTrackAppState extends State<CineTrackApp> {
     if (mounted) {
       setState(() => _onboardingDone = true);
     }
+  }
+
+  @override
+  void dispose() {
+    _router?.dispose();
+    super.dispose();
   }
 
   @override
@@ -74,6 +84,20 @@ class _CineTrackAppState extends State<CineTrackApp> {
       ],
       child: Consumer<ThemeProvider>(
         builder: (_, themeProvider, __) {
+          // Use GoRouter on web for URL-based routing; keep Navigator 1.0 on mobile
+          if (kIsWeb) {
+            _router ??= createAppRouter();
+            return MaterialApp.router(
+              title: 'CineTrack',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: themeProvider.themeMode,
+              routerConfig: _router!,
+            );
+          }
+
+          // Mobile: Navigator 1.0 (unchanged)
           return MaterialApp(
             title: 'CineTrack',
             debugShowCheckedModeBanner: false,

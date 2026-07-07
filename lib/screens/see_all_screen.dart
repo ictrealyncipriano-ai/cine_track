@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/movie.dart';
 import '../widgets/movie_card.dart';
+import '../helpers/responsive.dart';
 
 class SeeAllScreen extends StatefulWidget {
   final String title;
@@ -73,11 +74,13 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
         onRefresh: () async {
           widget.loadMore();
         },
-        child: GridView.builder(
+        child: ResponsiveContainer(
+          maxWidth: 1200,
+          child: GridView.builder(
           controller: _scrollController,
           padding: const EdgeInsets.all(16),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
+            crossAxisCount: Responsive.movieGridColumns(context),
             childAspectRatio: 0.6,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
@@ -96,6 +99,7 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
             return MovieCard(movie: movies[index]);
           },
         ),
+      ),
       ),
     );
   }

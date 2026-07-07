@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
 import 'login_screen.dart';
 import 'verification_sent_screen.dart';
@@ -243,10 +244,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: ResponsiveContainer(
+              maxWidth: 600,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.movie_creation_rounded,
@@ -520,6 +523,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
 import 'reset_password_screen.dart';
 
@@ -97,10 +98,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: ResponsiveContainer(
+              maxWidth: 480,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.lock_reset_rounded,
@@ -245,6 +248,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),

@@ -5,6 +5,7 @@ import '../providers/watchlist_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/empty_state.dart';
 import '../widgets/loading_shimmer.dart';
+import '../helpers/responsive.dart';
 import '../screens/home_screen.dart';
 
 class WatchlistScreen extends StatefulWidget {
@@ -61,7 +62,9 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: _onRefresh,
-        child: CustomScrollView(
+        child: ResponsiveContainer(
+          maxWidth: 1200,
+          child: CustomScrollView(
           controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
@@ -168,7 +171,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                 padding: const EdgeInsets.all(16),
                 sliver: SliverGrid(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: MediaQuery.of(context).size.width > 900 ? 5 : MediaQuery.of(context).size.width > 600 ? 4 : 3,
+                    crossAxisCount: Responsive.movieGridColumns(context),
                     childAspectRatio: 0.6,
                     crossAxisSpacing: 10,
                     mainAxisSpacing: 10,
@@ -192,6 +195,7 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
               ),
           ],
         ),
+      ),
       ),
     );
   }

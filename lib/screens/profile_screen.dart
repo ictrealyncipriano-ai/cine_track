@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import '../helpers/responsive.dart';
 import '../providers/auth_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/history_provider.dart';
@@ -356,8 +357,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
-        child: Column(
-          children: [
+        child: ResponsiveContainer(
+          child: Column(
+            children: [
             const SizedBox(height: 40),
             Container(
               width: 100, height: 100,
@@ -425,6 +427,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
@@ -475,8 +478,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onRefresh: () async => await hp.fetchHistory(),
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(20),
-          child: Column(
+          child: ResponsiveContainer(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildProfileHeader(user, auth),
@@ -573,6 +576,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

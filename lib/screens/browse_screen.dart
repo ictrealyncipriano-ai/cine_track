@@ -10,6 +10,7 @@ import '../widgets/error_retry.dart';
 import 'movie_details_screen.dart';
 import 'see_all_screen.dart';
 import '../widgets/loading_shimmer.dart';
+import '../helpers/responsive.dart';
 
 class BrowseScreen extends StatefulWidget {
   const BrowseScreen({super.key});
@@ -70,7 +71,9 @@ class _BrowseScreenState extends State<BrowseScreen> {
     return SafeArea(
       child: RefreshIndicator(
         onRefresh: _onRefresh,
-        child: CustomScrollView(
+        child: ResponsiveContainer(
+          maxWidth: 1200,
+          child: CustomScrollView(
           controller: _scrollController,
           slivers: [
             SliverToBoxAdapter(
@@ -247,11 +250,11 @@ class _BrowseScreenState extends State<BrowseScreen> {
           ],
         ),
       ),
+      ),
     );
   }
 
   Widget _buildGenreGrid(MovieProvider mp) {
-    final screenWidth = MediaQuery.of(context).size.width;
     if (mp.isLoading && mp.genreMovies.isEmpty) {
       return const SliverFillRemaining(
         child: MovieGridShimmer(crossAxisCount: 3),
@@ -293,7 +296,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate:
                     SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: screenWidth > 900 ? 5 : screenWidth > 600 ? 4 : 3,
+                  crossAxisCount: Responsive.movieGridColumns(context),
                   childAspectRatio: 0.6,
                   crossAxisSpacing: 10,
                   mainAxisSpacing: 10,

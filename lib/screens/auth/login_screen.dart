@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../config.dart';
+import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
 import '../home_screen.dart';
 import 'register_screen.dart';
@@ -185,10 +186,12 @@ class _LoginScreenState extends State<LoginScreen> {
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: ResponsiveContainer(
+              maxWidth: 480,
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     Icons.movie_creation_rounded,
@@ -444,6 +447,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ],
               ),
             ),
+          ),
           ),
         ),
       ),
