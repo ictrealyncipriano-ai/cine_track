@@ -41,6 +41,12 @@ class User {
     );
   }
 
+  /// Whether this user has admin privileges.
+  bool get isAdmin => role == 'admin';
+
+  /// Whether this user has moderator or admin privileges.
+  bool get isModerator => role == 'moderator' || role == 'admin';
+
   User copyWith({
     int? id,
     String? name,

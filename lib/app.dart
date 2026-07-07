@@ -10,6 +10,7 @@ import 'providers/watchlist_provider.dart';
 import 'providers/reviews_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/theme_provider.dart';
+import 'providers/admin_provider.dart';
 import 'router/app_router.dart';
 import 'theme.dart';
 import 'screens/onboarding_screen.dart';
@@ -80,6 +81,9 @@ class _CineTrackAppState extends State<CineTrackApp> {
         ),
         ChangeNotifierProvider(
           create: (_) => HistoryProvider(apiService, authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminProvider(apiService),
         ),
       ],
       child: Consumer<ThemeProvider>(

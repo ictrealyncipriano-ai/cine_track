@@ -15,6 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $userId = getAuthUserId();
 
+if (isBanned($userId)) {
+    jsonError('Your account has been suspended', 403);
+}
+
 try {
     $pdo = getDb();
     $stmt = $pdo->prepare('DELETE FROM watch_history WHERE user_id = ?');

@@ -22,6 +22,9 @@ import '../screens/auth/reset_password_screen.dart';
 import '../screens/auth/verify_email_screen.dart';
 import '../screens/auth/verification_sent_screen.dart';
 import '../widgets/responsive_shell.dart';
+import '../screens/admin/admin_dashboard_screen.dart';
+import '../screens/admin/admin_users_screen.dart';
+import '../screens/admin/admin_reviews_screen.dart';
 
 /// Creates the [GoRouter] instance for web.
 /// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
@@ -54,6 +57,11 @@ GoRouter createAppRouter() {
       // Email verification guard
       if (isAuth && auth.isAuthenticated && !auth.emailVerified && path != '/verify-email') {
         return '/verify-email';
+      }
+
+      // Admin guard
+      if (path.startsWith('/admin') && auth.user?.isAdmin != true) {
+        return '/browse';
       }
 
       return null;
@@ -121,6 +129,10 @@ GoRouter createAppRouter() {
           GoRoute(path: '/favorites', builder: (_, __) => const FavoritesScreen()),
           GoRoute(path: '/watchlist', builder: (_, __) => const WatchlistScreen()),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
+          // ── Admin routes  ──
+          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
+          GoRoute(path: '/admin/users', builder: (_, __) => const AdminUsersScreen()),
+          GoRoute(path: '/admin/reviews', builder: (_, __) => const AdminReviewsScreen()),
         ],
       ),
     ],
@@ -137,42 +149,43 @@ class _WebShell extends StatefulWidget {
 }
 
 class _WebShellState extends State<_WebShell> {
-  static const _navLabels = ['Browse', 'Search', 'Favorites', 'Watchlist', 'Profile'];
-  static const _navIcons = [
-    Icons.explore_outlined,
-    Icons.search_outlined,
-    Icons.favorite_outline,
-    Icons.bookmark_outline,
-    Icons.person_outline,
-  ];
-  static const _navSelectedIcons = [
-    Icons.explore,
-    Icons.search,
-    Icons.favorite,
-    Icons.bookmark,
-    Icons.person,
-  ];
+  List<_NavItem> _navItems(bool isAdmin) => [
+        _NavItem('Browse', Icons.explore_outlined, Icons.explore, '/browse'),
+        _NavItem('Search', Icons.search_outlined, Icons.search, '/search'),
+        _NavItem('Favorites', Icons.favorite_outline, Icons.favorite, '/favorites'),
+        _NavItem('Watchlist', Icons.bookmark_outline, Icons.bookmark, '/watchlist'),
+        if (isAdmin)
+          _NavItem('Admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, '/admin'),
+        _NavItem('Profile', Icons.person_outline, Icons.person, '/profile'),
+      ];
 
-  int _currentTabForPath(String path) {
+  int _currentTabForPath(String path, bool isAdmin) {
     if (path.startsWith('/browse')) return 0;
     if (path.startsWith('/search')) return 1;
     if (path.startsWith('/favorites')) return 2;
     if (path.startsWith('/watchlist')) return 3;
-    if (path.startsWith('/profile')) return 4;
+    if (isAdmin && path.startsWith('/admin')) return 4;
+    if (path.startsWith('/profile')) return isAdmin ? 5 : 4;
     return 0;
   }
 
   void _onTabSelected(int index) {
-    final routes = ['/browse', '/search', '/favorites', '/watchlist', '/profile'];
-    context.go(routes[index]);
+    final auth = context.read<AuthProvider>();
+    final isAdmin = auth.user?.isAdmin ?? false;
+    final items = _navItems(isAdmin);
+    if (index >= 0 && index < items.length) {
+      context.go(items[index].route);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final isWide = Responsive.isDesktop(context);
     final auth = context.watch<AuthProvider>();
+    final isAdmin = auth.user?.isAdmin ?? false;
     final currentPath = GoRouterState.of(context).matchedLocation;
-    final currentIndex = _currentTabForPath(currentPath);
+    final items = _navItems(isAdmin);
+    final currentIndex = _currentTabForPath(currentPath, isAdmin);
 
     return Scaffold(
       body: Row(
@@ -229,11 +242,11 @@ class _WebShellState extends State<_WebShell> {
                       ),
                     )
                   : const SizedBox.shrink(),
-              destinations: List.generate(_navLabels.length, (i) {
+              destinations: List.generate(items.length, (i) {
                 return NavigationRailDestination(
-                  icon: Icon(_navIcons[i]),
-                  selectedIcon: Icon(_navSelectedIcons[i]),
-                  label: Text(_navLabels[i], style: GoogleFonts.inter(fontSize: 12)),
+                  icon: Icon(items[i].icon),
+                  selectedIcon: Icon(items[i].activeIcon),
+                  label: Text(items[i].label, style: GoogleFonts.inter(fontSize: 12)),
                 );
               }),
             ),
@@ -243,7 +256,7 @@ class _WebShellState extends State<_WebShell> {
       bottomNavigationBar: isWide
           ? null
           : BottomNavigationBar(
-              currentIndex: currentIndex,
+              currentIndex: currentIndex >= 0 && currentIndex < items.length ? currentIndex : 0,
               onTap: _onTabSelected,
               type: BottomNavigationBarType.fixed,
               selectedItemColor: Theme.of(context).colorScheme.primary,
@@ -251,14 +264,22 @@ class _WebShellState extends State<_WebShell> {
                   .colorScheme
                   .onSurface
                   .withValues(alpha: 0.54),
-              items: List.generate(_navLabels.length, (i) {
+              items: List.generate(items.length, (i) {
                 return BottomNavigationBarItem(
-                  icon: Icon(_navIcons[i]),
-                  activeIcon: Icon(_navSelectedIcons[i]),
-                  label: _navLabels[i],
+                  icon: Icon(items[i].icon),
+                  activeIcon: Icon(items[i].activeIcon),
+                  label: items[i].label,
                 );
               }),
             ),
     );
   }
+}
+
+class _NavItem {
+  final String label;
+  final IconData icon;
+  final IconData activeIcon;
+  final String route;
+  const _NavItem(this.label, this.icon, this.activeIcon, this.route);
 }

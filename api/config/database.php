@@ -64,6 +64,20 @@ function requireRole(int $userId, string ...$roles): void {
     }
 }
 
+function isBanned(int $userId): bool {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('SELECT banned_at FROM users WHERE id = ?');
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch();
+    return $user && $user['banned_at'] !== null;
+}
+
+function logAdminAction(int $adminId, string $action, string $targetType, ?int $targetId = null, ?string $details = null): void {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('INSERT INTO admin_logs (admin_id, action, target_type, target_id, details) VALUES (?, ?, ?, ?, ?)');
+    $stmt->execute([$adminId, $action, $targetType, $targetId, $details]);
+}
+
 function getAuthUserId(): int {
     $headers = getallheaders();
     $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';

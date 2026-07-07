@@ -11,6 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $userId = getAuthUserId();
 
+if (isBanned($userId)) {
+    jsonError('Your account has been suspended', 403);
+}
+
 $input = json_decode(file_get_contents('php://input'), true);
 $movieId = (int) ($input['movie_id'] ?? $_GET['movie_id'] ?? 0);
 
