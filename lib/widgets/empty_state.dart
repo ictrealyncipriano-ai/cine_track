@@ -30,7 +30,7 @@ class EmptyState extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: GoogleFonts.inter(
                 color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -41,7 +41,7 @@ class EmptyState extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 14),
+                style: GoogleFonts.inter(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 14),
               ),
             ],
             if (actionLabel != null && onAction != null) ...[

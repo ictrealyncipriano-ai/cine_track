@@ -22,6 +22,10 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
   int _sourceIndex = 0;
   bool _showTrySource = false;
 
+  /// Tracks registered view types to prevent duplicate registrations
+  /// that leak iframe elements in the browser's DOM.
+  static final _registeredViewTypes = <String>{};
+
   String get _currentUrl => AppConfig.streamUrl(widget.movie.id, _sourceIndex);
   String get _currentName => AppConfig.streamingSources[_sourceIndex]['name']!;
 
@@ -57,18 +61,22 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
   Widget _buildPlayer() {
     final viewType = 'sp-${widget.movie.id}-$_sourceIndex';
     try {
-      ui_web.platformViewRegistry.registerViewFactory(viewType, (int id) {
-        final iframe = html.IFrameElement()
-          ..src = _currentUrl
-          ..style.border = 'none'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..allow = 'fullscreen; autoplay; encrypted-media'
-          ..referrerPolicy = 'no-referrer';
-        try { iframe.sandbox?.value = ''; } catch (_) {}
-        return iframe;
-      });
-    } catch (_) {}
+      if (_registeredViewTypes.add(viewType)) {
+        ui_web.platformViewRegistry.registerViewFactory(viewType, (int id) {
+          final iframe = html.IFrameElement()
+            ..src = _currentUrl
+            ..style.border = 'none'
+            ..style.width = '100%'
+            ..style.height = '100%'
+            ..allow = 'fullscreen; autoplay; encrypted-media'
+            ..referrerPolicy = 'no-referrer';
+          try { iframe.sandbox?.value = ''; } catch (_) {}
+          return iframe;
+        });
+      }
+    } catch (_) {
+      debugPrint('StreamPlayerWeb: view factory registration failed for $viewType');
+    }
     return HtmlElementView(viewType: viewType);
   }
 

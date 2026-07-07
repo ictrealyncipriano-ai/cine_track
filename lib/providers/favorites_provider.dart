@@ -44,6 +44,8 @@ class FavoritesProvider extends ChangeNotifier {
     return 'Something went wrong. Please try again.';
   }
 
+  bool _fetching = false;
+
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       _page = 1;
@@ -52,7 +54,10 @@ class FavoritesProvider extends ChangeNotifier {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      fetchFavorites();
+      if (!_fetching) {
+        _fetching = true;
+        fetchFavorites().then((_) => _fetching = false);
+      }
     } else {
       _favorites.clear();
       _page = 1;

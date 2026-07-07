@@ -44,6 +44,8 @@ class WatchlistProvider extends ChangeNotifier {
     return 'Something went wrong. Please try again.';
   }
 
+  bool _fetching = false;
+
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       _page = 1;
@@ -52,7 +54,10 @@ class WatchlistProvider extends ChangeNotifier {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      fetchWatchlist();
+      if (!_fetching) {
+        _fetching = true;
+        fetchWatchlist().then((_) => _fetching = false);
+      }
     } else {
       _watchlist.clear();
       _page = 1;

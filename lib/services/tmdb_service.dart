@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
@@ -68,7 +69,7 @@ class TmdbService {
     final uri = Uri.parse('${AppConfig.tmdbBaseUrl}/genre/movie/list')
         .replace(queryParameters: params);
 
-    final response = await _client.get(uri);
+    final response = await _client.get(uri).timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('TMDB API error: ${response.statusCode}');
@@ -98,7 +99,7 @@ class TmdbService {
     final uri = Uri.parse('${AppConfig.tmdbBaseUrl}/movie/$movieId')
         .replace(queryParameters: params);
 
-    final response = await _client.get(uri);
+    final response = await _client.get(uri).timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('TMDB API error: ${response.statusCode}');
@@ -117,7 +118,7 @@ class TmdbService {
     final uri = Uri.parse('${AppConfig.tmdbBaseUrl}/movie/$movieId/credits')
         .replace(queryParameters: params);
 
-    final response = await _client.get(uri);
+    final response = await _client.get(uri).timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('TMDB API error: ${response.statusCode}');
@@ -141,7 +142,7 @@ class TmdbService {
     final uri = Uri.parse('${AppConfig.tmdbBaseUrl}/movie/$movieId/videos')
         .replace(queryParameters: params);
 
-    final response = await _client.get(uri);
+    final response = await _client.get(uri).timeout(const Duration(seconds: 15));
 
     if (response.statusCode != 200) {
       throw Exception('TMDB API error: ${response.statusCode}');

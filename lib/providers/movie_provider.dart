@@ -249,11 +249,8 @@ class MovieProvider extends ChangeNotifier {
     final videos = await _tmdbService.getMovieVideos(movieId);
     return videos.cast<TrailerVideo?>().firstWhere(
       (v) => v!.isTeaser,
-      orElse: () => videos.cast<TrailerVideo?>().firstWhere(
-        (v) => v!.isTrailer,
-        orElse: () => null,
-      ),
-    );
+      orElse: () => null,
+    ) ?? videos.where((v) => v.isTrailer).firstOrNull;
   }
 
   Future<void> search(String query, {int? genreId, int? year, String? sortBy}) async {

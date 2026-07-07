@@ -324,14 +324,17 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             return confirmed == true;
                           },
                           onDismissed: (_) {
-                            context.read<HistoryProvider>().removeFromHistory(movie.id);
+                            final removedMovie = movie;
+                            context.read<HistoryProvider>().removeFromHistory(removedMovie.id);
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Removed "${movie.title}"'),
+                                content: Text('Removed "${removedMovie.title}"'),
                                 duration: const Duration(seconds: 3),
                                 action: SnackBarAction(
                                   label: 'Undo',
-                                  onPressed: () {},
+                                  onPressed: () {
+                                    context.read<HistoryProvider>().addToHistory(removedMovie);
+                                  },
                                 ),
                               ),
                             );

@@ -21,7 +21,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _codeController = TextEditingController();
   bool _rememberMe = true;
   bool _obscurePassword = true;
-  int _passwordStrength = 0;
+
   String? _error;
   bool _emailNotVerified = false;
   bool _resendSent = false;
@@ -176,26 +176,6 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Color _strengthColor() {
-    return switch (_passwordStrength) {
-      0 => Colors.red,
-      1 => Colors.orange,
-      2 => Colors.amber,
-      3 => Colors.lightGreen,
-      _ => Colors.green,
-    };
-  }
-
-  String _strengthLabel() {
-    return switch (_passwordStrength) {
-      0 => 'Weak',
-      1 => 'Fair',
-      2 => 'Good',
-      3 => 'Strong',
-      _ => 'Very strong',
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
@@ -277,34 +257,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     obscureText: _obscurePassword,
-                    onChanged: (v) {
-                      int strength = 0;
-                      if (v.length >= 8) strength++;
-                      if (v.contains(RegExp(r'[A-Z]'))) strength++;
-                      if (v.contains(RegExp(r'[a-z]'))) strength++;
-                      if (v.contains(RegExp(r'[0-9]'))) strength++;
-                      setState(() => _passwordStrength = strength);
-                    },
                     validator: (v) =>
                         v != null && v.length >= 8 ? null : 'Min 8 characters',
                   ),
                   const SizedBox(height: 8),
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: _passwordStrength / 4,
-                      minHeight: 4,
-                      backgroundColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.10),
-                      valueColor: AlwaysStoppedAnimation(_strengthColor()),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(top: 4),
-                    child: Text(
-                      _strengthLabel(),
-                      style: TextStyle(fontSize: 12, color: _strengthColor()),
-                    ),
-                  ),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(

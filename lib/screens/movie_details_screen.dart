@@ -160,8 +160,11 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     }
   }
 
-  int _formatRuntime(int? minutes) {
-    return minutes ?? 0;
+  String _formatRuntime(int? minutes) {
+    if (minutes == null) return 'N/A';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    return h > 0 ? '${h}h ${m}m' : '${m}m';
   }
 
   @override

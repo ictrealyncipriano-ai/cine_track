@@ -27,7 +27,7 @@ class MovieGridShimmer extends StatelessWidget {
         itemCount: 6,
         itemBuilder: (_, _) => Container(
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
+            color: _highlightColor(context).withValues(alpha: 0.5),
             borderRadius: BorderRadius.circular(12),
           ),
         ),

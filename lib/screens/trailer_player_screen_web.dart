@@ -19,22 +19,30 @@ class TrailerPlayerScreen extends StatefulWidget {
 }
 
 class _TrailerPlayerScreenState extends State<TrailerPlayerScreen> {
+  /// Tracks registered view types to prevent duplicate registrations
+  /// that leak iframe elements in the browser's DOM.
+  static final _registeredViewTypes = <String>{};
+
   @override
   Widget build(BuildContext context) {
-    final viewType = 'tp-${identityHashCode(widget.video)}';
+    final viewType = 'tp-${widget.video.key}';
     try {
-      ui_web.platformViewRegistry.registerViewFactory(viewType, (int id) {
-        final iframe = html.IFrameElement()
-          ..src = 'https://www.youtube.com/embed/${widget.video.key}?autoplay=1&rel=0'
-          ..style.border = 'none'
-          ..style.width = '100%'
-          ..style.height = '100%'
-          ..allow = 'fullscreen; autoplay; encrypted-media'
-          ..referrerPolicy = 'no-referrer';
-        try { iframe.sandbox?.value = ''; } catch (_) {}
-        return iframe;
-      });
-    } catch (_) {}
+      if (_registeredViewTypes.add(viewType)) {
+        ui_web.platformViewRegistry.registerViewFactory(viewType, (int id) {
+          final iframe = html.IFrameElement()
+            ..src = 'https://www.youtube.com/embed/${widget.video.key}?autoplay=1&rel=0'
+            ..style.border = 'none'
+            ..style.width = '100%'
+            ..style.height = '100%'
+            ..allow = 'fullscreen; autoplay; encrypted-media'
+            ..referrerPolicy = 'no-referrer';
+          try { iframe.sandbox?.value = ''; } catch (_) {}
+          return iframe;
+        });
+      }
+    } catch (_) {
+      debugPrint('TrailerPlayerWeb: view factory registration failed');
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,

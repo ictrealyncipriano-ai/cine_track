@@ -46,6 +46,8 @@ class HistoryProvider extends ChangeNotifier {
     return 'Something went wrong. Please try again.';
   }
 
+  bool _fetching = false;
+
   void _onAuthChanged() {
     if (_authService.isAuthenticated) {
       _page = 1;
@@ -54,7 +56,10 @@ class HistoryProvider extends ChangeNotifier {
       isLoading = true;
       errorMessage = null;
       notifyListeners();
-      fetchHistory();
+      if (!_fetching) {
+        _fetching = true;
+        fetchHistory().then((_) => _fetching = false);
+      }
     } else {
       _history.clear();
       _page = 1;
@@ -128,7 +133,7 @@ class HistoryProvider extends ChangeNotifier {
     try {
       await _api.post('/history/delete.php', {'movie_id': movieId});
       _history.removeWhere((m) => m.id == movieId);
-      _total = _history.length;
+      _total = _total > 0 ? _total - 1 : 0;
       _hasMore = _history.length < _total;
       notifyListeners();
     } catch (e) {

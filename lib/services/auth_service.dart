@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import '../models/user.dart';
 import 'api_service.dart';
 
@@ -43,6 +44,18 @@ class AuthService extends ChangeNotifier {
 
   Future<Map<String, dynamic>> _getDeviceInfo() async {
     if (kIsWeb) return {'platform': 'web'};
+    try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final info = await DeviceInfoPlugin().androidInfo;
+        return {
+          'platform': 'android',
+          'model': info.model,
+          'os_version': info.version.release,
+        };
+      }
+    } catch (_) {
+      // Fall through to unknown
+    }
     return {'platform': 'unknown'};
   }
 

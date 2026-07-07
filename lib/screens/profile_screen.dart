@@ -1135,7 +1135,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final url = user?.avatarUrl;
     if (url == null || url.isEmpty) return null;
     if (url.startsWith('data:')) {
-      return MemoryImage(base64Decode(url.split(',')[1]));
+      final parts = url.split(',');
+      if (parts.length >= 2 && parts[1].isNotEmpty) {
+        return MemoryImage(base64Decode(parts[1]));
+      }
     }
     return CachedNetworkImageProvider(url);
   }

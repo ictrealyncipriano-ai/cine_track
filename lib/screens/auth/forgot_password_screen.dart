@@ -70,6 +70,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
 
+    final emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
+    if (!emailRegExp.hasMatch(email)) {
+      setState(() => _error = 'Invalid email address in the reset link');
+      return;
+    }
+    if (token.length < 10) {
+      setState(() => _error = 'Invalid reset token in the link');
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(
