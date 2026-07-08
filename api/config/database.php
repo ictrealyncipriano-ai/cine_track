@@ -167,6 +167,11 @@ function checkAccountLockout(string $email, int $maxAttempts = 5, int $lockoutMi
             return;
         }
 
+        $data = json_decode($row['value'], true);
+        if (!($data['locked'] ?? false)) {
+            return; // not locked — just an attempt counter
+        }
+
         $retryAfter = $expiration - time();
         jsonError("Account temporarily locked. Try again in {$retryAfter} seconds.", 429);
     }

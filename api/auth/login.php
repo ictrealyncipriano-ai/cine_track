@@ -30,7 +30,7 @@ $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
 checkRateLimit("login:$ip", 5, 5);
 
-checkAccountLockout($email, 5, 5);
+checkAccountLockout($email, 3, 5);
 
 $pdo = getDb();
 $stmt = $pdo->prepare('SELECT id, name, email, password, email_verified_at, role FROM users WHERE email = ?');
@@ -39,7 +39,7 @@ $user = $stmt->fetch();
 
 if (!$user || !password_verify($password, $user['password'])) {
     logLoginAttempt($email, null, false, $ip, $userAgent);
-    incrementAccountLockout($email, 5, 5);
+    incrementAccountLockout($email, 3, 5);
     incrementRateLimit("login:$ip", 5);
     jsonError('Invalid email or password', 401);
 }
