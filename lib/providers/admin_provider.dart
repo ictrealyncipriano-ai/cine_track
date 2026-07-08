@@ -143,7 +143,7 @@ class AdminProvider extends ChangeNotifier {
     await _api.post('admin/reviews/moderate.php', {
       'review_id': reviewId.toString(),
       'action': action,
-      if (note != null) 'moderation_note': note,
+      'moderation_note': ?note,
     });
     await fetchReviews(status: _reviewFilter, page: _reviewsPage);
   }

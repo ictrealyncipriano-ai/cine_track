@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+﻿import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -40,6 +40,12 @@ class _CineTrackAppState extends State<CineTrackApp> {
     _onboardingDone = widget.onboardingDone;
   }
 
+  @override
+  void dispose() {
+    _router?.dispose();
+    super.dispose();
+  }
+
   Future<void> _completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_completed', true);
@@ -49,46 +55,27 @@ class _CineTrackAppState extends State<CineTrackApp> {
   }
 
   @override
-  void dispose() {
-    _router?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (!_onboardingDone) {
+      return OnboardingScreen(onComplete: _completeOnboarding);
+    }
+
     final apiService = ApiService();
     final authService = AuthService(apiService);
 
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(
-          create: (_) => AuthProvider(authService),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => MovieProvider(TmdbService()),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ThemeProvider(),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => FavoritesProvider(apiService, authService),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => WatchlistProvider(apiService, authService),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => ReviewsProvider(apiService),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => HistoryProvider(apiService, authService),
-        ),
-        ChangeNotifierProvider(
-          create: (_) => AdminProvider(apiService),
-        ),
+        ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
+        ChangeNotifierProvider(create: (_) => MovieProvider(TmdbService())),
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider(apiService, authService)),
+        ChangeNotifierProvider(create: (_) => WatchlistProvider(apiService, authService)),
+        ChangeNotifierProvider(create: (_) => ReviewsProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => HistoryProvider(apiService, authService)),
+        ChangeNotifierProvider(create: (_) => AdminProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (_, themeProvider, __) {
-          // Use GoRouter on web for URL-based routing; keep Navigator 1.0 on mobile
           if (kIsWeb) {
             _router ??= createAppRouter();
             return MaterialApp.router(
@@ -101,16 +88,13 @@ class _CineTrackAppState extends State<CineTrackApp> {
             );
           }
 
-          // Mobile: Navigator 1.0 (unchanged)
           return MaterialApp(
             title: 'CineTrack',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.light,
+            theme: AppTheme.dark,
             darkTheme: AppTheme.dark,
             themeMode: themeProvider.themeMode,
-            home: !_onboardingDone
-                ? OnboardingScreen(onComplete: _completeOnboarding)
-                : Consumer<AuthProvider>(
+            home: Consumer<AuthProvider>(
               builder: (_, auth, __) {
                 if (auth.isLoading) {
                   return const _SplashScreen();
@@ -137,9 +121,9 @@ class _SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(),
-      ),
+      body: Center(child: CircularProgressIndicator()),
     );
   }
 }
+
+

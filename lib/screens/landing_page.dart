@@ -183,7 +183,7 @@ class _Logo extends StatelessWidget {
       'assets/images/logo.png',
       width: isDesk ? 120 : 100,
       height: isDesk ? 120 : 100,
-      errorBuilder: (_, __, ___) => CircleAvatar(
+      errorBuilder: (_, _, _) => CircleAvatar(
         radius: isDesk ? 60 : 50,
         backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
         child: Text(

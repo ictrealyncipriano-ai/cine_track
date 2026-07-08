@@ -150,8 +150,8 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
                       imageUrl: posterUrl,
                       width: 56, height: 84,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84),
-                      errorWidget: (_, __, ___) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
+                      placeholder: (_, _) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84),
+                      errorWidget: (_, _, _) => Container(color: Theme.of(context).scaffoldBackgroundColor, width: 56, height: 84, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
                     )
                   : Container(
                       color: Theme.of(context).scaffoldBackgroundColor,

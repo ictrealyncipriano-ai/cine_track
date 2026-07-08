@@ -1,141 +1,194 @@
-﻿import 'dart:convert';
+# Admin Flutter Side Integration Plan
+
+Two files need edits: `lib/app.dart` and `lib/router/app_router.dart`
+After editing: `flutter build web --release --no-tree-shake-icons`, then `flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation`, then `git add -A && git commit -m "Wire admin screens into app + router" && git push origin main`
+
+---
+
+## 1. `lib/app.dart` — Full Replacement
+
+Replace the entire file with:
+
+```dart
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../helpers/responsive.dart';
-import '../providers/auth_provider.dart';
-import '../screens/onboarding_screen.dart';
-import '../screens/landing_page.dart';
-import '../screens/browse_screen.dart';
-import '../screens/search_screen.dart';
-import '../screens/favorites_screen.dart';
-import '../screens/watchlist_screen.dart';
-import '../screens/profile_screen.dart';
-import '../screens/auth/login_screen.dart';
-import '../screens/auth/register_screen.dart';
-import '../screens/auth/forgot_password_screen.dart';
-import '../screens/auth/reset_password_screen.dart';
-import '../screens/auth/verify_email_screen.dart';
-import '../screens/auth/verification_sent_screen.dart';
+import 'providers/auth_provider.dart';
+import 'providers/movie_provider.dart';
+import 'providers/favorites_provider.dart';
+import 'providers/watchlist_provider.dart';
+import 'providers/reviews_provider.dart';
+import 'providers/history_provider.dart';
+import 'providers/theme_provider.dart';
+import 'providers/admin_provider.dart';
+import 'router/app_router.dart';
+import 'theme.dart';
+import 'screens/onboarding_screen.dart';
+import 'screens/landing_page.dart';
+import 'screens/home_screen.dart';
+import 'screens/auth/verify_email_screen.dart';
+import 'services/auth_service.dart';
+import 'services/api_service.dart';
+import 'services/tmdb_service.dart';
+
+class CineTrackApp extends StatefulWidget {
+  final bool onboardingDone;
+
+  const CineTrackApp({super.key, required this.onboardingDone});
+
+  @override
+  State<CineTrackApp> createState() => _CineTrackAppState();
+}
+
+class _CineTrackAppState extends State<CineTrackApp> {
+  late bool _onboardingDone;
+  GoRouter? _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _onboardingDone = widget.onboardingDone;
+  }
+
+  @override
+  void dispose() {
+    _router?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('onboarding_completed', true);
+    if (mounted) {
+      setState(() => _onboardingDone = true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_onboardingDone) {
+      return OnboardingScreen(onComplete: _completeOnboarding);
+    }
+
+    final apiService = ApiService();
+    final authService = AuthService(apiService);
+
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => MovieProvider(TmdbService()),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ThemeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => FavoritesProvider(apiService, authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => WatchlistProvider(apiService, authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ReviewsProvider(apiService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => HistoryProvider(apiService, authService),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AdminProvider(apiService),
+        ),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (_, themeProvider, __) {
+          if (kIsWeb) {
+            _router ??= createAppRouter();
+            return MaterialApp.router(
+              title: 'CineTrack',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light,
+              darkTheme: AppTheme.dark,
+              themeMode: themeProvider.themeMode,
+              routerConfig: _router!,
+            );
+          }
+
+          return MaterialApp(
+            title: 'CineTrack',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.dark,
+            darkTheme: AppTheme.dark,
+            themeMode: themeProvider.themeMode,
+            home: Consumer<AuthProvider>(
+              builder: (_, auth, __) {
+                if (auth.isLoading) {
+                  return const _SplashScreen();
+                }
+                if (auth.isAuthenticated || auth.isGuest) {
+                  if (auth.isAuthenticated && !auth.emailVerified) {
+                    return const VerifyEmailScreen();
+                  }
+                  return const HomeScreen();
+                }
+                return const LandingPage();
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SplashScreen extends StatelessWidget {
+  const _SplashScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+  }
+}
+```
+
+---
+
+## 2. `lib/router/app_router.dart` — Changes
+
+### a. Add imports after line 21
+
+```dart
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_users_screen.dart';
 import '../screens/admin/admin_reviews_screen.dart';
+```
 
-/// Creates the [GoRouter] instance for web.
-/// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
-/// to avoid complex parameter passing and keep mobile compatibility.
-GoRouter createAppRouter() {
-  return GoRouter(
-    initialLocation: '/browse',
-    redirect: (context, state) async {
-      final auth = context.read<AuthProvider>();
-      final isAuth = auth.isAuthenticated || auth.isGuest;
-      final path = state.matchedLocation;
+### b. Add admin guard in `redirect` (after email verification, before `return null`)
 
-      final prefs = await SharedPreferences.getInstance();
-      final onboardingDone = prefs.getBool('onboarding_completed') ?? false;
-
-      final isAuthRoute = path.startsWith('/login') ||
-          path.startsWith('/register') ||
-          path.startsWith('/forgot-password') ||
-          path.startsWith('/reset-password') ||
-          path == '/landing';
-
-      // Onboarding guard
-      if (!onboardingDone && path != '/onboarding') return '/onboarding';
-      if (onboardingDone && path == '/onboarding') return '/browse';
-
-      // Auth guard
-      if (!isAuth && !isAuthRoute) return '/landing';
-      if (isAuth && isAuthRoute) return '/browse';
-
-      // Email verification guard
-      if (isAuth && auth.isAuthenticated && !auth.emailVerified && path != '/verify-email') {
-        return '/verify-email';
-      }
-
+```dart
       // Admin guard
       if (path.startsWith('/admin') && auth.user?.isAdmin != true) {
         return '/browse';
       }
+```
 
-      return null;
-    },
-    routes: [
-      // â”€â”€ Standalone routes â”€â”€
-      GoRoute(
-        path: '/onboarding',
-        builder: (_, _) => OnboardingScreen(
-          onComplete: () {
-            SharedPreferences.getInstance().then((prefs) {
-              prefs.setBool('onboarding_completed', true);
-            });
-          },
-        ),
-      ),
-      GoRoute(
-        path: '/landing',
-        builder: (_, _) => const LandingPage(),
-      ),
-      GoRoute(
-        path: '/login',
-        builder: (_, _) => const LoginScreen(),
-        routes: [
-          GoRoute(
-            path: 'register',
-            builder: (_, _) => const RegisterScreen(),
-          ),
-          GoRoute(
-            path: 'forgot-password',
-            builder: (_, _) => const ForgotPasswordScreen(),
-          ),
-          GoRoute(
-            path: 'reset-password',
-            builder: (_, state) {
-              final email = state.uri.queryParameters['email'] ?? '';
-              final token = state.uri.queryParameters['token'] ?? '';
-              return ResetPasswordScreen(email: email, token: token);
-            },
-          ),
-        ],
-      ),
-      GoRoute(
-        path: '/verify-email',
-        builder: (_, _) => const VerifyEmailScreen(),
-      ),
-      GoRoute(
-        path: '/verification-sent',
-        builder: (_, _) => const VerificationSentScreen(email: ''),
-      ),
+### c. Add admin routes inside ShellRoute (after /profile line, before closing bracket)
 
-      // â”€â”€ Shell route (auth screens with responsive nav) â”€â”€
-      ShellRoute(
-        builder: (context, state, child) {
-          return _WebShell(child: child);
-        },
-        routes: [
-          GoRoute(path: '/browse', builder: (_, _) => const BrowseScreen()),
-          GoRoute(path: '/search', builder: (_, _) => const SearchScreen()),
-          GoRoute(path: '/favorites', builder: (_, _) => const FavoritesScreen()),
-          GoRoute(path: '/watchlist', builder: (_, _) => const WatchlistScreen()),
-          GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
-        ],
-      ),
-    ],
-  );
-}
+```dart
+          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
+          GoRoute(path: '/admin/users', builder: (_, __) => const AdminUsersScreen()),
+          GoRoute(path: '/admin/reviews', builder: (_, __) => const AdminReviewsScreen()),
+```
 
-/// Web-specific shell with responsive NavigationRail / BottomNavigationBar.
-class _WebShell extends StatefulWidget {
-  final Widget child;
-  const _WebShell({required this.child});
+### d. Replace the entire `_WebShellState` class (lines 131-256) with:
 
-  @override
-  State<_WebShell> createState() => _WebShellState();
-}
-
+```dart
 class _WebShellState extends State<_WebShell> {
   List<_NavItem> _navItems(bool isAdmin) => [
         _NavItem('Browse', Icons.explore_outlined, Icons.explore, '/browse'),
@@ -271,7 +324,24 @@ class _NavItem {
   final String route;
   const _NavItem(this.label, this.icon, this.activeIcon, this.route);
 }
+```
 
+---
 
+## 3. Build Commands
 
+```powershell
+$env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-21.0.9.10-hotspot"
+flutter build web --release --no-tree-shake-icons
+flutter build apk --release --no-tree-shake-icons --android-skip-build-dependency-validation
+```
 
+## 4. Git Push
+
+```powershell
+git add -A
+git commit -m "Wire admin screens into app + router"
+git push origin main
+```
+
+Vercel will auto-deploy from the push.
