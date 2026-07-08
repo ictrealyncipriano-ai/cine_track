@@ -477,6 +477,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       child: RefreshIndicator(
         onRefresh: () async => await hp.fetchHistory(),
         child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           physics: const AlwaysScrollableScrollPhysics(),
           child: ResponsiveContainer(
             child: Column(

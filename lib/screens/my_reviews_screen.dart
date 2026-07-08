@@ -61,6 +61,10 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
   }
 
   Widget _buildBody() {
+    return SafeArea(
+      top: false,
+      child: Builder(
+        builder: (_) {
     if (_isLoading) {
       return const MovieListShimmer();
     }
@@ -102,6 +106,9 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
         padding: const EdgeInsets.all(16),
         itemCount: _reviews.length,
         itemBuilder: (_, i) => _reviewCard(_reviews[i]),
+      ),
+    );
+        },
       ),
     );
   }

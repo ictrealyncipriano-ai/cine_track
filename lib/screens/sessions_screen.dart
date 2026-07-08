@@ -67,7 +67,9 @@ class _SessionsScreenState extends State<SessionsScreen> {
         title: Text('Sessions', style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         centerTitle: true,
       ),
-      body: _loading
+      body: SafeArea(
+        top: false,
+        child: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
               ? Center(
@@ -189,6 +191,8 @@ class _SessionsScreenState extends State<SessionsScreen> {
                         },
                       ),
                     ),
+                  ),
     );
   }
 }
+

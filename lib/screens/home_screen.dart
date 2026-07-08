@@ -52,7 +52,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: SafeArea(
+        top: false,
+        left: false,
+        right: false,
+        child: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {
           if (isGuest && index >= 2 && index <= 3) {
@@ -80,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
         ],
+      ),
       ),
     );
   }
