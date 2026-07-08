@@ -39,3 +39,5 @@ Deploy via `vercel --prod --confirm` from the project root.
 ## Notes
 - CMake 3.31.6 installed at `C:\Android\cmake\3.31.6` (set via `android.cmakeVersion=3.31.6` in `gradle.properties`)
 - `--no-tree-shake-icons` required for release builds (font-subset.exe crash on this Flutter version)
+- `dependency_overrides: path_provider_android: 2.2.23` in `pubspec.yaml` — avoids the `jni-1.0.0` transitive dependency (which has a native CMake build that crashes on Windows: `ninja: CreateProcess: Access is denied` when running NDK `clang.exe`).
+- The `objective_c-9.4.1` package's `hook/` directory is renamed to `hook.bak` in the pub cache to skip its native asset hook (crashes the Dart AOT snapshotter on Windows with `STATUS_ACCESS_VIOLATION` on Android builds). The hook is only needed for iOS/macOS.
