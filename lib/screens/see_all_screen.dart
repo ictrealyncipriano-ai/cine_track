@@ -70,7 +70,8 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: RefreshIndicator(
+      body: SafeArea(
+        child: RefreshIndicator(
         onRefresh: () async {
           widget.loadMore();
         },
@@ -101,6 +102,8 @@ class _SeeAllScreenState extends State<SeeAllScreen> {
         ),
       ),
       ),
+      ),
     );
   }
 }
+
