@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../helpers/responsive.dart';
@@ -201,12 +202,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             ActionChip(
               avatar: const Icon(Icons.rate_review_outlined, size: 18),
               label: const Text('Moderate Reviews'),
-              onPressed: () => Navigator.pushNamed(context, '/admin/reviews'),
+              onPressed: () => context.go('/admin/reviews'),
             ),
             ActionChip(
               avatar: const Icon(Icons.people_outline, size: 18),
               label: const Text('Manage Users'),
-              onPressed: () => Navigator.pushNamed(context, '/admin/users'),
+              onPressed: () => context.go('/admin/users'),
             ),
             ActionChip(
               avatar: const Icon(Icons.settings_outlined, size: 18),

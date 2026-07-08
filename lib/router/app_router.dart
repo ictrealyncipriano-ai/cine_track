@@ -121,6 +121,10 @@ GoRouter createAppRouter() {
           GoRoute(path: '/favorites', builder: (_, _) => const FavoritesScreen()),
           GoRoute(path: '/watchlist', builder: (_, _) => const WatchlistScreen()),
           GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
+          // Admin routes (inside shell, keeps nav visible)
+          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
+          GoRoute(path: '/admin/users', builder: (_, __) => const AdminUsersScreen()),
+          GoRoute(path: '/admin/reviews', builder: (_, __) => const AdminReviewsScreen()),
         ],
       ),
     ],
@@ -148,13 +152,9 @@ class _WebShellState extends State<_WebShell> {
       ];
 
   int _currentTabForPath(String path, bool isAdmin) {
-    if (path.startsWith('/browse')) return 0;
-    if (path.startsWith('/search')) return 1;
-    if (path.startsWith('/favorites')) return 2;
-    if (path.startsWith('/watchlist')) return 3;
-    if (isAdmin && path.startsWith('/admin')) return 4;
-    if (path.startsWith('/profile')) return isAdmin ? 5 : 4;
-    return 0;
+    final items = _navItems(isAdmin);
+    final idx = items.indexWhere((item) => path.startsWith(item.route));
+    return idx >= 0 ? idx : 0;
   }
 
   void _onTabSelected(int index) {
