@@ -57,7 +57,11 @@ class _CineTrackAppState extends State<CineTrackApp> {
   @override
   Widget build(BuildContext context) {
     if (!_onboardingDone) {
-      return OnboardingScreen(onComplete: _completeOnboarding);
+      return MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: AppTheme.dark,
+        home: OnboardingScreen(onComplete: _completeOnboarding),
+      );
     }
 
     final apiService = ApiService();
