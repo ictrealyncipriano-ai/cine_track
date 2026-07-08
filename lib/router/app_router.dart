@@ -26,9 +26,10 @@ import '../screens/admin/admin_reviews_screen.dart';
 /// Creates the [GoRouter] instance for web.
 /// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
 /// to avoid complex parameter passing and keep mobile compatibility.
-GoRouter createAppRouter() {
+GoRouter createAppRouter({Listenable? refreshListenable}) {
   return GoRouter(
     initialLocation: '/browse',
+    refreshListenable: refreshListenable,
     redirect: (context, state) async {
       final auth = context.read<AuthProvider>();
       final isAuth = auth.isAuthenticated || auth.isGuest;
@@ -107,7 +108,9 @@ GoRouter createAppRouter() {
       ),
       GoRoute(
         path: '/verification-sent',
-        builder: (_, _) => const VerificationSentScreen(email: ''),
+        builder: (_, state) => VerificationSentScreen(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
 
       // â”€â”€ Shell route (auth screens with responsive nav) â”€â”€

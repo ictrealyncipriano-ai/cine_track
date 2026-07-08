@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../helpers/responsive.dart';
@@ -123,12 +125,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         setState(() => _showSuccess = true);
         await Future.delayed(const Duration(seconds: 1));
         if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => VerificationSentScreen(email: _emailController.text.trim()),
-            ),
-          );
+          if (kIsWeb) {
+            context.go('/verification-sent?email=${Uri.encodeComponent(_emailController.text.trim())}');
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => VerificationSentScreen(email: _emailController.text.trim()),
+              ),
+            );
+          }
         }
       }
     }

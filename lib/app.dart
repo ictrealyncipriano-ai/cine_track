@@ -81,7 +81,8 @@ class _CineTrackAppState extends State<CineTrackApp> {
       child: Consumer<ThemeProvider>(
         builder: (_, themeProvider, __) {
           if (kIsWeb) {
-            _router ??= createAppRouter();
+            final auth = context.read<AuthProvider>();
+            _router ??= createAppRouter(refreshListenable: auth);
             return MaterialApp.router(
               title: 'CineTrack',
               debugShowCheckedModeBanner: false,
