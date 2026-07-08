@@ -2,6 +2,12 @@
 .git/
 .gitignore
 
+# Flutter / build artifacts
+build/
+.dart_tool/
+.flutter-plugins*
+*.iml
+
 # Other
 node_modules/
 .opencode/
