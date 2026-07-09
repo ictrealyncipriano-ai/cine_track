@@ -1,10 +1,8 @@
 {
-  "name": "vidsrc-server",
+  "name": "cine-track",
   "version": "1.0.0",
-  "type": "module",
   "dependencies": {
-    "express": "^4.21.0",
-    "cheerio": "^1.0.0"
+    "vercel-php": "^0.9.0"
   },
   "private": true
 }
