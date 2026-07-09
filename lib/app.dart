@@ -69,6 +69,7 @@ class _CineTrackAppState extends State<CineTrackApp> {
 
     return MultiProvider(
       providers: [
+Provider<ApiService>.value(value: apiService),
         ChangeNotifierProvider(create: (_) => AuthProvider(authService)),
         ChangeNotifierProvider(create: (_) => MovieProvider(TmdbService())),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
@@ -79,9 +80,9 @@ class _CineTrackAppState extends State<CineTrackApp> {
         ChangeNotifierProvider(create: (_) => AdminProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (_, themeProvider, __) {
+        builder: (ctx, themeProvider, __) {
           if (kIsWeb) {
-            final auth = context.read<AuthProvider>();
+            final auth = ctx.read<AuthProvider>();
             _router ??= createAppRouter(auth);
             return MaterialApp.router(
               title: 'CineTrack',

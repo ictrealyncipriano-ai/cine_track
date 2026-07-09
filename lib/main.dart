@@ -30,15 +30,16 @@ void main() {
       debugPrint('FlutterError: ${details.exception}');
     };
     ErrorWidget.builder = (details) {
+      debugPrint('FLUTTER ERROR: ${details.exception}\n${details.stack}');
       return Directionality(
         textDirection: TextDirection.ltr,
         child: ColoredBox(
           color: const Color(0xFF0D1117),
           child: Center(
-            child: Padding(
+            child: SingleChildScrollView(
               padding: const EdgeInsets.all(24),
-              child: Text(
-                'Something went wrong.\n${details.exception}',
+              child: SelectableText(
+                'Something went wrong.\n${details.exception}\n\n${details.stack}',
                 style: const TextStyle(color: Colors.white70, fontSize: 16),
                 textAlign: TextAlign.center,
               ),
