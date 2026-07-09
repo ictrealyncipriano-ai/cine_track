@@ -59,7 +59,7 @@ logLoginAttempt($email, (int) $user['id'], true, $ip, $userAgent);
 $token = bin2hex(random_bytes(32));
 $deviceInfo = isset($input['device_info']) ? json_encode($input['device_info']) : null;
 
-$expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 30 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
+$expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 7 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
 $stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info) VALUES (?, ?, $expiry, ?, ?, ?)");
 $stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo]);
 

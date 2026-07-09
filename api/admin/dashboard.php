@@ -20,22 +20,30 @@ $pdo = getDb();
 $stmt = $pdo->query('SELECT COUNT(*) AS cnt FROM users WHERE deleted_at IS NULL');
 $totalUsers = (int) $stmt->fetch()['cnt'];
 
+// New users today
+$stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM users WHERE deleted_at IS NULL AND DATE(created_at) = CURDATE()");
+$newToday = (int) $stmt->fetch()['cnt'];
+
+// Active users in last 7 days (have a review or login)
+$stmt = $pdo->query('
+    SELECT COUNT(DISTINCT u.id) AS cnt
+    FROM users u
+    LEFT JOIN reviews r ON r.user_id = u.id AND r.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    LEFT JOIN login_audit la ON la.user_id = u.id AND la.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+    WHERE u.deleted_at IS NULL
+      AND (r.id IS NOT NULL OR la.id IS NOT NULL)
+');
+$active7d = (int) $stmt->fetch()['cnt'];
+
 // Total reviews
 $stmt = $pdo->query('SELECT COUNT(*) AS cnt FROM reviews');
 $totalReviews = (int) $stmt->fetch()['cnt'];
 
-// Pending reviews
-$stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM reviews WHERE status = 'pending'");
-$pendingReviews = (int) $stmt->fetch()['cnt'];
-
-// Reported reviews
-$stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM reviews WHERE status = 'reported'");
-$reportedReviews = (int) $stmt->fetch()['cnt'];
-
-// Recent activity (last 20 admin_logs)
+// Recent activity (last 20 admin_logs) — column aliases match Dart field names
 $stmt = $pdo->query('
-    SELECT al.id, al.action, al.target_type, al.target_id, al.details, al.created_at,
-           u.name AS admin_name
+    SELECT al.id, al.action AS action_type, al.target_type, al.target_id,
+           al.details AS description, al.created_at,
+           u.name AS user_name
     FROM admin_logs al
     LEFT JOIN users u ON u.id = al.admin_id
     ORDER BY al.created_at DESC
@@ -56,10 +64,12 @@ $stmt = $pdo->query("
 $pendingReviewList = $stmt->fetchAll();
 
 jsonResponse([
-    'total_users' => $totalUsers,
-    'total_reviews' => $totalReviews,
-    'pending_reviews' => $pendingReviews,
-    'reported_reviews' => $reportedReviews,
+    'stats' => [
+        'total_users' => $totalUsers,
+        'new_today' => $newToday,
+        'active_7d' => $active7d,
+        'total_reviews' => $totalReviews,
+    ],
     'recent_activity' => $recentActivity,
     'pending_reviews_list' => $pendingReviewList,
 ]);
