@@ -26,12 +26,11 @@ import '../screens/admin/admin_reviews_screen.dart';
 /// Creates the [GoRouter] instance for web.
 /// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
 /// to avoid complex parameter passing and keep mobile compatibility.
-GoRouter createAppRouter({Listenable? refreshListenable}) {
+GoRouter createAppRouter(AuthProvider auth) {
   return GoRouter(
     initialLocation: '/browse',
-    refreshListenable: refreshListenable,
+    refreshListenable: auth,
     redirect: (context, state) async {
-      final auth = context.read<AuthProvider>();
       final isAuth = auth.isAuthenticated || auth.isGuest;
       final path = state.matchedLocation;
 
