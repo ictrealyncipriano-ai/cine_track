@@ -96,7 +96,7 @@ class _CineTrackAppState extends State<CineTrackApp> {
           return MaterialApp(
             title: 'CineTrack',
             debugShowCheckedModeBanner: false,
-            theme: AppTheme.dark,
+theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeProvider.themeMode,
             home: Consumer<AuthProvider>(
