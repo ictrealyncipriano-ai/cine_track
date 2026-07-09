@@ -91,6 +91,13 @@ class ApiService {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
+    final contentType = response.headers['content-type'] ?? '';
+    if (!contentType.contains('application/json')) {
+      throw Exception(
+        'Expected JSON but got "${contentType.isEmpty ? 'no content-type' : contentType}" '
+        '(status ${response.statusCode}): ${response.body.length > 500 ? '${response.body.substring(0, 500)}...' : response.body}',
+      );
+    }
     if (response.statusCode >= 400) {
       try {
         final decoded = jsonDecode(response.body);
