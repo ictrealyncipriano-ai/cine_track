@@ -27,11 +27,12 @@ class AuthService extends ChangeNotifier {
 
       try {
         final data = await _api.get('/auth/verify.php');
-        if (data['valid'] == true) {
-          _user = User.fromJson(data['user'] as Map<String, dynamic>);
+        final userData = data['user'];
+        if (data['valid'] == true && userData is Map<String, dynamic>) {
+          _user = User.fromJson(userData);
         } else {
           _user = null;
-          await _api.deleteToken();
+          if (data['valid'] != true) await _api.deleteToken();
         }
       } catch (_) {
         _user = null;
@@ -72,7 +73,7 @@ class AuthService extends ChangeNotifier {
         'device_info': deviceInfo,
       });
       await _api.saveToken(data['token'] as String);
-      _user = User.fromJson(data['user'] as Map<String, dynamic>);
+      _user = User.fromJson(data['user'] is Map<String, dynamic> ? data['user'] as Map<String, dynamic> : <String, dynamic>{});
       return null;
     } catch (e) {
       return e.toString();
@@ -267,7 +268,7 @@ class AuthService extends ChangeNotifier {
         'country': country,
         'marketing_opt_in': marketingOptIn,
       });
-      _user = User.fromJson(data['user'] as Map<String, dynamic>);
+      _user = User.fromJson(data['user'] is Map<String, dynamic> ? data['user'] as Map<String, dynamic> : <String, dynamic>{});
       notifyListeners();
       return null;
     } catch (e) {

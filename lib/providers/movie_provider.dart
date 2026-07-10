@@ -233,7 +233,8 @@ class MovieProvider extends ChangeNotifier {
     final data = await _tmdbService.getMovieCredits(movieId);
     final cast = data['cast'] as List<dynamic>;
     return cast
-        .map((e) => CastMember.fromJson(e as Map<String, dynamic>))
+        .whereType<Map<String, dynamic>>()
+        .map(CastMember.fromJson)
         .toList();
   }
 

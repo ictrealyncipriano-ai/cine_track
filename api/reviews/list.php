@@ -50,6 +50,9 @@ if (!empty($token)) {
         ');
         $userStmt->execute([$movieId, $userId]);
         $userReview = $userStmt->fetch();
+        if ($userReview === false) {
+            $userReview = null;
+        }
     }
 }
 

@@ -83,7 +83,9 @@ class WatchlistProvider extends ChangeNotifier {
       _total = data['total'] as int? ?? list.length;
       _watchlist.clear();
       for (final item in list) {
-        _watchlist.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _watchlist.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _watchlist.length < _total;
     } catch (e) {
@@ -106,7 +108,9 @@ class WatchlistProvider extends ChangeNotifier {
       final list = data['watchlist'] as List<dynamic>;
       _total = data['total'] as int? ?? 0;
       for (final item in list) {
-        _watchlist.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _watchlist.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _watchlist.length < _total;
     } catch (e) {

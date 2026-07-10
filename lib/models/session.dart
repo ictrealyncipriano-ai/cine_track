@@ -31,7 +31,7 @@ class Session {
       lastUsedAt: json['last_used_at'] as String?,
       ipAddress: json['ip_address'] as String? ?? '',
       userAgent: json['user_agent'] as String? ?? '',
-      deviceInfo: json['device_info'] as Map<String, dynamic>?,
+      deviceInfo: json['device_info'] is Map<String, dynamic> ? json['device_info'] as Map<String, dynamic> : null,
       isCurrent: json['is_current'] == true,
       isExpired: json['is_expired'] == true,
       rememberMe: json['remember_me'] == true,

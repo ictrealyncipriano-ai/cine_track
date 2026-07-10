@@ -83,7 +83,9 @@ class FavoritesProvider extends ChangeNotifier {
       _total = data['total'] as int? ?? list.length;
       _favorites.clear();
       for (final item in list) {
-        _favorites.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _favorites.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _favorites.length < _total;
     } catch (e) {
@@ -106,7 +108,9 @@ class FavoritesProvider extends ChangeNotifier {
       final list = data['favorites'] as List<dynamic>;
       _total = data['total'] as int? ?? 0;
       for (final item in list) {
-        _favorites.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _favorites.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _favorites.length < _total;
     } catch (e) {

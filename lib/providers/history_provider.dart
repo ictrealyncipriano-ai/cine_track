@@ -85,7 +85,9 @@ class HistoryProvider extends ChangeNotifier {
       _total = data['total'] as int? ?? list.length;
       _history.clear();
       for (final item in list) {
-        _history.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _history.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _history.length < _total;
     } catch (e) {
@@ -108,7 +110,9 @@ class HistoryProvider extends ChangeNotifier {
       final list = data['history'] as List<dynamic>;
       _total = data['total'] as int? ?? 0;
       for (final item in list) {
-        _history.add(Movie.fromBackendJson(item as Map<String, dynamic>));
+        if (item is Map<String, dynamic>) {
+          _history.add(Movie.fromBackendJson(item));
+        }
       }
       _hasMore = _history.length < _total;
     } catch (e) {

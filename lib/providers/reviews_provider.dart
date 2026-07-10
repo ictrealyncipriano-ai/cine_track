@@ -29,20 +29,21 @@ class ReviewsProvider extends ChangeNotifier {
       final data = await _api.get('/reviews/list.php?movie_id=$movieId');
       final list = data['reviews'] as List<dynamic>;
       _reviews = list
-          .map((e) => Review.fromJson(e as Map<String, dynamic>))
+          .whereType<Map<String, dynamic>>()
+          .map(Review.fromJson)
           .toList();
 
-      final summary = data['summary'] as Map<String, dynamic>?;
-      _averageRating = summary?['average'] != null
-          ? (summary!['average'] as num).toDouble()
+      final summary = data['summary'];
+      final summaryMap = summary is Map<String, dynamic> ? summary : null;
+      _averageRating = summaryMap?['average'] != null
+          ? (summaryMap!['average'] as num).toDouble()
           : null;
-      _totalReviews = summary?['count'] as int? ?? _reviews.length;
+      _totalReviews = summaryMap?['count'] as int? ?? _reviews.length;
 
-      if (data['user_review'] != null) {
-        _userReview = Review.fromJson(data['user_review'] as Map<String, dynamic>);
-      } else {
-        _userReview = null;
-      }
+      final userReviewData = data['user_review'];
+      _userReview = userReviewData is Map<String, dynamic>
+          ? Review.fromJson(userReviewData)
+          : null;
     } catch (e) {
       _error = '$e';
       debugPrint('fetchReviews error: $e');

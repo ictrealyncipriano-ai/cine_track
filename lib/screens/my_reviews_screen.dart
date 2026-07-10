@@ -35,7 +35,7 @@ class _MyReviewsScreenState extends State<MyReviewsScreen> {
       final data = await api.get('/reviews/my.php');
       if (mounted) {
         setState(() {
-          _reviews = (data['reviews'] as List<dynamic>).cast<Map<String, dynamic>>();
+          _reviews = (data['reviews'] as List<dynamic>).whereType<Map<String, dynamic>>().toList();
           _isLoading = false;
         });
       }

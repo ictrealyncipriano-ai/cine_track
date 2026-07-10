@@ -628,9 +628,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       );
     }
 
-    final registrations = analytics['registrations'] as Map<String, dynamic>?;
-    final reviewsPerDay = analytics['reviews_per_day'] as Map<String, dynamic>?;
-    final reviewStatuses = analytics['review_statuses'] as Map<String, dynamic>?;
+    final registrations = analytics['registrations'] is Map<String, dynamic> ? analytics['registrations'] as Map<String, dynamic> : null;
+    final reviewsPerDay = analytics['reviews_per_day'] is Map<String, dynamic> ? analytics['reviews_per_day'] as Map<String, dynamic> : null;
+    final reviewStatuses = analytics['review_statuses'] is Map<String, dynamic> ? analytics['review_statuses'] as Map<String, dynamic> : null;
 
     return Column(
       children: [
