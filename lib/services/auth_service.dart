@@ -159,6 +159,21 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<Map<String, dynamic>> revokeAllSessions() async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final data = await _api.post('/auth/sessions.php', {'action': 'revoke_all'});
+      return data;
+    } catch (e) {
+      return {'error': e.toString()};
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<String?> forgotPassword(String email) async {
     _isLoading = true;
     notifyListeners();

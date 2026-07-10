@@ -96,7 +96,12 @@ function getAuthUserId(): int {
         jsonError('Invalid or expired token', 401);
     }
 
-    return (int) $row['user_id'];
+    $userId = (int) $row['user_id'];
+
+    $updateStmt = $pdo->prepare('UPDATE api_tokens SET last_used_at = NOW() WHERE token = ?');
+    $updateStmt->execute([$token]);
+
+    return $userId;
 }
 
 function checkRateLimit(string $key, int $maxAttempts = 5, int $decayMinutes = 15): void {

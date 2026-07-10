@@ -33,7 +33,7 @@ checkRateLimit("login:$ip", 5, 5);
 checkAccountLockout($email, 3, 5);
 
 $pdo = getDb();
-$stmt = $pdo->prepare('SELECT id, name, email, password, email_verified_at, role FROM users WHERE email = ?');
+$stmt = $pdo->prepare('SELECT id, name, username, email, phone, date_of_birth, country, marketing_opt_in, password, email_verified_at, role, avatar_url FROM users WHERE email = ?');
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
@@ -60,16 +60,23 @@ $token = bin2hex(random_bytes(32));
 $deviceInfo = isset($input['device_info']) ? json_encode($input['device_info']) : null;
 
 $expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 7 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
-$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info) VALUES (?, ?, $expiry, ?, ?, ?)");
-$stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo]);
+$rememberMeInt = $rememberMe ? 1 : 0;
+$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info, remember_me) VALUES (?, ?, $expiry, ?, ?, ?, ?)");
+$stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo, $rememberMeInt]);
 
 jsonResponse([
     'token' => $token,
     'user' => [
         'id' => (int) $user['id'],
         'name' => $user['name'],
+        'username' => $user['username'],
         'email' => $user['email'],
+        'phone' => $user['phone'],
+        'date_of_birth' => $user['date_of_birth'],
+        'country' => $user['country'],
+        'marketing_opt_in' => (bool) $user['marketing_opt_in'],
         'email_verified' => true,
         'role' => $user['role'],
+        'avatar_url' => $user['avatar_url'],
     ],
 ]);

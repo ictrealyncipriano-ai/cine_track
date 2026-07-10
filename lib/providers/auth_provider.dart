@@ -91,6 +91,10 @@ class AuthProvider extends ChangeNotifier {
     return _authService.revokeSession(sessionId);
   }
 
+  Future<Map<String, dynamic>> revokeAllSessions() async {
+    return _authService.revokeAllSessions();
+  }
+
   Future<String?> forgotPassword(String email) async {
     return _authService.forgotPassword(email);
   }
