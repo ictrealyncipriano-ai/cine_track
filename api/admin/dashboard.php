@@ -16,6 +16,8 @@ requireRole($userId, 'admin');
 
 $pdo = getDb();
 
+// ── Stats ────────────────────────────────────────────────────────
+
 // Total users (excl. soft-deleted)
 $stmt = $pdo->query('SELECT COUNT(*) AS cnt FROM users WHERE deleted_at IS NULL');
 $totalUsers = (int) $stmt->fetch()['cnt'];
@@ -23,6 +25,10 @@ $totalUsers = (int) $stmt->fetch()['cnt'];
 // New users today
 $stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM users WHERE deleted_at IS NULL AND DATE(created_at) = CURDATE()");
 $newToday = (int) $stmt->fetch()['cnt'];
+
+// New users this week
+$stmt = $pdo->query("SELECT COUNT(*) AS cnt FROM users WHERE deleted_at IS NULL AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)");
+$newThisWeek = (int) $stmt->fetch()['cnt'];
 
 // Active users in last 7 days (have a review or login)
 $stmt = $pdo->query('
@@ -39,7 +45,88 @@ $active7d = (int) $stmt->fetch()['cnt'];
 $stmt = $pdo->query('SELECT COUNT(*) AS cnt FROM reviews');
 $totalReviews = (int) $stmt->fetch()['cnt'];
 
-// Recent activity (last 20 admin_logs) — column aliases match Dart field names
+// Total movies interacted with (across reviews, favorites, watchlist, history)
+$stmt = $pdo->query('
+    SELECT COUNT(DISTINCT tmdb_id) AS cnt FROM (
+        SELECT tmdb_id FROM reviews
+        UNION
+        SELECT tmdb_id FROM favorites
+        UNION
+        SELECT tmdb_id FROM watchlist
+        UNION
+        SELECT tmdb_id FROM watch_history
+    ) AS all_movies
+');
+$totalMovies = (int) $stmt->fetch()['cnt'];
+
+// Review status breakdown
+$stmt = $pdo->query("
+    SELECT status, COUNT(*) AS cnt
+    FROM reviews
+    GROUP BY status
+");
+$reviewStatuses = [];
+while ($row = $stmt->fetch()) {
+    $reviewStatuses[$row['status']] = (int) $row['cnt'];
+}
+
+// Pending reviews count (for badge)
+$pendingReviewsCount = $reviewStatuses['pending'] ?? 0;
+
+// ── Analytics: Registrations per day (last 14 days) ─────────────
+$stmt = $pdo->query("
+    SELECT DATE(created_at) AS date, COUNT(*) AS cnt
+    FROM users
+    WHERE deleted_at IS NULL AND created_at >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+");
+$registrations = [];
+$regDates = [];
+while ($row = $stmt->fetch()) {
+    $registrations[] = (int) $row['cnt'];
+    $regDates[] = $row['date'];
+}
+
+// ── Analytics: Reviews per day (last 14 days) ───────────────────
+$stmt = $pdo->query("
+    SELECT DATE(created_at) AS date, COUNT(*) AS cnt
+    FROM reviews
+    WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+");
+$reviewsPerDay = [];
+$reviewDates = [];
+while ($row = $stmt->fetch()) {
+    $reviewsPerDay[] = (int) $row['cnt'];
+    $reviewDates[] = $row['date'];
+}
+
+// ── Top movies (by total interactions: reviews + favorites + watchlist) ──
+$stmt = $pdo->query("
+    SELECT tmdb_id, title, poster_path,
+           COUNT(*) AS total_interactions
+    FROM (
+        SELECT tmdb_id, title, poster_path FROM reviews
+        UNION ALL
+        SELECT tmdb_id, '' AS title, '' AS poster_path FROM favorites
+        UNION ALL
+        SELECT tmdb_id, '' AS title, '' AS poster_path FROM watchlist
+    ) AS all_interactions
+    WHERE tmdb_id IS NOT NULL
+    GROUP BY tmdb_id
+    ORDER BY total_interactions DESC
+    LIMIT 5
+");
+$topMovies = $stmt->fetchAll();
+foreach ($topMovies as &$m) {
+    $m['tmdb_id'] = (int) $m['tmdb_id'];
+    $m['total_interactions'] = (int) $m['total_interactions'];
+}
+unset($m);
+
+// ── Recent activity (last 20 admin_logs) ─────────────────────────
 $stmt = $pdo->query('
     SELECT al.id, al.action AS action_type, al.target_type, al.target_id,
            al.details AS description, al.created_at,
@@ -51,7 +138,7 @@ $stmt = $pdo->query('
 ');
 $recentActivity = $stmt->fetchAll();
 
-// Recent reviews needing attention
+// ── Pending reviews list (for dashboard preview) ─────────────────
 $stmt = $pdo->query("
     SELECT r.id, r.rating, r.review_text, r.status, r.created_at,
            u.name AS user_name
@@ -67,9 +154,24 @@ jsonResponse([
     'stats' => [
         'total_users' => $totalUsers,
         'new_today' => $newToday,
+        'new_this_week' => $newThisWeek,
         'active_7d' => $active7d,
         'total_reviews' => $totalReviews,
+        'total_movies' => $totalMovies,
+        'pending_reviews' => $pendingReviewsCount,
     ],
+    'analytics' => [
+        'registrations' => [
+            'dates' => $regDates,
+            'values' => $registrations,
+        ],
+        'reviews_per_day' => [
+            'dates' => $reviewDates,
+            'values' => $reviewsPerDay,
+        ],
+        'review_statuses' => $reviewStatuses,
+    ],
+    'top_movies' => $topMovies,
     'recent_activity' => $recentActivity,
     'pending_reviews_list' => $pendingReviewList,
 ]);

@@ -22,6 +22,9 @@ import '../screens/auth/verification_sent_screen.dart';
 import '../screens/admin/admin_dashboard_screen.dart';
 import '../screens/admin/admin_users_screen.dart';
 import '../screens/admin/admin_reviews_screen.dart';
+import '../screens/admin/admin_settings_screen.dart';
+import '../screens/admin/admin_activity_screen.dart';
+import '../screens/admin/admin_movies_screen.dart';
 
 /// Creates the [GoRouter] instance for web.
 /// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
@@ -127,6 +130,9 @@ GoRouter createAppRouter(AuthProvider auth) {
           GoRoute(path: '/admin', builder: (_, _) => const AdminDashboardScreen()),
           GoRoute(path: '/admin/users', builder: (_, _) => const AdminUsersScreen()),
           GoRoute(path: '/admin/reviews', builder: (_, _) => const AdminReviewsScreen()),
+          GoRoute(path: '/admin/settings', builder: (_, _) => const AdminSettingsScreen()),
+          GoRoute(path: '/admin/activity', builder: (_, _) => const AdminActivityScreen()),
+          GoRoute(path: '/admin/movies', builder: (_, _) => const AdminMoviesScreen()),
         ],
       ),
     ],

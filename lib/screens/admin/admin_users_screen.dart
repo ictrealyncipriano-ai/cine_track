@@ -259,6 +259,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   Widget _buildActions(Map<String, dynamic> user, BuildContext context) {
     final userId = user['id'] as int;
+    final isBanned = user['banned_at'] != null;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -273,7 +274,10 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           itemBuilder: (_) => [
             const PopupMenuItem(value: 'promote', child: Text('Promote to Admin')),
             const PopupMenuItem(value: 'demote', child: Text('Demote to User')),
-            const PopupMenuItem(value: 'ban', child: Text('Ban User')),
+            if (isBanned)
+              const PopupMenuItem(value: 'unban', child: Text('Unban User'))
+            else
+              const PopupMenuItem(value: 'ban', child: Text('Ban User')),
             const PopupMenuItem(value: 'delete', child: Text('Delete Account')),
           ],
         ),
@@ -306,6 +310,13 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           if (confirm == true) {
             await admin.toggleBanUser(userId, true);
             if (context.mounted) _showSnack(context, 'User banned');
+          }
+          break;
+        case 'unban':
+          final confirm = await _confirmDialog(context, 'Unban this user?');
+          if (confirm == true) {
+            await admin.toggleBanUser(userId, false);
+            if (context.mounted) _showSnack(context, 'User unbanned');
           }
           break;
         case 'delete':
@@ -369,6 +380,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               _detailRow(theme, 'Email', user['email'] as String? ?? ''),
               _detailRow(theme, 'Role', role.toUpperCase()),
               _detailRow(theme, 'Email Verified', user['email_verified'] == true ? 'Yes' : 'No'),
+              _detailRow(theme, 'Status', user['banned_at'] != null ? '⚠ Banned' : 'Active'),
               _detailRow(theme, 'Phone', user['phone'] as String? ?? '—'),
               _detailRow(theme, 'Country', user['country'] as String? ?? '—'),
               _detailRow(theme, 'Joined', _relativeDate(user['created_at'] as String?)),

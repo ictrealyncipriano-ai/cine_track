@@ -68,6 +68,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         // ── Two-column (desktop) or stacked (mobile) sections ──
         _buildMiddleSection(admin, isDesk, padding),
         SizedBox(height: isDesk ? 32 : 28),
+        // ── Analytics & Top Movies ──
+        _buildAnalyticsSection(admin, isDesk, padding),
+        SizedBox(height: isDesk ? 32 : 28),
         // ── Quick Actions ──
         Padding(
           padding: EdgeInsets.symmetric(horizontal: padding),
@@ -416,10 +419,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 color: theme.colorScheme.onSurface,
               ),
             ),
-            if (activity.length >= 20) ...[
+            if (activity.isNotEmpty) ...[
               const Spacer(),
               TextButton(
-                onPressed: () {},
+                onPressed: () => context.go('/admin/activity'),
                 style: TextButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   minimumSize: Size.zero,
@@ -471,6 +474,435 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   }
 
   // ────────────────────────────────────────────────────────────────
+  // Analytics & Top Movies Section
+  // ────────────────────────────────────────────────────────────────
+
+  Widget _buildAnalyticsSection(AdminProvider admin, bool isDesk, double padding) {
+    final theme = Theme.of(context);
+    final analytics = admin.analytics;
+    final topMovies = admin.topMovies;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: padding),
+      child: isDesk
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  flex: 6,
+                  child: _buildRegistrationChart(theme, analytics),
+                ),
+                const SizedBox(width: 20),
+                Expanded(
+                  flex: 5,
+                  child: _buildTopMoviesCard(theme, topMovies),
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                _buildRegistrationChart(theme, analytics),
+                const SizedBox(height: 24),
+                _buildTopMoviesCard(theme, topMovies),
+              ],
+            ),
+    );
+  }
+
+  // ── Bar Chart ──────────────────────────────────────────────────
+
+  Widget _buildBarChart(ThemeData theme, {
+    required String title,
+    required List<dynamic> values,
+    required List<dynamic> dates,
+    required Color barColor,
+  }) {
+    if (values.isEmpty) {
+      return _buildEmptyBox(
+        icon: Icons.bar_chart_outlined,
+        message: 'No data yet',
+        subtitle: 'Data will appear as users interact.',
+      );
+    }
+
+    final maxVal = values.cast<num>().fold<num>(0, (a, b) => a > b ? a : b);
+    final maxBarHeight = 120.0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: barColor,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                title,
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: maxBarHeight + 28,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: List.generate(values.length.clamp(0, 14), (i) {
+                final val = values[i] is num ? (values[i] as num).toDouble() : 0.0;
+                final barH = maxVal > 0 ? (val / maxVal) * maxBarHeight : 0.0;
+                final dateStr = dates.length > i ? dates[i].toString() : '';
+                final dayLabel = dateStr.length >= 10 ? dateStr.substring(5) : dateStr;
+
+                return Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 1),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        if (val > 0)
+                          Text(
+                            val.toInt().toString(),
+                            style: GoogleFonts.inter(
+                              fontSize: 9,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.45),
+                            ),
+                          ),
+                        const SizedBox(height: 2),
+                        Container(
+                          height: barH.clamp(0, maxBarHeight),
+                          decoration: BoxDecoration(
+                            color: barColor.withValues(alpha: 0.7),
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(3),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          dayLabel,
+                          style: GoogleFonts.inter(
+                            fontSize: 7.5,
+                            color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Registration Trend Chart ──────────────────────────────────
+
+  Widget _buildRegistrationChart(ThemeData theme, Map<String, dynamic>? analytics) {
+    if (analytics == null) {
+      return _buildEmptyBox(
+        icon: Icons.bar_chart_outlined,
+        message: 'Analytics loading...',
+        subtitle: 'Charts will appear here.',
+      );
+    }
+
+    final registrations = analytics['registrations'] as Map<String, dynamic>?;
+    final reviewsPerDay = analytics['reviews_per_day'] as Map<String, dynamic>?;
+    final reviewStatuses = analytics['review_statuses'] as Map<String, dynamic>?;
+
+    return Column(
+      children: [
+        _buildBarChart(
+          theme,
+          title: 'New Registrations (14 days)',
+          values: registrations?['values'] as List<dynamic>? ?? [],
+          dates: registrations?['dates'] as List<dynamic>? ?? [],
+          barColor: Colors.green,
+        ),
+        const SizedBox(height: 16),
+        _buildBarChart(
+          theme,
+          title: 'Reviews Per Day (14 days)',
+          values: reviewsPerDay?['values'] as List<dynamic>? ?? [],
+          dates: reviewsPerDay?['dates'] as List<dynamic>? ?? [],
+          barColor: Colors.amber,
+        ),
+        if (reviewStatuses != null && reviewStatuses.isNotEmpty) ...[
+          const SizedBox(height: 16),
+          _buildReviewStatusPie(theme, reviewStatuses),
+        ],
+      ],
+    );
+  }
+
+  // ── Review Status Breakdown ───────────────────────────────────
+
+  Widget _buildReviewStatusPie(ThemeData theme, Map<String, dynamic> statuses) {
+    final total = statuses.values.fold<int>(0, (a, b) => a + (b as int));
+    if (total == 0) return const SizedBox.shrink();
+
+    final statusColors = <String, Color>{
+      'pending': Colors.orange,
+      'approved': Colors.green,
+      'rejected': Colors.red,
+      'reported': Colors.purple,
+    };
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                'Review Status Breakdown',
+                style: GoogleFonts.inter(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Simple stacked bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(6),
+            child: SizedBox(
+              height: 24,
+              child: Row(
+                children: statuses.entries.map((e) {
+                  final pct = (e.value as int) / total;
+                  return Expanded(
+                    flex: (pct * 100).round().clamp(1, 100),
+                    child: Container(
+                      color: statusColors[e.key] ?? Colors.grey,
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 8,
+            children: statuses.entries.map((e) {
+              final pct = total > 0 ? ((e.value as int) / total * 100).toStringAsFixed(0) : '0';
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: statusColors[e.key] ?? Colors.grey,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    '${e.key}: ${e.value} ($pct%)',
+                    style: GoogleFonts.inter(
+                      fontSize: 11,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+                    ),
+                  ),
+                ],
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Top Movies ────────────────────────────────────────────────
+
+  Widget _buildTopMoviesCard(ThemeData theme, List<Map<String, dynamic>> topMovies) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade700,
+                  borderRadius: BorderRadius.circular(3),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Icon(Icons.movie_outlined, size: 18, color: Colors.amber.shade700),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Top Movies',
+                  style: GoogleFonts.inter(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              TextButton(
+                onPressed: () => context.go('/admin/movies'),
+                style: TextButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: Text(
+                  'View All',
+                  style: GoogleFonts.inter(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (topMovies.isEmpty)
+            _buildMiniEmptyBox(theme)
+          else
+            ...topMovies.take(5).map((m) {
+              final title = m['title'] as String? ?? 'Unknown';
+              final interactions = m['total_interactions'] ?? 0;
+              final posterPath = m['poster_path'] as String?;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Row(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: posterPath != null && posterPath.isNotEmpty
+                          ? Image.network(
+                              'https://image.tmdb.org/t/p/w92$posterPath',
+                              width: 36,
+                              height: 54,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => Container(
+                                width: 36, height: 54,
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                                child: Icon(Icons.movie, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                              ),
+                            )
+                          : Container(
+                              width: 36, height: 54,
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
+                              child: Icon(Icons.movie, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),
+                            ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.inter(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: Colors.amber.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      child: Text(
+                        '$interactions',
+                        style: GoogleFonts.inter(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.amber.shade700,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniEmptyBox(ThemeData theme) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Column(
+        children: [
+          Icon(Icons.movie_outlined, size: 28,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.12)),
+          const SizedBox(height: 8),
+          Text(
+            'No movie data yet',
+            style: GoogleFonts.inter(
+              fontSize: 12,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ────────────────────────────────────────────────────────────────
   // Quick Actions
   // ────────────────────────────────────────────────────────────────
 
@@ -495,7 +927,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         label: 'Settings',
         subtitle: 'Configure application settings',
         color: Colors.blue,
-        route: null,
+        route: '/admin/settings',
       ),
     ];
 
