@@ -11,11 +11,13 @@ class AdminProvider extends ChangeNotifier {
   // ── Dashboard ──────────────────────────────────────────────────
   Map<String, dynamic>? _dashboardStats;
   List<Map<String, dynamic>> _recentActivity = [];
+  List<Map<String, dynamic>> _pendingReviewsList = [];
   bool _isLoadingDashboard = false;
   String? _dashboardError;
 
   Map<String, dynamic>? get dashboardStats => _dashboardStats;
   List<Map<String, dynamic>> get recentActivity => _recentActivity;
+  List<Map<String, dynamic>> get pendingReviewsList => _pendingReviewsList;
   bool get isLoadingDashboard => _isLoadingDashboard;
   String? get dashboardError => _dashboardError;
 
@@ -27,6 +29,7 @@ class AdminProvider extends ChangeNotifier {
       final data = await _api.get('admin/dashboard.php');
       _dashboardStats = Map<String, dynamic>.from(data['stats'] ?? {});
       _recentActivity = List<Map<String, dynamic>>.from(data['recent_activity'] ?? []);
+      _pendingReviewsList = List<Map<String, dynamic>>.from(data['pending_reviews_list'] ?? []);
     } catch (e) {
       _dashboardError = e.toString();
     }

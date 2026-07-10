@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// A single row in the admin activity feed.
+/// A single row in the admin activity feed with a cleaner, more modern design.
 class AdminActivityTile extends StatelessWidget {
   final String userName;
   final String? userAvatar;
@@ -20,33 +20,18 @@ class AdminActivityTile extends StatelessWidget {
     required this.createdAt,
   });
 
-  IconData _iconForAction() {
+  (IconData, Color) _actionMeta(ThemeData theme) {
     switch (actionType) {
       case 'favorite':
-        return Icons.favorite;
+        return (Icons.favorite, Colors.red);
       case 'watch':
-        return Icons.visibility;
+        return (Icons.visibility, theme.colorScheme.primary);
       case 'review':
-        return Icons.rate_review;
+        return (Icons.rate_review, Colors.amber);
       case 'watchlist':
-        return Icons.bookmark;
+        return (Icons.bookmark, Colors.blue);
       default:
-        return Icons.circle;
-    }
-  }
-
-  Color _colorForAction(ThemeData theme) {
-    switch (actionType) {
-      case 'favorite':
-        return Colors.red;
-      case 'watch':
-        return theme.colorScheme.primary;
-      case 'review':
-        return Colors.amber;
-      case 'watchlist':
-        return Colors.blue;
-      default:
-        return theme.colorScheme.onSurface.withValues(alpha: 0.38);
+        return (Icons.circle, theme.colorScheme.onSurface.withValues(alpha: 0.3));
     }
   }
 
@@ -67,45 +52,82 @@ class AdminActivityTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final actionColor = _colorForAction(theme);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+    final (icon, color) = _actionMeta(theme);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
+          ),
+        ),
+      ),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 18,
-            backgroundColor: actionColor.withValues(alpha: 0.15),
-            child: Icon(_iconForAction(), size: 16, color: actionColor),
+          // Action icon
+          Container(
+            width: 34,
+            height: 34,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.12),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 15, color: color),
           ),
           const SizedBox(width: 12),
+          // Text content
           Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: GoogleFonts.inter(
-                  fontSize: 14,
-                  color: theme.colorScheme.onSurface.withValues(alpha: 0.87),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.inter(
+                      fontSize: 13.5,
+                      height: 1.35,
+                      color: theme.colorScheme.onSurface.withValues(alpha: 0.85),
+                    ),
+                    children: [
+                      TextSpan(
+                        text: userName,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                      TextSpan(
+                        text: ' $description',
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                children: [
-                  TextSpan(
-                    text: userName,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                if (movieTitle != null && movieTitle!.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Text(
+                      movieTitle!,
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: theme.colorScheme.primary.withValues(alpha: 0.8),
+                      ),
+                    ),
                   ),
-                  TextSpan(
-                    text: ' $description',
-                    style: TextStyle(color: theme.colorScheme.onSurface.withValues(alpha: 0.6)),
-                  ),
-                ],
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+              ],
             ),
           ),
           const SizedBox(width: 8),
+          // Time
           Text(
             _relativeTime(),
             style: GoogleFonts.inter(
-              fontSize: 12,
-              color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
+              fontSize: 11.5,
+              fontWeight: FontWeight.w500,
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.35),
             ),
           ),
         ],
