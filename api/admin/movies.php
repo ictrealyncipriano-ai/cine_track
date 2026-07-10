@@ -26,75 +26,71 @@ $allowedSortBy = ['interactions', 'reviews', 'favorites', 'title', 'last_interac
 if (!in_array($sortBy, $allowedSortBy)) $sortBy = 'interactions';
 if (!in_array($sortOrder, ['ASC', 'DESC'])) $sortOrder = 'DESC';
 
-// Aggregate all movie interactions from reviews, favorites, watchlist, history
-$where = ['1=1'];
-$params = [];
-
-if (!empty($search)) {
-    $where[] = 'm.title LIKE ?';
-    $params[] = "%{$search}%";
-}
-
-$whereClause = implode(' AND ', $where);
-
 // Count total distinct movies
-$stmt = $pdo->prepare("
+$stmt = $pdo->query('
     SELECT COUNT(*) AS cnt FROM (
-        SELECT tmdb_id FROM reviews
+        SELECT movie_id FROM reviews
         UNION
-        SELECT tmdb_id FROM favorites
+        SELECT movie_id FROM favorites
         UNION
-        SELECT tmdb_id FROM watchlist
+        SELECT movie_id FROM watchlist
         UNION
-        SELECT tmdb_id FROM watch_history
+        SELECT movie_id FROM watch_history
     ) AS all_movies
-    WHERE tmdb_id IS NOT NULL
-");
-$stmt->execute();
+    WHERE movie_id IS NOT NULL
+');
 $total = (int) $stmt->fetch()['cnt'];
 
-// Get movie stats
-$orderField = match ($sortBy) {
-    'reviews' => 'review_count',
-    'favorites' => 'favorite_count',
-    'title' => 'title',
-    'last_interaction' => 'last_interaction',
-    default => 'total_interactions',
-};
+// Map sort field
+$orderField = 'total_interactions';
+if ($sortBy === 'reviews') $orderField = 'review_count';
+elseif ($sortBy === 'favorites') $orderField = 'favorite_count';
+elseif ($sortBy === 'title') $orderField = 'title';
+elseif ($sortBy === 'last_interaction') $orderField = 'last_interaction';
 
+// Get movie stats
+$offset = ($page - 1) * $perPage;
 $stmt = $pdo->prepare("
     SELECT
-        m.tmdb_id,
-        MAX(COALESCE(m.title, '')) AS title,
-        MAX(COALESCE(m.poster_path, '')) AS poster_path,
+        m.movie_id,
+        MAX(COALESCE(m.movie_title, '')) AS title,
+        MAX(COALESCE(m.movie_poster, '')) AS poster_path,
         COUNT(DISTINCT m.review_id) AS review_count,
         COUNT(DISTINCT m.favorite_id) AS favorite_count,
         COUNT(DISTINCT m.watchlist_id) AS watchlist_count,
         COUNT(*) AS total_interactions,
         MAX(m.last_date) AS last_interaction
     FROM (
-        SELECT r.tmdb_id, r.title, r.poster_path, r.id AS review_id, NULL AS favorite_id, NULL AS watchlist_id, r.created_at AS last_date
+        SELECT r.movie_id, NULL AS movie_title, NULL AS movie_poster, r.id AS review_id, NULL AS favorite_id, NULL AS watchlist_id, r.created_at AS last_date
         FROM reviews r
         UNION ALL
-        SELECT f.tmdb_id, f.title, f.poster_path, NULL, f.id, NULL, f.created_at
+        SELECT f.movie_id, f.title, f.poster_path, NULL, f.id, NULL, f.created_at
         FROM favorites f
         UNION ALL
-        SELECT w.tmdb_id, w.title, w.poster_path, NULL, NULL, w.id, w.created_at
+        SELECT w.movie_id, w.title, w.poster_path, NULL, NULL, w.id, w.created_at
         FROM watchlist w
     ) AS m
-    WHERE m.tmdb_id IS NOT NULL
-    GROUP BY m.tmdb_id
-    HAVING {$whereClause}
+    WHERE m.movie_id IS NOT NULL
+    GROUP BY m.movie_id
     ORDER BY {$orderField} {$sortOrder}
     LIMIT ? OFFSET ?
 ");
-$offset = ($page - 1) * $perPage;
-$executeParams = array_merge($params, [$perPage, $offset]);
-$stmt->execute($executeParams);
+$stmt->execute([$perPage, $offset]);
 $movies = $stmt->fetchAll();
 
+// Apply search filter in PHP (since HAVING on COALESCE/MAX is tricky)
+if (!empty($search)) {
+    $searchLower = strtolower($search);
+    $movies = array_filter($movies, function ($m) use ($searchLower) {
+        return str_contains(strtolower($m['title'] ?? ''), $searchLower);
+    });
+    $total = count($movies);
+    // Re-slice after filtering
+    $movies = array_slice(array_values($movies), 0, $perPage);
+}
+
 foreach ($movies as &$m) {
-    $m['tmdb_id'] = (int) $m['tmdb_id'];
+    $m['movie_id'] = (int) $m['movie_id'];
     $m['review_count'] = (int) $m['review_count'];
     $m['favorite_count'] = (int) $m['favorite_count'];
     $m['watchlist_count'] = (int) $m['watchlist_count'];

@@ -47,14 +47,14 @@ $totalReviews = (int) $stmt->fetch()['cnt'];
 
 // Total movies interacted with (across reviews, favorites, watchlist, history)
 $stmt = $pdo->query('
-    SELECT COUNT(DISTINCT tmdb_id) AS cnt FROM (
-        SELECT tmdb_id FROM reviews
+    SELECT COUNT(DISTINCT movie_id) AS cnt FROM (
+        SELECT movie_id FROM reviews
         UNION
-        SELECT tmdb_id FROM favorites
+        SELECT movie_id FROM favorites
         UNION
-        SELECT tmdb_id FROM watchlist
+        SELECT movie_id FROM watchlist
         UNION
-        SELECT tmdb_id FROM watch_history
+        SELECT movie_id FROM watch_history
     ) AS all_movies
 ');
 $totalMovies = (int) $stmt->fetch()['cnt'];
@@ -105,23 +105,25 @@ while ($row = $stmt->fetch()) {
 
 // ── Top movies (by total interactions: reviews + favorites + watchlist) ──
 $stmt = $pdo->query("
-    SELECT tmdb_id, title, poster_path,
+    SELECT movie_id,
+           MAX(title) AS title,
+           MAX(poster_path) AS poster_path,
            COUNT(*) AS total_interactions
     FROM (
-        SELECT tmdb_id, title, poster_path FROM reviews
+        SELECT movie_id, NULL AS title, NULL AS poster_path FROM reviews
         UNION ALL
-        SELECT tmdb_id, '' AS title, '' AS poster_path FROM favorites
+        SELECT movie_id, title, poster_path FROM favorites
         UNION ALL
-        SELECT tmdb_id, '' AS title, '' AS poster_path FROM watchlist
+        SELECT movie_id, title, poster_path FROM watchlist
     ) AS all_interactions
-    WHERE tmdb_id IS NOT NULL
-    GROUP BY tmdb_id
+    WHERE movie_id IS NOT NULL
+    GROUP BY movie_id
     ORDER BY total_interactions DESC
     LIMIT 5
 ");
 $topMovies = $stmt->fetchAll();
 foreach ($topMovies as &$m) {
-    $m['tmdb_id'] = (int) $m['tmdb_id'];
+    $m['movie_id'] = (int) $m['movie_id'];
     $m['total_interactions'] = (int) $m['total_interactions'];
 }
 unset($m);
