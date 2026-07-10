@@ -1,12 +1,12 @@
 {
-    "name": "CineTrack",
-    "short_name": "CineTrack",
+    "name": "cine_track",
+    "short_name": "cine_track",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0D1117",
-    "theme_color": "#FFC107",
-    "description": "Track movies, build watchlists, and discover new favorites.",
-    "orientation": "any",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "A new Flutter project.",
+    "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
         {

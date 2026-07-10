@@ -11,12 +11,7 @@ plugins {
 android {
     namespace = "com.example.cine_track"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "28.2.13676358"
-    externalNativeBuild {
-        cmake {
-            version = "3.31.6"
-        }
-    }
+    ndkVersion = "27.0.12077973"
     setProperty("archivesBaseName", "cine_track")
 
     compileOptions {
@@ -63,3 +58,4 @@ android {
 flutter {
     source = "../.."
 }
+

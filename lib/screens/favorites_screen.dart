@@ -149,8 +149,8 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 ),
               ),
             if (fp.isLoading)
-              const SliverFillRemaining(
-                child: MovieGridShimmer(crossAxisCount: 3),
+              SliverFillRemaining(
+                child: MovieGridShimmer(crossAxisCount: Responsive.movieGridColumns(context)),
               )
             else if (favorites.isEmpty)
               SliverFillRemaining(

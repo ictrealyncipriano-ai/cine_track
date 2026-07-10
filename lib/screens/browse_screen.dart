@@ -256,8 +256,8 @@ class _BrowseScreenState extends State<BrowseScreen> {
 
   Widget _buildGenreGrid(MovieProvider mp) {
     if (mp.isLoading && mp.genreMovies.isEmpty) {
-      return const SliverFillRemaining(
-        child: MovieGridShimmer(crossAxisCount: 3),
+      return SliverFillRemaining(
+        child: MovieGridShimmer(crossAxisCount: Responsive.movieGridColumns(context)),
       );
     }
 

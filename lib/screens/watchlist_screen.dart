@@ -148,8 +148,8 @@ class _WatchlistScreenState extends State<WatchlistScreen> {
                 ),
               ),
             if (wp.isLoading)
-              const SliverFillRemaining(
-                child: MovieGridShimmer(crossAxisCount: 3),
+              SliverFillRemaining(
+                child: MovieGridShimmer(crossAxisCount: Responsive.movieGridColumns(context)),
               )
             else if (watchlist.isEmpty)
               SliverFillRemaining(
