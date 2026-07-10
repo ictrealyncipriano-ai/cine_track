@@ -124,9 +124,9 @@ GoRouter createAppRouter(AuthProvider auth) {
           GoRoute(path: '/watchlist', builder: (_, _) => const WatchlistScreen()),
           GoRoute(path: '/profile', builder: (_, _) => const ProfileScreen()),
           // Admin routes (inside shell, keeps nav visible)
-          GoRoute(path: '/admin', builder: (_, __) => const AdminDashboardScreen()),
-          GoRoute(path: '/admin/users', builder: (_, __) => const AdminUsersScreen()),
-          GoRoute(path: '/admin/reviews', builder: (_, __) => const AdminReviewsScreen()),
+          GoRoute(path: '/admin', builder: (_, _) => const AdminDashboardScreen()),
+          GoRoute(path: '/admin/users', builder: (_, _) => const AdminUsersScreen()),
+          GoRoute(path: '/admin/reviews', builder: (_, _) => const AdminReviewsScreen()),
         ],
       ),
     ],
