@@ -26,7 +26,7 @@ class AdminProvider extends ChangeNotifier {
     _dashboardError = null;
     notifyListeners();
     try {
-      final data = await _api.get('admin/dashboard.php');
+      final data = await _api.get('/admin/dashboard.php');
       _dashboardStats = Map<String, dynamic>.from(data['stats'] ?? {});
       _recentActivity = List<Map<String, dynamic>>.from(data['recent_activity'] ?? []);
       _pendingReviewsList = List<Map<String, dynamic>>.from(data['pending_reviews_list'] ?? []);
@@ -71,7 +71,7 @@ class AdminProvider extends ChangeNotifier {
       if (search != null && search.isNotEmpty) q['search'] = search;
       if (role != null && role.isNotEmpty) q['role'] = role;
       final qs = q.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
-      final data = await _api.get('admin/users.php?$qs');
+      final data = await _api.get('/admin/users.php?$qs');
       _users = List<Map<String, dynamic>>.from(data['users'] ?? []);
       _totalUsers = data['total'] as int? ?? 0;
     } catch (e) {
@@ -82,7 +82,7 @@ class AdminProvider extends ChangeNotifier {
   }
 
   Future<void> updateUserRole(int userId, String newRole) async {
-    await _api.post('admin/users/update_role.php', {
+    await _api.post('/admin/users/update_role.php', {
       'user_id': userId.toString(),
       'role': newRole,
     });
@@ -90,7 +90,7 @@ class AdminProvider extends ChangeNotifier {
   }
 
   Future<void> toggleBanUser(int userId, bool banned) async {
-    await _api.post('admin/users/toggle_ban.php', {
+    await _api.post('/admin/users/toggle_ban.php', {
       'user_id': userId.toString(),
       'banned': banned.toString(),
     });
@@ -98,7 +98,7 @@ class AdminProvider extends ChangeNotifier {
   }
 
   Future<void> deleteUser(int userId) async {
-    await _api.post('admin/users/delete.php', {
+    await _api.post('/admin/users/delete.php', {
       'user_id': userId.toString(),
     });
     await fetchUsers(page: _usersPage);
@@ -132,7 +132,7 @@ class AdminProvider extends ChangeNotifier {
         'status': status,
       };
       final qs = q.entries.map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}').join('&');
-      final data = await _api.get('admin/reviews.php?$qs');
+      final data = await _api.get('/admin/reviews.php?$qs');
       _reviews = List<Map<String, dynamic>>.from(data['reviews'] ?? []);
       _totalReviews = data['total'] as int? ?? 0;
     } catch (e) {
@@ -143,7 +143,7 @@ class AdminProvider extends ChangeNotifier {
   }
 
   Future<void> moderateReview(int reviewId, String action, {String? note}) async {
-    await _api.post('admin/reviews/moderate.php', {
+    await _api.post('/admin/reviews/moderate.php', {
       'review_id': reviewId.toString(),
       'action': action,
       'moderation_note': ?note,
@@ -152,7 +152,7 @@ class AdminProvider extends ChangeNotifier {
   }
 
   Future<void> deleteReview(int reviewId) async {
-    await _api.post('admin/reviews/delete.php', {
+    await _api.post('/admin/reviews/delete.php', {
       'review_id': reviewId.toString(),
     });
     await fetchReviews(status: _reviewFilter, page: _reviewsPage);
