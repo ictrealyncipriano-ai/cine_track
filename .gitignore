@@ -60,4 +60,5 @@ logs/
 api/cache/
 # Build logs
 *.log.txt
+ninja_*.txt
 .vercel
