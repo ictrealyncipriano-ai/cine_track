@@ -18,6 +18,8 @@ if (isBanned($userId)) {
     jsonError('Your account has been suspended', 403);
 }
 
+checkAndIncrementRateLimit("review_report:$userId", 10, 5);
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (empty($input['review_id'])) {
@@ -51,15 +53,16 @@ if ((int) $review['user_id'] === $userId) {
     jsonError('Cannot report your own review', 403);
 }
 
-// Check if already reported by this user
-$stmt = $pdo->prepare('SELECT id FROM review_reports WHERE review_id = ? AND reported_by = ?');
-$stmt->execute([$reviewId, $userId]);
-if ($stmt->fetch()) {
-    jsonError('You have already reported this review', 409);
-}
-
 $pdo->beginTransaction();
 try {
+    // Check if already reported by this user (inside transaction to prevent race)
+    $stmt = $pdo->prepare('SELECT id FROM review_reports WHERE review_id = ? AND reported_by = ? FOR UPDATE');
+    $stmt->execute([$reviewId, $userId]);
+    if ($stmt->fetch()) {
+        $pdo->rollBack();
+        jsonError('You have already reported this review', 409);
+    }
+
     $stmt = $pdo->prepare('INSERT INTO review_reports (review_id, reported_by, reason) VALUES (?, ?, ?)');
     $stmt->execute([$reviewId, $userId, $reason]);
 

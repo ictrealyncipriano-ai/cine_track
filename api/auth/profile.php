@@ -129,6 +129,7 @@ if ($action === 'update_profile') {
             $mail->AltBody = "Your verification code: {$verificationCode}\n\nOr click: {$verifyLink}\n\nThis code expires in 10 minutes.";
             $mail->send();
         } catch (Exception $e) {
+            $emailVerificationFailed = true;
         }
     }
 
@@ -136,7 +137,7 @@ if ($action === 'update_profile') {
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
 
-    jsonResponse([
+    $response = [
         'user' => [
             'id' => (int) $user['id'],
             'name' => $user['name'],
@@ -149,8 +150,12 @@ if ($action === 'update_profile') {
             'email_verified' => $user['email_verified_at'] !== null,
             'avatar_url' => $user['avatar_url'],
         ],
-    ]);
-}
+    ];
+    if (!empty($emailVerificationFailed)) {
+        $response['email_verification_failed'] = true;
+    }
+    jsonResponse($response);
+
 
 if ($action === 'change_password') {
     $currentPassword = $input['current_password'] ?? '';

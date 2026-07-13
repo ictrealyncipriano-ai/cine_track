@@ -80,9 +80,9 @@ Provider<ApiService>.value(value: apiService),
         ChangeNotifierProvider(create: (_) => AdminProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (ctx, themeProvider, __) {
+        builder: (_, themeProvider, _) {
           if (kIsWeb) {
-            final auth = ctx.read<AuthProvider>();
+            final auth = context.read<AuthProvider>();
             _router ??= createAppRouter(auth);
             return MaterialApp.router(
               title: 'CineTrack',
@@ -101,7 +101,7 @@ theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeProvider.themeMode,
             home: Consumer<AuthProvider>(
-              builder: (_, auth, __) {
+              builder: (_, auth, _) {
                 if (auth.isLoading) {
                   return const _SplashScreen();
                 }

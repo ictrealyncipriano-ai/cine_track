@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import '../models/movie.dart';
 import '../providers/movie_provider.dart';
 import '../providers/history_provider.dart';
+import '../providers/home_content_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/error_retry.dart';
 import 'movie_details_screen.dart';
@@ -28,6 +29,7 @@ class _BrowseScreenState extends State<BrowseScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final mp = context.read<MovieProvider>();
       mp.fetchGenres();
+      context.read<HomeContentProvider>().fetchHomeContent();
       if (mp.trending.isEmpty) {
         _onRefresh();
       }
@@ -109,6 +111,10 @@ class _BrowseScreenState extends State<BrowseScreen> {
                   ),
                 ),
               ),
+            // Banners carousel
+            _buildBannersSliver(context),
+            // Featured movies
+            _buildFeaturedMoviesSliver(context),
             if (recentlyWatched.isNotEmpty)
               SliverToBoxAdapter(
                 child: Column(
@@ -404,6 +410,153 @@ class _BrowseScreenState extends State<BrowseScreen> {
                 },
               ),
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBannersSliver(BuildContext context) {
+    final hc = context.watch<HomeContentProvider>();
+    final banners = hc.banners;
+    if (banners.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    return SliverToBoxAdapter(
+      child: SizedBox(
+        height: 180,
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          itemCount: banners.length,
+          itemBuilder: (_, i) {
+            final b = banners[i];
+            return Container(
+              width: 320,
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                image: DecorationImage(
+                  image: NetworkImage(b.imageUrl),
+                  fit: BoxFit.cover,
+                  onError: (_, _) {},
+                ),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: b.linkUrl != null ? () {} : null,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.center,
+                        colors: [Colors.black.withValues(alpha: 0.7), Colors.transparent],
+                      ),
+                    ),
+                    alignment: Alignment.bottomLeft,
+                    padding: const EdgeInsets.all(12),
+                    child: Text(
+                      b.title,
+                      style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedMoviesSliver(BuildContext context) {
+    final hc = context.watch<HomeContentProvider>();
+    final movies = hc.featuredMovies;
+    if (movies.isEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
+    return SliverToBoxAdapter(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            child: Row(
+              children: [
+                Icon(Icons.star, size: 18, color: Colors.amber),
+                const SizedBox(width: 6),
+                Text(
+                  'Featured Movies',
+                  style: GoogleFonts.inter(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Theme.of(context).colorScheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 180,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: movies.length,
+              itemBuilder: (_, i) {
+                final m = movies[i];
+                final posterPath = m['poster_path'] as String?;
+                final title = m['title'] as String? ?? '';
+                return GestureDetector(
+                  onTap: () {
+                    final tmdbId = m['tmdb_id'] is int ? m['tmdb_id'] : int.tryParse(m['tmdb_id']?.toString() ?? '') ?? 0;
+                    if (tmdbId > 0) {
+                        Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => MovieDetailsScreen(movie: Movie(
+                            id: tmdbId,
+                            title: title,
+                            overview: m['overview'] as String? ?? '',
+                            releaseDate: m['release_date'] as String? ?? '',
+                            voteAverage: (m['vote_average'] as num?)?.toDouble() ?? 0.0,
+                            posterPath: posterPath,
+                          )),
+                        ),
+                      );
+                    }
+                  },
+                  child: Container(
+                    width: 110,
+                    margin: const EdgeInsets.only(right: 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: posterPath != null && posterPath.isNotEmpty
+                                ? CachedNetworkImage(
+                                    imageUrl: 'https://image.tmdb.org/t/p/w185$posterPath',
+                                    width: 110,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, _) => Container(color: Theme.of(context).cardColor),
+                                    errorWidget: (_, _, _) => Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
+                                  )
+                                : Container(color: Theme.of(context).cardColor, child: Icon(Icons.movie, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24))),
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          title,
+                          style: GoogleFonts.inter(fontSize: 12, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
         ],
       ),
     );

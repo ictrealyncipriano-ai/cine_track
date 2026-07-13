@@ -41,6 +41,18 @@ try {
     $stmt = $pdo->prepare('DELETE FROM api_tokens WHERE user_id = ?');
     $stmt->execute([$userId]);
 
+    $stmt = $pdo->prepare('DELETE FROM review_reports WHERE review_id IN (SELECT id FROM reviews WHERE user_id = ?)');
+    $stmt->execute([$userId]);
+
+    $stmt = $pdo->prepare('DELETE FROM review_replies WHERE review_id IN (SELECT id FROM reviews WHERE user_id = ?)');
+    $stmt->execute([$userId]);
+
+    $stmt = $pdo->prepare('DELETE FROM reviews WHERE user_id = ?');
+    $stmt->execute([$userId]);
+
+    $stmt = $pdo->prepare('DELETE FROM watch_history WHERE user_id = ?');
+    $stmt->execute([$userId]);
+
     $stmt = $pdo->prepare('DELETE FROM users WHERE id = ?');
     $stmt->execute([$userId]);
 

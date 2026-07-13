@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../models/admin/admin_review.dart';
+import '../review_replies_section.dart';
 
 /// A review card for the moderation queue with status and action buttons.
 class AdminReviewCard extends StatelessWidget {
-  final Map<String, dynamic> review;
+  final AdminReview review;
+  final bool isSelected;
+  final VoidCallback? onTap;
+  final VoidCallback? onLongPress;
   final VoidCallback onApprove;
   final VoidCallback onReject;
   final VoidCallback? onDismissReport;
@@ -12,6 +17,9 @@ class AdminReviewCard extends StatelessWidget {
   const AdminReviewCard({
     super.key,
     required this.review,
+    this.isSelected = false,
+    this.onTap,
+    this.onLongPress,
     required this.onApprove,
     required this.onReject,
     this.onDismissReport,
@@ -21,12 +29,11 @@ class AdminReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final status = review['status'] as String? ?? 'approved';
-    final rating = review['rating'] as int? ?? 0;
-    final text = review['review'] as String? ?? '';
-    final userName = review['user_name'] as String? ?? 'Unknown';
-    final movieTitle = review['movie_title'] as String? ?? 'Unknown';
-    final reportReason = review['report_reason'] as String?;
+    final status = review.status;
+    final rating = review.rating;
+    final text = review.reviewText ?? '';
+    final userName = review.userName ?? 'Unknown';
+    final reportReason = review.reportReason;
     final isReported = status == 'reported';
     final isPending = status == 'pending';
 
@@ -54,16 +61,23 @@ class AdminReviewCard extends StatelessWidget {
         statusLabel = status.toUpperCase();
     }
 
-    return Container(
-      padding: const EdgeInsets.all(16),
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: Container(
+      padding: EdgeInsets.all(16),
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isReported
+          color: isSelected
+              ? theme.colorScheme.primary
+              : isReported
               ? Colors.red.withValues(alpha: 0.3)
               : theme.colorScheme.onSurface.withValues(alpha: 0.08),
+          width: isSelected ? 2 : 1,
         ),
       ),
       child: Column(
@@ -71,9 +85,14 @@ class AdminReviewCard extends StatelessWidget {
         children: [
           Row(
             children: [
+              if (isSelected)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: Icon(Icons.check_circle, size: 18, color: theme.colorScheme.primary),
+                ),
               // Star rating
               ...List.generate(5, (i) => Icon(
-                i < rating ? Icons.star : Icons.star_border,
+                i < (rating / 2).ceil() ? Icons.star : Icons.star_border,
                 size: 18,
                 color: Colors.amber,
               )),
@@ -124,7 +143,7 @@ class AdminReviewCard extends StatelessWidget {
               Icon(Icons.movie_outlined, size: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.38)),
               const SizedBox(width: 4),
               Text(
-                movieTitle,
+                'Movie #${review.movieId}',
                 style: GoogleFonts.inter(
                   fontSize: 12,
                   color: theme.colorScheme.onSurface.withValues(alpha: 0.54),
@@ -158,6 +177,8 @@ class AdminReviewCard extends StatelessWidget {
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          ReviewRepliesSection(reviewId: review.id, isAdmin: true),
           const SizedBox(height: 12),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -206,6 +227,7 @@ class AdminReviewCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

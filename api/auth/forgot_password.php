@@ -20,7 +20,7 @@ if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-checkRateLimit("forgot:$ip", 3, 5);
+checkAndIncrementRateLimit("forgot:$ip", 3, 5);
 
 $pdo = getDb();
 
@@ -51,7 +51,7 @@ try {
             <p>Hi {$user['name']},</p>
             <p>We received a request to reset your password. Click the button below to set a new one:</p>
             <p style='text-align: center; margin: 32px 0;'>
-                <a href='http://localhost/cine_track/#/reset-password?email=" . urlencode($email) . "&token=" . urlencode($token) . "'
+                <a href='" . getAppUrl() . "/#/reset-password?email=" . urlencode($email) . "&token=" . urlencode($token) . "'
                    style='background-color: #FFC107; color: #000; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block;'>
                     Reset Password
                 </a>
@@ -59,7 +59,7 @@ try {
             <p style='color: #888; font-size: 13px;'>This link expires in 60 minutes. If you didn't request this, you can safely ignore this email.</p>
         </div>
     ";
-    $mail->AltBody = "Reset your password: http://localhost/cine_track/#/reset-password?email=" . urlencode($email) . "&token=" . urlencode($token) . "\n\nThis link expires in 60 minutes.";
+    $mail->AltBody = "Reset your password: " . getAppUrl() . "/#/reset-password?email=" . urlencode($email) . "&token=" . urlencode($token) . "\n\nThis link expires in 60 minutes.";
     $mail->send();
 } catch (Exception $e) {
     jsonError('Failed to send email. Please try again later.', 500);

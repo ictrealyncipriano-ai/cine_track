@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $userId = getAuthUserId();
-requireRole($userId, 'admin');
+requireRole($userId, 'admin', 'moderator');
 
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $perPage = max(1, min(100, (int) ($_GET['per_page'] ?? 20)));
@@ -44,10 +44,16 @@ $stmt = $pdo->prepare("
     SELECT r.id, r.user_id, r.movie_id, r.rating, r.review_text, r.status,
            r.moderated_by, r.moderated_at, r.moderation_note, r.created_at, r.updated_at,
            u.name AS user_name, u.username AS user_username, u.avatar_url AS user_avatar,
-           m.name AS moderator_name
+           m.name AS moderator_name,
+           rr.report_reason
     FROM reviews r
     LEFT JOIN users u ON u.id = r.user_id
     LEFT JOIN users m ON m.id = r.moderated_by
+    LEFT JOIN (
+        SELECT review_id, GROUP_CONCAT(reason SEPARATOR '; ') AS report_reason
+        FROM review_reports
+        GROUP BY review_id
+    ) rr ON rr.review_id = r.id
     {$whereClause}
     ORDER BY r.created_at DESC
     LIMIT ? OFFSET ?

@@ -79,7 +79,7 @@ if ($password !== $confirmPassword) {
 }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-checkRateLimit("register:$ip", 5, 5);
+checkAndIncrementRateLimit("register:$ip", 5, 5);
 
 $pdo = getDb();
 

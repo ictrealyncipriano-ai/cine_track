@@ -25,6 +25,9 @@ import '../screens/admin/admin_reviews_screen.dart';
 import '../screens/admin/admin_settings_screen.dart';
 import '../screens/admin/admin_activity_screen.dart';
 import '../screens/admin/admin_movies_screen.dart';
+import '../screens/admin/admin_banners_screen.dart';
+import '../screens/admin/admin_reports_screen.dart';
+import '../screens/admin/admin_login_audit_screen.dart';
 
 /// Creates the [GoRouter] instance for web.
 /// Detail screens (movie, stream, see-all, etc.) still use Navigator.push
@@ -60,7 +63,7 @@ GoRouter createAppRouter(AuthProvider auth) {
       }
 
       // Admin guard
-      if (path.startsWith('/admin') && auth.user?.isAdmin != true) {
+      if (path.startsWith('/admin') && auth.user?.isModerator != true) {
         return '/browse';
       }
 
@@ -133,6 +136,9 @@ GoRouter createAppRouter(AuthProvider auth) {
           GoRoute(path: '/admin/settings', builder: (_, _) => const AdminSettingsScreen()),
           GoRoute(path: '/admin/activity', builder: (_, _) => const AdminActivityScreen()),
           GoRoute(path: '/admin/movies', builder: (_, _) => const AdminMoviesScreen()),
+          GoRoute(path: '/admin/banners', builder: (_, _) => const AdminBannersScreen()),
+          GoRoute(path: '/admin/reports', builder: (_, _) => const AdminReportsScreen()),
+          GoRoute(path: '/admin/login-audit', builder: (_, _) => const AdminLoginAuditScreen()),
         ],
       ),
     ],
@@ -149,26 +155,26 @@ class _WebShell extends StatefulWidget {
 }
 
 class _WebShellState extends State<_WebShell> {
-  List<_NavItem> _navItems(bool isAdmin) => [
+  List<_NavItem> _navItems(bool isMod) => [
         _NavItem('Browse', Icons.explore_outlined, Icons.explore, '/browse'),
         _NavItem('Search', Icons.search_outlined, Icons.search, '/search'),
         _NavItem('Favorites', Icons.favorite_outline, Icons.favorite, '/favorites'),
         _NavItem('Watchlist', Icons.bookmark_outline, Icons.bookmark, '/watchlist'),
-        if (isAdmin)
+        if (isMod)
           _NavItem('Admin', Icons.admin_panel_settings_outlined, Icons.admin_panel_settings, '/admin'),
         _NavItem('Profile', Icons.person_outline, Icons.person, '/profile'),
       ];
 
-  int _currentTabForPath(String path, bool isAdmin) {
-    final items = _navItems(isAdmin);
+  int _currentTabForPath(String path, bool isMod) {
+    final items = _navItems(isMod);
     final idx = items.indexWhere((item) => path.startsWith(item.route));
     return idx >= 0 ? idx : 0;
   }
 
   void _onTabSelected(int index) {
     final auth = context.read<AuthProvider>();
-    final isAdmin = auth.user?.isAdmin ?? false;
-    final items = _navItems(isAdmin);
+    final isMod = auth.user?.isModerator ?? false;
+    final items = _navItems(isMod);
     if (index >= 0 && index < items.length) {
       context.go(items[index].route);
     }
@@ -178,10 +184,10 @@ class _WebShellState extends State<_WebShell> {
   Widget build(BuildContext context) {
     final isWide = Responsive.isDesktop(context);
     final auth = context.watch<AuthProvider>();
-    final isAdmin = auth.user?.isAdmin ?? false;
+    final isMod = auth.user?.isModerator ?? false;
     final currentPath = GoRouterState.of(context).matchedLocation;
-    final items = _navItems(isAdmin);
-    final currentIndex = _currentTabForPath(currentPath, isAdmin);
+    final items = _navItems(isMod);
+    final currentIndex = _currentTabForPath(currentPath, isMod);
 
     return Scaffold(
       body: Row(

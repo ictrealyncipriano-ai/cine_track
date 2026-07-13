@@ -28,7 +28,7 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-checkRateLimit("login:$ip", 5, 5);
+checkAndIncrementRateLimit("login:$ip", 5, 5);
 
 checkAccountLockout($email, 3, 5);
 
@@ -40,7 +40,6 @@ $user = $stmt->fetch();
 if (!$user || !password_verify($password, $user['password'])) {
     logLoginAttempt($email, null, false, $ip, $userAgent);
     incrementAccountLockout($email, 3, 5);
-    incrementRateLimit("login:$ip", 5);
     jsonError('Invalid email or password', 401);
 }
 
@@ -60,9 +59,8 @@ $token = bin2hex(random_bytes(32));
 $deviceInfo = isset($input['device_info']) ? json_encode($input['device_info']) : null;
 
 $expiry = $rememberMe ? 'DATE_ADD(NOW(), INTERVAL 7 DAY)' : 'DATE_ADD(NOW(), INTERVAL 1 DAY)';
-$rememberMeInt = $rememberMe ? 1 : 0;
-$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info, remember_me) VALUES (?, ?, $expiry, ?, ?, ?, ?)");
-$stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo, $rememberMeInt]);
+$stmt = $pdo->prepare("INSERT INTO api_tokens (user_id, token, expires_at, ip_address, user_agent, device_info) VALUES (?, ?, $expiry, ?, ?, ?)");
+$stmt->execute([$user['id'], $token, $ip, $userAgent, $deviceInfo]);
 
 jsonResponse([
     'token' => $token,

@@ -3,7 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:convert';
 import '../../helpers/responsive.dart';
-import '../../providers/admin_provider.dart';
+import '../../helpers/time_ago.dart';
+import '../../models/admin/admin_user.dart';
+import '../../providers/admin/user_management_provider.dart';
+import '../../widgets/pagination_bar.dart';
 
 class AdminUsersScreen extends StatefulWidget {
   const AdminUsersScreen({super.key});
@@ -22,7 +25,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminProvider>().fetchUsers();
+      context.read<UserManagementProvider>().fetchUsers();
     });
   }
 
@@ -33,7 +36,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   void _search() {
-    context.read<AdminProvider>().fetchUsers(
+    context.read<UserManagementProvider>().fetchUsers(
       search: _searchController.text,
       role: _roleFilter,
       sortBy: _sortBy,
@@ -43,7 +46,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final admin = context.watch<AdminProvider>();
+    final admin = context.watch<UserManagementProvider>();
     final isDesk = Responsive.isDesktop(context);
 
     return Scaffold(
@@ -63,9 +66,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           _buildSearchBar(context),
           // ── Table / List ──
           Expanded(
-            child: admin.isLoadingUsers
+            child: admin.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : admin.usersError != null
+                : admin.error != null
                     ? _buildError(admin)
                     : admin.users.isEmpty
                         ? _buildEmpty()
@@ -73,7 +76,15 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
           ),
           // ── Pagination ──
           if (admin.totalUsers > 20)
-            _buildPagination(admin),
+            PaginationBar(
+              currentPage: admin.currentPage,
+              totalPages: (admin.totalUsers / 20).ceil(),
+              onPageChanged: (p) => admin.fetchUsers(
+                search: _searchController.text,
+                role: _roleFilter,
+                page: p,
+              ),
+            ),
         ],
       ),
     );
@@ -123,7 +134,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildUserList(AdminProvider admin, bool isDesk) {
+  Widget _buildUserList(UserManagementProvider admin, bool isDesk) {
     if (isDesk) {
       return SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -157,31 +168,31 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  DataRow _buildUserRow(Map<String, dynamic> user, BuildContext context) {
+  DataRow _buildUserRow(AdminUser user, BuildContext context) {
     final theme = Theme.of(context);
-    final role = user['role'] as String? ?? 'user';
-    final verified = user['email_verified'] == true;
+    final role = user.role;
+    final verified = user.emailVerified;
     return DataRow(
       cells: [
         DataCell(_buildAvatar(user)),
-        DataCell(Text(user['name'] as String? ?? '', style: GoogleFonts.inter(fontSize: 14))),
-        DataCell(Text(user['email'] as String? ?? '', style: GoogleFonts.inter(fontSize: 13))),
+        DataCell(Text(user.name, style: GoogleFonts.inter(fontSize: 14))),
+        DataCell(Text(user.email, style: GoogleFonts.inter(fontSize: 13))),
         DataCell(_buildRoleChip(role, theme)),
         DataCell(
           verified
               ? Icon(Icons.check_circle, size: 18, color: Colors.green)
               : Icon(Icons.cancel, size: 18, color: Colors.grey),
         ),
-        DataCell(Text(_relativeDate(user['created_at'] as String?), style: GoogleFonts.inter(fontSize: 12))),
+        DataCell(Text(timeAgo(user.createdAt), style: GoogleFonts.inter(fontSize: 12))),
         DataCell(_buildActions(user, context)),
       ],
     );
   }
 
-  Widget _buildUserCard(Map<String, dynamic> user, BuildContext context) {
+  Widget _buildUserCard(AdminUser user, BuildContext context) {
     final theme = Theme.of(context);
-    final role = user['role'] as String? ?? 'user';
-    final verified = user['email_verified'] == true;
+    final role = user.role;
+    final verified = user.emailVerified;
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
@@ -194,9 +205,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(user['name'] as String? ?? '', style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
+                  Text(user.name, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w600)),
                   const SizedBox(height: 2),
-                  Text(user['email'] as String? ?? '', style: GoogleFonts.inter(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.54))),
+                  Text(user.email, style: GoogleFonts.inter(fontSize: 12, color: theme.colorScheme.onSurface.withValues(alpha: 0.54))),
                   const SizedBox(height: 4),
                   Row(
                     children: [
@@ -204,7 +215,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                       const SizedBox(width: 8),
                       Icon(verified ? Icons.check_circle : Icons.cancel, size: 14, color: verified ? Colors.green : Colors.grey),
                       const SizedBox(width: 4),
-                      Text(_relativeDate(user['created_at'] as String?), style: GoogleFonts.inter(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.38))),
+                      Text(timeAgo(user.createdAt), style: GoogleFonts.inter(fontSize: 11, color: theme.colorScheme.onSurface.withValues(alpha: 0.38))),
                     ],
                   ),
                 ],
@@ -217,8 +228,8 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildAvatar(Map<String, dynamic> user) {
-    final avatarUrl = user['avatar_url'] as String?;
+  Widget _buildAvatar(AdminUser user) {
+    final avatarUrl = user.avatarUrl;
     return CircleAvatar(
       radius: 20,
       backgroundImage: avatarUrl != null && avatarUrl.isNotEmpty
@@ -227,7 +238,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               : NetworkImage(avatarUrl) as ImageProvider)
           : null,
       child: avatarUrl == null || avatarUrl.isEmpty
-          ? Text((user['name'] as String? ?? '?')[0].toUpperCase())
+          ? Text((user.name.isNotEmpty ? user.name : '?')[0].toUpperCase())
           : null,
     );
   }
@@ -257,9 +268,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildActions(Map<String, dynamic> user, BuildContext context) {
-    final userId = user['id'] as int;
-    final isBanned = user['banned_at'] != null;
+  Widget _buildActions(AdminUser user, BuildContext context) {
+    final userId = user.id;
+    final isBanned = user.isBanned;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -294,7 +305,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
   }
 
   void _handleUserAction(String action, int userId, BuildContext context) async {
-    final admin = context.read<AdminProvider>();
+    final admin = context.read<UserManagementProvider>();
     try {
       switch (action) {
         case 'promote':
@@ -332,9 +343,9 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     }
   }
 
-  void _showUserDetail(Map<String, dynamic> user, BuildContext context) {
+  void _showUserDetail(AdminUser user, BuildContext context) {
     final theme = Theme.of(context);
-    final role = user['role'] as String? ?? 'user';
+    final role = user.role;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -366,31 +377,31 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
               const SizedBox(height: 12),
               Center(
                 child: Text(
-                  user['name'] as String? ?? '',
+                  user.name,
                   style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w700),
                 ),
               ),
               Center(
                 child: Text(
-                  '@${user['username'] as String? ?? ''}',
+                  '@${user.username}',
                   style: GoogleFonts.inter(fontSize: 14, color: theme.colorScheme.onSurface.withValues(alpha: 0.54)),
                 ),
               ),
               const SizedBox(height: 16),
-              _detailRow(theme, 'Email', user['email'] as String? ?? ''),
+              _detailRow(theme, 'Email', user.email),
               _detailRow(theme, 'Role', role.toUpperCase()),
-              _detailRow(theme, 'Email Verified', user['email_verified'] == true ? 'Yes' : 'No'),
-              _detailRow(theme, 'Status', user['banned_at'] != null ? '⚠ Banned' : 'Active'),
-              _detailRow(theme, 'Phone', user['phone'] as String? ?? '—'),
-              _detailRow(theme, 'Country', user['country'] as String? ?? '—'),
-              _detailRow(theme, 'Joined', _relativeDate(user['created_at'] as String?)),
+              _detailRow(theme, 'Email Verified', user.emailVerified ? 'Yes' : 'No'),
+              _detailRow(theme, 'Status', user.isBanned ? '⚠ Banned' : 'Active'),
+              _detailRow(theme, 'Phone', user.phone ?? '—'),
+              _detailRow(theme, 'Country', user.country ?? '—'),
+              _detailRow(theme, 'Joined', timeAgo(user.createdAt)),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  Expanded(child: _statChip(theme, 'Favorites', user['favorites_count'] as int? ?? 0)),
-                  Expanded(child: _statChip(theme, 'Watchlist', user['watchlist_count'] as int? ?? 0)),
-                  Expanded(child: _statChip(theme, 'Reviews', user['reviews_count'] as int? ?? 0)),
-                  Expanded(child: _statChip(theme, 'History', user['history_count'] as int? ?? 0)),
+                  Expanded(child: _statChip(theme, 'Favorites', user.favoritesCount)),
+                  Expanded(child: _statChip(theme, 'Watchlist', user.watchlistCount)),
+                  Expanded(child: _statChip(theme, 'Reviews', user.reviewsCount)),
+                  Expanded(child: _statChip(theme, 'History', user.historyCount)),
                 ],
               ),
               const SizedBox(height: 24),
@@ -443,50 +454,14 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildPagination(AdminProvider admin) {
-    final totalPages = (admin.totalUsers / 20).ceil();
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: admin.usersPage > 1
-                ? () => admin.fetchUsers(
-                      search: _searchController.text,
-                      role: _roleFilter,
-                      page: admin.usersPage - 1,
-                    )
-                : null,
-          ),
-          Text(
-            'Page ${admin.usersPage} of $totalPages',
-            style: GoogleFonts.inter(fontSize: 13),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: admin.usersPage < totalPages
-                ? () => admin.fetchUsers(
-                      search: _searchController.text,
-                      role: _roleFilter,
-                      page: admin.usersPage + 1,
-                    )
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError(AdminProvider admin) {
+  Widget _buildError(UserManagementProvider admin) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 16),
-          Text('Failed to load users: ${admin.usersError}'),
+          Text('Failed to load users: ${admin.error}'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () => _search(),
@@ -532,16 +507,4 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  String _relativeDate(String? dateStr) {
-    if (dateStr == null) return '—';
-    try {
-      final dt = DateTime.parse(dateStr);
-      final diff = DateTime.now().difference(dt);
-      if (diff.inDays > 60) return '${diff.inDays ~/ 30}mo ago';
-      if (diff.inDays > 0) return '${diff.inDays}d ago';
-      return 'Today';
-    } catch (_) {
-      return dateStr;
-    }
-  }
 }

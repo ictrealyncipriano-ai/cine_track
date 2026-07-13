@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $adminId = getAuthUserId();
-requireRole($adminId, 'admin');
+requireRole($adminId, 'admin', 'moderator');
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -30,11 +30,14 @@ if (!$stmt->fetch()) {
     jsonError('Review not found', 404);
 }
 
-$stmt = $pdo->prepare('DELETE FROM review_reports WHERE review_id = ?');
-$stmt->execute([$reviewId]);
+    $stmt = $pdo->prepare('DELETE FROM review_reports WHERE review_id = ?');
+    $stmt->execute([$reviewId]);
 
-$stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
-$stmt->execute([$reviewId]);
+    $stmt = $pdo->prepare('DELETE FROM review_replies WHERE review_id = ?');
+    $stmt->execute([$reviewId]);
+
+    $stmt = $pdo->prepare('DELETE FROM reviews WHERE id = ?');
+    $stmt->execute([$reviewId]);
 
 logAdminAction($adminId, 'delete', 'review', $reviewId, 'Review permanently deleted');
 

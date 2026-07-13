@@ -15,6 +15,8 @@ if (isBanned($userId)) {
     jsonError('Your account has been suspended', 403);
 }
 
+checkAndIncrementRateLimit("review_delete:$userId", 10, 5);
+
 $input = json_decode(file_get_contents('php://input'), true);
 $movieId = (int) ($input['movie_id'] ?? $_GET['movie_id'] ?? 0);
 
@@ -31,6 +33,9 @@ $review = $stmt->fetch();
 if (!$review) {
     jsonError('Review not found or not yours', 404);
 }
+
+$stmt = $pdo->prepare('DELETE FROM review_replies WHERE review_id = (SELECT id FROM reviews WHERE movie_id = ? AND user_id = ?)');
+$stmt->execute([$movieId, $userId]);
 
 $stmt = $pdo->prepare('DELETE FROM reviews WHERE movie_id = ? AND user_id = ?');
 $stmt->execute([$movieId, $userId]);

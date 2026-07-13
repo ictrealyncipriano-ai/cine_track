@@ -28,7 +28,7 @@ if (!preg_match('/^\d{6}$/', $code)) {
 }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-checkRateLimit("verify_code:$ip", 5, 5);
+checkAndIncrementRateLimit("verify_code:$ip", 5, 5);
 
 $pdo = getDb();
 

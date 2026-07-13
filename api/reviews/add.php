@@ -19,6 +19,8 @@ if (isBanned($userId)) {
     jsonError('Your account has been suspended', 403);
 }
 
+checkAndIncrementRateLimit("review_add:$userId", 10, 5);
+
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (empty($input['movie_id'])) {

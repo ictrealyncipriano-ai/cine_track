@@ -12,6 +12,7 @@ import '../providers/watchlist_provider.dart';
 import '../providers/reviews_provider.dart';
 import '../widgets/movie_card.dart';
 import '../widgets/rating_bar.dart';
+import '../widgets/review_replies_section.dart';
 import 'stream_player_screen.dart';
 import 'trailer_player_screen.dart';
 
@@ -639,6 +640,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
           ],
+          ReviewRepliesSection(reviewId: review.id),
           const SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -776,6 +778,8 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
               style: GoogleFonts.inter(fontSize: 13, color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)),
             ),
           ],
+          const SizedBox(height: 4),
+          ReviewRepliesSection(reviewId: review.id),
         ],
       ),
     );

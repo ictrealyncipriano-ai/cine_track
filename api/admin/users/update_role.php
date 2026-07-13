@@ -34,7 +34,7 @@ if ($targetUserId === $adminId) {
     jsonError('Cannot change your own role', 403);
 }
 
-$stmt = $pdo->prepare('SELECT name FROM users WHERE id = ? AND deleted_at IS NULL');
+$stmt = $pdo->prepare('SELECT name, role FROM users WHERE id = ? AND deleted_at IS NULL');
 $stmt->execute([$targetUserId]);
 $target = $stmt->fetch();
 

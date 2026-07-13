@@ -832,7 +832,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                               width: 36,
                               height: 54,
                               fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                              errorBuilder: (_, _, _) => Container(
                                 width: 36, height: 54,
                                 color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
                                 child: Icon(Icons.movie, size: 18, color: theme.colorScheme.onSurface.withValues(alpha: 0.2)),

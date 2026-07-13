@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/time_ago.dart';
 
 /// A single row in the admin activity feed with a cleaner, more modern design.
 class AdminActivityTile extends StatelessWidget {
@@ -32,20 +33,6 @@ class AdminActivityTile extends StatelessWidget {
         return (Icons.bookmark, Colors.blue);
       default:
         return (Icons.circle, theme.colorScheme.onSurface.withValues(alpha: 0.3));
-    }
-  }
-
-  String _relativeTime() {
-    try {
-      final dt = DateTime.parse(createdAt);
-      final diff = DateTime.now().difference(dt);
-      if (diff.inMinutes < 1) return 'Just now';
-      if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
-      if (diff.inHours < 24) return '${diff.inHours}h ago';
-      if (diff.inDays < 7) return '${diff.inDays}d ago';
-      return '${diff.inDays ~/ 7}w ago';
-    } catch (_) {
-      return createdAt;
     }
   }
 
@@ -123,7 +110,7 @@ class AdminActivityTile extends StatelessWidget {
           const SizedBox(width: 8),
           // Time
           Text(
-            _relativeTime(),
+            timeAgo(createdAt),
             style: GoogleFonts.inter(
               fontSize: 11.5,
               fontWeight: FontWeight.w500,

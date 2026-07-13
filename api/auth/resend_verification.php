@@ -20,7 +20,7 @@ if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-checkRateLimit("resend_verify:$ip", 3, 5);
+checkAndIncrementRateLimit("resend_verify:$ip", 3, 5);
 
 $pdo = getDb();
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../helpers/responsive.dart';
+import '../../models/admin/admin_movie.dart';
 import '../../providers/admin_provider.dart';
 
 class AdminMoviesScreen extends StatefulWidget {
@@ -145,24 +146,24 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
             cells: [
               DataCell(_buildThumbnail(m)),
               DataCell(Text(
-                m['title'] as String? ?? 'Unknown',
+                m.title,
                 style: GoogleFonts.inter(fontSize: 13),
               )),
               DataCell(Text(
-                '${m['review_count'] ?? 0}',
+                '${m.reviewCount}',
                 style: GoogleFonts.inter(fontSize: 13),
               )),
               DataCell(Text(
-                '${m['favorite_count'] ?? 0}',
+                '${m.favoriteCount}',
                 style: GoogleFonts.inter(fontSize: 13),
               )),
               DataCell(Text(
-                '${m['watchlist_count'] ?? 0}',
+                '${m.watchlistCount}',
                 style: GoogleFonts.inter(fontSize: 13),
               )),
               DataCell(_buildInteractionBadge(m)),
               DataCell(Text(
-                _relativeDate(m['last_interaction'] as String?),
+                _relativeDate(m.lastInteraction),
                 style: GoogleFonts.inter(fontSize: 11),
               )),
             ],
@@ -178,13 +179,13 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
     );
   }
 
-  Widget _buildMovieCard(Map<String, dynamic> movie, ThemeData theme) {
-    final title = movie['title'] as String? ?? 'Unknown';
-    final posterPath = movie['poster_path'] as String?;
-    final reviews = movie['review_count'] ?? 0;
-    final favorites = movie['favorite_count'] ?? 0;
-    final watchlist = movie['watchlist_count'] ?? 0;
-    final total = movie['total_interactions'] ?? 0;
+  Widget _buildMovieCard(AdminMovie movie, ThemeData theme) {
+    final title = movie.title;
+    final posterPath = movie.posterPath;
+    final reviews = movie.reviewCount;
+    final favorites = movie.favoriteCount;
+    final watchlist = movie.watchlistCount;
+    final total = movie.totalInteractions;
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
@@ -201,7 +202,7 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
                       width: 48,
                       height: 72,
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
+                      errorBuilder: (_, _, _) => Container(
                         width: 48,
                         height: 72,
                         color: theme.colorScheme.onSurface.withValues(alpha: 0.06),
@@ -278,8 +279,8 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
     );
   }
 
-  Widget _buildThumbnail(Map<String, dynamic> movie) {
-    final posterPath = movie['poster_path'] as String?;
+  Widget _buildThumbnail(AdminMovie movie) {
+    final posterPath = movie.posterPath;
     if (posterPath == null || posterPath.isEmpty) {
       return Container(
         width: 32,
@@ -298,7 +299,7 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
         width: 32,
         height: 48,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           width: 32,
           height: 48,
           color: Colors.grey.withValues(alpha: 0.1),
@@ -308,8 +309,8 @@ class _AdminMoviesScreenState extends State<AdminMoviesScreen> {
     );
   }
 
-  Widget _buildInteractionBadge(Map<String, dynamic> movie) {
-    final total = movie['total_interactions'] ?? 0;
+  Widget _buildInteractionBadge(AdminMovie movie) {
+    final total = movie.totalInteractions;
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),

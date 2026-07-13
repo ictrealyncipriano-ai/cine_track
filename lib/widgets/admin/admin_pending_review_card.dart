@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../models/admin/admin_review.dart';
 
 /// A compact pending-review card for the admin dashboard showing rating,
 /// text excerpt, user info, and a "Review →" action.
 class AdminPendingReviewCard extends StatelessWidget {
-  final Map<String, dynamic> review;
+  final AdminReview review;
   final VoidCallback onTap;
 
   const AdminPendingReviewCard({
@@ -16,10 +17,10 @@ class AdminPendingReviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final rating = review['rating'] as int? ?? 0;
-    final text = review['review_text'] as String? ?? '';
-    final userName = review['user_name'] as String? ?? 'Unknown';
-    final status = review['status'] as String? ?? 'pending';
+    final rating = review.rating;
+    final text = review.reviewText ?? '';
+    final userName = review.userName ?? 'Unknown';
+    final status = review.status;
 
     final isReported = status == 'reported';
     final statusColor = isReported ? Colors.red : Colors.orange;

@@ -144,17 +144,53 @@ function checkRateLimit(string $key, int $maxAttempts = 5, int $decayMinutes = 1
 function incrementRateLimit(string $key, int $decayMinutes = 15): void {
     $pdo = getDb();
     $cacheKey = "rate_limit:$key";
-    $expiration = time() + ($decayMinutes * 60);
 
-    $stmt = $pdo->prepare('SELECT value FROM cache WHERE `key` = ?');
+    $stmt = $pdo->prepare('SELECT value, expiration FROM cache WHERE `key` = ?');
     $stmt->execute([$cacheKey]);
     $row = $stmt->fetch();
 
     if ($row) {
         $data = json_decode($row['value'], true);
         $data['attempts'] = ($data['attempts'] ?? 0) + 1;
-        $stmt = $pdo->prepare('UPDATE cache SET value = ?, expiration = ? WHERE `key` = ?');
-        $stmt->execute([json_encode($data), $expiration, $cacheKey]);
+        $stmt = $pdo->prepare('UPDATE cache SET value = ? WHERE `key` = ?');
+        $stmt->execute([json_encode($data), $cacheKey]);
+    } else {
+        $expiration = time() + ($decayMinutes * 60);
+        $data = ['attempts' => 1];
+        $stmt = $pdo->prepare('INSERT INTO cache (`key`, value, expiration) VALUES (?, ?, ?)');
+        $stmt->execute([$cacheKey, json_encode($data), $expiration]);
+    }
+}
+
+function checkAndIncrementRateLimit(string $key, int $maxAttempts = 5, int $decayMinutes = 15): void {
+    $pdo = getDb();
+    $cacheKey = "rate_limit:$key";
+    $expiration = time() + ($decayMinutes * 60);
+
+    $stmt = $pdo->prepare('SELECT value, expiration FROM cache WHERE `key` = ?');
+    $stmt->execute([$cacheKey]);
+    $row = $stmt->fetch();
+
+    if ($row) {
+        $exp = (int) $row['expiration'];
+        if (time() >= $exp) {
+            // Window expired — reset
+            $data = ['attempts' => 1];
+            $stmt = $pdo->prepare('REPLACE INTO cache (`key`, value, expiration) VALUES (?, ?, ?)');
+            $stmt->execute([$cacheKey, json_encode($data), $expiration]);
+            return;
+        }
+
+        $data = json_decode($row['value'], true);
+        $attempts = ($data['attempts'] ?? 0) + 1;
+
+        if ($attempts > $maxAttempts) {
+            $retryAfter = $exp - time();
+            jsonError("Too many attempts. Please try again in {$retryAfter} seconds.", 429);
+        }
+
+        $stmt = $pdo->prepare('UPDATE cache SET value = ? WHERE `key` = ?');
+        $stmt->execute([json_encode(['attempts' => $attempts]), $cacheKey]);
     } else {
         $data = ['attempts' => 1];
         $stmt = $pdo->prepare('INSERT INTO cache (`key`, value, expiration) VALUES (?, ?, ?)');

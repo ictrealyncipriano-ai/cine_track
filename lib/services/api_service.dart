@@ -90,8 +90,19 @@ class ApiService {
     return _handleResponse(response);
   }
 
+  static String buildQueryString(Map<String, String> params) {
+    return params.entries
+        .map((e) =>
+            '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value)}')
+        .join('&');
+  }
+
+  String _getHeader(Map<String, String> headers, String name) {
+    return headers[name] ?? headers[name.toLowerCase()] ?? '';
+  }
+
   Map<String, dynamic> _handleResponse(http.Response response) {
-    final contentType = response.headers['content-type'] ?? '';
+    final contentType = _getHeader(response.headers, 'content-type');
     if (!contentType.contains('application/json')) {
       throw Exception(
         'Expected JSON but got "${contentType.isEmpty ? 'no content-type' : contentType}" '

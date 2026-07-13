@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
 }
 
 $userId = getAuthUserId();
-requireRole($userId, 'admin');
+requireRole($userId, 'admin', 'moderator');
 
 $pdo = getDb();
 

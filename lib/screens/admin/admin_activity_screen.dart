@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../helpers/responsive.dart';
-import '../../providers/admin_provider.dart';
+import '../../helpers/time_ago.dart';
+import '../../providers/admin/activity_log_provider.dart';
+import '../../widgets/pagination_bar.dart';
 
 class AdminActivityScreen extends StatefulWidget {
   const AdminActivityScreen({super.key});
@@ -19,7 +21,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AdminProvider>().fetchActivityLogs();
+      context.read<ActivityLogProvider>().fetchLogs();
     });
   }
 
@@ -30,7 +32,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
   }
 
   void _fetch({int page = 1}) {
-    context.read<AdminProvider>().fetchActivityLogs(
+    context.read<ActivityLogProvider>().fetchLogs(
       page: page,
       action: _actionFilter,
       search: _searchController.text,
@@ -39,7 +41,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final admin = context.watch<AdminProvider>();
+    final admin = context.watch<ActivityLogProvider>();
     final isDesk = Responsive.isDesktop(context);
     final theme = Theme.of(context);
 
@@ -60,23 +62,27 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
           _buildFilters(context, admin),
           // ── Content ──
           Expanded(
-            child: admin.isLoadingActivityLogs
+            child: admin.isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : admin.activityLogsError != null
+                : admin.error != null
                     ? _buildError(admin)
-                    : admin.activityLogs.isEmpty
+                    : admin.logs.isEmpty
                         ? _buildEmpty()
                         : _buildLogList(admin, theme, isDesk),
           ),
           // ── Pagination ──
-          if (admin.totalActivityLogs > 30)
-            _buildPagination(admin),
+          if (admin.totalLogs > 30)
+            PaginationBar(
+              currentPage: admin.currentPage,
+              totalPages: (admin.totalLogs / 30).ceil(),
+              onPageChanged: (p) => _fetch(page: p),
+            ),
         ],
       ),
     );
   }
 
-  Widget _buildFilters(BuildContext context, AdminProvider admin) {
+  Widget _buildFilters(BuildContext context, ActivityLogProvider admin) {
     final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
@@ -106,7 +112,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
             underline: const SizedBox(),
             items: [
               const DropdownMenuItem(value: null, child: Text('All Actions')),
-              ...admin.activityActionTypes.map(
+              ...admin.actionTypes.map(
                 (a) => DropdownMenuItem(value: a, child: Text(a)),
               ),
             ],
@@ -120,7 +126,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     );
   }
 
-  Widget _buildLogList(AdminProvider admin, ThemeData theme, bool isDesk) {
+  Widget _buildLogList(ActivityLogProvider admin, ThemeData theme, bool isDesk) {
     if (isDesk) {
       return SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -132,28 +138,28 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
             DataColumn(label: Text('Details')),
             DataColumn(label: Text('Date')),
           ],
-          rows: admin.activityLogs.map((log) => DataRow(
+          rows: admin.logs.map((log) => DataRow(
             cells: [
               DataCell(Text(
-                log['admin_name'] as String? ?? 'Unknown',
+                log.adminName ?? 'Unknown',
                 style: GoogleFonts.inter(fontSize: 13),
               )),
-              DataCell(_buildActionChip(theme, log['action'] as String? ?? '')),
+              DataCell(_buildActionChip(theme, log.actionType)),
               DataCell(Text(
-                '${log['target_type'] as String? ?? ''} #${log['target_id'] ?? ''}',
+                '${log.targetType} #${log.targetId?.toString() ?? ''}',
                 style: GoogleFonts.inter(fontSize: 12),
               )),
               DataCell(ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 300),
                 child: Text(
-                  log['description'] as String? ?? '',
+                  log.description ?? '',
                   style: GoogleFonts.inter(fontSize: 12),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               )),
               DataCell(Text(
-                _relativeDate(log['created_at'] as String?),
+                timeAgo(log.createdAt),
                 style: GoogleFonts.inter(fontSize: 12),
               )),
             ],
@@ -164,9 +170,9 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: admin.activityLogs.length,
+      itemCount: admin.logs.length,
       itemBuilder: (_, i) {
-        final log = admin.activityLogs[i];
+        final log = admin.logs[i];
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: Padding(
@@ -178,14 +184,14 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: _actionColor(log['action'] as String? ?? '', theme)
+                    color: _actionColor(log.actionType, theme)
                         .withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
-                    _actionIcon(log['action'] as String? ?? ''),
+                    _actionIcon(log.actionType),
                     size: 18,
-                    color: _actionColor(log['action'] as String? ?? '', theme),
+                    color: _actionColor(log.actionType, theme),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -196,19 +202,19 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                       Row(
                         children: [
                           Text(
-                            log['admin_name'] as String? ?? 'Unknown',
+                            log.adminName ?? 'Unknown',
                             style: GoogleFonts.inter(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(width: 6),
-                          _buildActionChip(theme, log['action'] as String? ?? ''),
+                          _buildActionChip(theme, log.actionType),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        log['description'] as String? ?? '',
+                        log.description ?? '',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
@@ -216,7 +222,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '${log['target_type'] as String? ?? ''} — ${_relativeDate(log['created_at'] as String?)}',
+                        '${log.targetType} — ${timeAgo(log.createdAt)}',
                         style: GoogleFonts.inter(
                           fontSize: 11,
                           color: theme.colorScheme.onSurface.withValues(alpha: 0.38),
@@ -292,35 +298,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     }
   }
 
-  Widget _buildPagination(AdminProvider admin) {
-    final totalPages = (admin.totalActivityLogs / 30).ceil();
-    return Container(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.chevron_left),
-            onPressed: admin.activityLogsPage > 1
-                ? () => _fetch(page: admin.activityLogsPage - 1)
-                : null,
-          ),
-          Text(
-            'Page ${admin.activityLogsPage} of $totalPages',
-            style: GoogleFonts.inter(fontSize: 13),
-          ),
-          IconButton(
-            icon: const Icon(Icons.chevron_right),
-            onPressed: admin.activityLogsPage < totalPages
-                ? () => _fetch(page: admin.activityLogsPage + 1)
-                : null,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildError(AdminProvider admin) {
+  Widget _buildError(ActivityLogProvider admin) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -328,7 +306,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
           Icon(Icons.error_outline, size: 48,
               color: Theme.of(context).colorScheme.error),
           const SizedBox(height: 16),
-          Text('Failed to load activity logs: ${admin.activityLogsError}'),
+          Text('Failed to load activity logs: ${admin.error}'),
           const SizedBox(height: 12),
           ElevatedButton.icon(
             onPressed: () => _fetch(),
@@ -356,18 +334,4 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     );
   }
 
-  String _relativeDate(String? dateStr) {
-    if (dateStr == null) return '—';
-    try {
-      final dt = DateTime.parse(dateStr);
-      final diff = DateTime.now().difference(dt);
-      if (diff.inDays > 60) return '${diff.inDays ~/ 30}mo ago';
-      if (diff.inDays > 0) return '${diff.inDays}d ago';
-      if (diff.inHours > 0) return '${diff.inHours}h ago';
-      if (diff.inMinutes > 0) return '${diff.inMinutes}m ago';
-      return 'Just now';
-    } catch (_) {
-      return dateStr;
-    }
-  }
 }

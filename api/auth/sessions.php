@@ -17,7 +17,6 @@ $action = $input['action'] ?? '';
 
 if ($action === 'list') {
     checkRateLimit("sessions_list:{$userId}", 30, 1);
-    clearRateLimit("sessions_list:{$userId}");
 
     $pdo = getDb();
     $currentToken = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
@@ -84,8 +83,6 @@ if ($action === 'revoke') {
 
     logLoginAttempt('', $userId, false, $token['ip_address'] ?? '', $token['user_agent'] ?? '', 'session_revoke');
 
-    clearRateLimit("sessions_revoke:{$userId}");
-
     jsonResponse(['message' => 'Session revoked']);
 }
 
@@ -110,8 +107,6 @@ if ($action === 'revoke_all') {
     $stmt->execute([$userId, $currentToken]);
 
     logLoginAttempt('', $userId, false, $_SERVER['REMOTE_ADDR'] ?? '', $_SERVER['HTTP_USER_AGENT'] ?? '', 'session_revoke_all');
-
-    clearRateLimit("sessions_revoke_all:{$userId}");
 
     jsonResponse(['message' => "{$count} session(s) revoked"]);
 }

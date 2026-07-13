@@ -37,6 +37,10 @@ if (!preg_match('/[a-z]/', $password)) {
     jsonError('Password must contain at least one lowercase letter');
 }
 
+if (strlen($password) > 72) {
+    jsonError('Password must not exceed 72 characters');
+}
+
 if (!preg_match('/[0-9]/', $password)) {
     jsonError('Password must contain at least one digit');
 }

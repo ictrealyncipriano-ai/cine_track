@@ -8,6 +8,7 @@ import 'search_screen.dart';
 import 'favorites_screen.dart';
 import 'watchlist_screen.dart';
 import 'profile_screen.dart';
+import 'admin/admin_dashboard_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -38,18 +39,46 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final isGuest = auth.isGuest;
+    final isMod = auth.user?.isModerator ?? false;
+
+    final children = <Widget>[
+      const BrowseScreen(),
+      const SearchScreen(),
+      if (isGuest) const _GuestGuardScreen() else const FavoritesScreen(),
+      if (isGuest) const _GuestGuardScreen() else const WatchlistScreen(),
+      if (isMod) const AdminDashboardScreen(),
+      if (isGuest) _buildGuestProfile() else const ProfileScreen(),
+    ];
+
+    final items = <BottomNavigationBarItem>[
+      const BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Browse'),
+      const BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.favorite_outline),
+        activeIcon: Icon(Icons.favorite),
+        label: 'Favorites',
+      ),
+      const BottomNavigationBarItem(
+        icon: Icon(Icons.bookmark_outline),
+        activeIcon: Icon(Icons.bookmark),
+        label: 'Watchlist',
+      ),
+      if (isMod)
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.admin_panel_settings_outlined),
+          activeIcon: Icon(Icons.admin_panel_settings),
+          label: 'Admin',
+        ),
+      const BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
+    ];
+
+    final clampedIndex = _currentIndex.clamp(0, children.length - 1);
 
     return Scaffold(
       body: IdleTimerWrapper(
         child: IndexedStack(
-          index: _currentIndex,
-          children: [
-            const BrowseScreen(),
-            const SearchScreen(),
-            isGuest ? const _GuestGuardScreen() : const FavoritesScreen(),
-            isGuest ? const _GuestGuardScreen() : const WatchlistScreen(),
-            isGuest ? _buildGuestProfile() : const ProfileScreen(),
-          ],
+          index: clampedIndex,
+          children: children,
         ),
       ),
       bottomNavigationBar: SafeArea(
@@ -57,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
         left: false,
         right: false,
         child: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: clampedIndex,
         onTap: (index) {
           if (isGuest && index >= 2 && index <= 3) {
             _showGuestPrompt(context);
@@ -69,21 +98,7 @@ class _HomeScreenState extends State<HomeScreen> {
         selectedItemColor: Theme.of(context).colorScheme.primary,
         unselectedItemColor: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38),
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Browse'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: 'Search'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.favorite_outline),
-            activeIcon: Icon(Icons.favorite),
-            label: 'Favorites',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bookmark_outline),
-            activeIcon: Icon(Icons.bookmark),
-            label: 'Watchlist',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person_outline), label: 'Profile'),
-        ],
+        items: items,
       ),
       ),
     );
