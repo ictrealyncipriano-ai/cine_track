@@ -88,9 +88,13 @@ $dataSql = "
     ORDER BY {$orderField} {$sortOrder}
     LIMIT ? OFFSET ?
 ";
-$dataParams = array_merge($params, [$perPage, $offset]);
 $stmt = $pdo->prepare($dataSql);
-$stmt->execute($dataParams);
+foreach ($params as $i => $param) {
+    $stmt->bindValue($i + 1, $param, PDO::PARAM_STR);
+}
+$stmt->bindValue(count($params) + 1, $perPage, PDO::PARAM_INT);
+$stmt->bindValue(count($params) + 2, $offset, PDO::PARAM_INT);
+$stmt->execute();
 $movies = $stmt->fetchAll();
 
 foreach ($movies as &$m) {
