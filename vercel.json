@@ -1,17 +1,15 @@
 {
+  "functions": {
+    "api/index.php": {
+      "runtime": "vercel-php@0.9.0"
+    }
+  },
   "framework": null,
   "buildCommand": "bash build.sh",
   "outputDirectory": "build/web",
-  "functions": {
-    "api/**/*.php": {
-      "runtime": "vercel-php@0.9.0",
-      "maxDuration": 30,
-      "excludeFiles": "{build/**,android/**,ios/**,windows/**,linux/**,macos/**,web/**,lib/**,test/**,.dart_tool/**,.flutter-plugins*,*.iml,migrations/**,node_modules/**,.opencode/**,vidsrc-api/**}"
-    }
-  },
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
     { "handle": "filesystem" },
+    { "src": "/api/(.*)", "dest": "/api/index.php" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
