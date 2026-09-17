@@ -23,6 +23,7 @@ if ($action === 'update_profile') {
     $phone = $input['phone'] ?? null;
     $dateOfBirth = $input['date_of_birth'] ?? null;
     $country = $input['country'] ?? null;
+    $bio = $input['bio'] ?? null;
     $marketingOptIn = isset($input['marketing_opt_in']) ? ($input['marketing_opt_in'] ? 1 : 0) : null;
 
     if (empty($name) || empty($email)) {
@@ -75,6 +76,10 @@ if ($action === 'update_profile') {
     if ($country !== null) {
         $updateFields[] = 'country = ?';
         $params[] = $country;
+    }
+    if ($bio !== null) {
+        $updateFields[] = 'bio = ?';
+        $params[] = $bio;
     }
     if ($marketingOptIn !== null) {
         $updateFields[] = 'marketing_opt_in = ?';
@@ -133,7 +138,7 @@ if ($action === 'update_profile') {
         }
     }
 
-    $stmt = $pdo->prepare('SELECT id, name, username, email, phone, date_of_birth, country, marketing_opt_in, email_verified_at, avatar_url FROM users WHERE id = ?');
+    $stmt = $pdo->prepare('SELECT id, name, username, email, phone, date_of_birth, country, bio, marketing_opt_in, email_verified_at, avatar_url FROM users WHERE id = ?');
     $stmt->execute([$userId]);
     $user = $stmt->fetch();
 
@@ -146,6 +151,7 @@ if ($action === 'update_profile') {
             'phone' => $user['phone'],
             'date_of_birth' => $user['date_of_birth'],
             'country' => $user['country'],
+            'bio' => $user['bio'],
             'marketing_opt_in' => (bool) $user['marketing_opt_in'],
             'email_verified' => $user['email_verified_at'] !== null,
             'avatar_url' => $user['avatar_url'],

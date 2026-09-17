@@ -117,6 +117,7 @@ class AuthProvider extends ChangeNotifier {
     String? phone,
     String? dateOfBirth,
     String? country,
+    String? bio,
     bool? marketingOptIn,
   }) async {
     return _authService.updateProfile(
@@ -125,6 +126,7 @@ class AuthProvider extends ChangeNotifier {
       phone: phone,
       dateOfBirth: dateOfBirth,
       country: country,
+      bio: bio,
       marketingOptIn: marketingOptIn,
     );
   }

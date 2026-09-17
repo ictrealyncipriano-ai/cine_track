@@ -253,6 +253,7 @@ class AuthService extends ChangeNotifier {
     String? phone,
     String? dateOfBirth,
     String? country,
+    String? bio,
     bool? marketingOptIn,
   }) async {
     _isLoading = true;
@@ -266,6 +267,7 @@ class AuthService extends ChangeNotifier {
         'phone': phone,
         'date_of_birth': dateOfBirth,
         'country': country,
+        'bio': bio,
         'marketing_opt_in': marketingOptIn,
       });
       _user = User.fromJson(data['user'] is Map<String, dynamic> ? data['user'] as Map<String, dynamic> : <String, dynamic>{});
