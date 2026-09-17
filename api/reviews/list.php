@@ -16,13 +16,13 @@ if ($movieId <= 0) {
 
 $pdo = getDb();
 
-$stmt = $pdo->prepare('
+$stmt = $pdo->prepare("
     SELECT r.id, r.user_id, r.movie_id, r.rating, r.review_text, r.created_at, r.updated_at, u.name as user_name
     FROM reviews r
     JOIN users u ON u.id = r.user_id
     WHERE r.movie_id = ? AND r.status = 'approved'
     ORDER BY r.created_at DESC
-');
+");
 $stmt->execute([$movieId]);
 $reviews = $stmt->fetchAll();
 
