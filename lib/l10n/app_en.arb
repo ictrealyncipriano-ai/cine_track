@@ -1,0 +1,929 @@
+{
+  "@@locale": "en",
+
+  "signIn": "Sign In",
+  "@signIn": {"description": "Login button"},
+
+  "signUp": "Sign Up",
+  "@signUp": {"description": "Register link text"},
+
+  "createAccount": "Create Account",
+  "@createAccount": {"description": "Register page title"},
+
+  "welcomeBack": "Welcome Back",
+  "@welcomeBack": {"description": "Login page greeting"},
+
+  "emailLabel": "Email",
+  "@emailLabel": {"description": "Email field label"},
+
+  "passwordLabel": "Password",
+  "@passwordLabel": {"description": "Password field label"},
+
+  "forgotPassword": "Forgot Password?",
+  "@forgotPassword": {"description": "Forgot password link"},
+
+  "rememberMe": "Remember me",
+  "@rememberMe": {"description": "Remember me checkbox"},
+
+  "noAccount": "Don't have an account?",
+  "@noAccount": {"description": "Sign up prompt"},
+
+  "invalidEmail": "Enter a valid email",
+  "@invalidEmail": {"description": "Email validation error"},
+
+  "minPasswordChars": "Min 8 characters",
+  "@minPasswordChars": {"description": "Password min length error"},
+
+  "verifyCode": "Verify Code",
+  "@verifyCode": {"description": "Verify code button"},
+
+  "resendVerification": "Resend verification email",
+  "@resendVerification": {"description": "Resend verification link"},
+
+  "verificationEmailSent": "Verification email sent",
+  "@verificationEmailSent": {"description": "Verification sent confirmation"},
+
+  "emailVerifiedSigningIn": "Email verified! Signing in...",
+  "@emailVerifiedSigningIn": {"description": "Verification success message"},
+
+  "enter6DigitCode": "Enter the 6-digit code from the email",
+  "@enter6DigitCode": {"description": "Code input hint"},
+
+  "showPassword": "Show password",
+  "@showPassword": {"description": "Show password tooltip"},
+
+  "hidePassword": "Hide password",
+  "@hidePassword": {"description": "Hide password tooltip"},
+
+  "apiUrl": "API URL",
+  "@apiUrl": {"description": "API URL dialog title"},
+
+  "apiUrlDescription": "Enter a custom API base URL.\nThis is saved across app restarts.",
+  "@apiUrlDescription": {"description": "API URL dialog description"},
+
+  "cancel": "Cancel",
+  "@cancel": {"description": "Cancel button"},
+
+  "save": "Save",
+  "@save": {"description": "Save button"},
+
+  "apiUrlUpdated": "API URL updated",
+  "@apiUrlUpdated": {"description": "API URL update snackbar"},
+
+  "newVerificationLinkSent": "A new verification link has been sent to your email.",
+  "@newVerificationLinkSent": {"description": "Verification link sent"},
+
+  "nameLabel": "Name",
+  "@nameLabel": {"description": "Name field label"},
+
+  "nameRequired": "Name is required",
+  "@nameRequired": {"description": "Name validation error"},
+
+  "usernameLabel": "Username",
+  "@usernameLabel": {"description": "Username field label"},
+
+  "usernameMinChars": "Min 3 characters",
+  "@usernameMinChars": {"description": "Username min length error"},
+
+  "usernameMaxChars": "Max 50 characters",
+  "@usernameMaxChars": {"description": "Username max length error"},
+
+  "usernameInvalidChars": "Letters, numbers, _ and - only",
+  "@usernameInvalidChars": {"description": "Username invalid chars error"},
+
+  "phoneLabel": "Phone",
+  "@phoneLabel": {"description": "Phone field label"},
+
+  "phoneOptionalLabel": "Phone (optional)",
+  "@phoneOptionalLabel": {"description": "Optional phone field label"},
+
+  "invalidPhone": "Invalid phone number",
+  "@invalidPhone": {"description": "Phone validation error"},
+
+  "dateOfBirthLabel": "Date of Birth",
+  "@dateOfBirthLabel": {"description": "DOB field label"},
+
+  "dateOfBirthOptionalLabel": "Date of Birth (optional)",
+  "@dateOfBirthOptionalLabel": {"description": "Optional DOB field label"},
+
+  "countryLabel": "Country",
+  "@countryLabel": {"description": "Country field label"},
+
+  "countryOptionalLabel": "Country (optional)",
+  "@countryOptionalLabel": {"description": "Optional country field label"},
+
+  "selectCountry": "Select your country",
+  "@selectCountry": {"description": "Country dropdown hint"},
+
+  "passwordStrengthWeak": "Weak",
+  "@passwordStrengthWeak": {"description": "Password strength label"},
+
+  "passwordStrengthFair": "Fair",
+  "@passwordStrengthFair": {"description": "Password strength label"},
+
+  "passwordStrengthGood": "Good",
+  "@passwordStrengthGood": {"description": "Password strength label"},
+
+  "passwordStrengthStrong": "Strong",
+  "@passwordStrengthStrong": {"description": "Password strength label"},
+
+  "passwordStrengthVeryStrong": "Very strong",
+  "@passwordStrengthVeryStrong": {"description": "Password strength label"},
+
+  "confirmPasswordLabel": "Confirm Password",
+  "@confirmPasswordLabel": {"description": "Confirm password field label"},
+
+  "passwordsDoNotMatch": "Passwords do not match",
+  "@passwordsDoNotMatch": {"description": "Password mismatch error"},
+
+  "maxPasswordChars": "Max 72 characters",
+  "@maxPasswordChars": {"description": "Password max length error"},
+
+  "needsUppercase": "Needs an uppercase letter",
+  "@needsUppercase": {"description": "Password uppercase requirement"},
+
+  "needsLowercase": "Needs a lowercase letter",
+  "@needsLowercase": {"description": "Password lowercase requirement"},
+
+  "needsDigit": "Needs a digit",
+  "@needsDigit": {"description": "Password digit requirement"},
+
+  "acceptTerms": "I agree to the Terms of Service and Privacy Policy",
+  "@acceptTerms": {"description": "Terms acceptance label"},
+
+  "marketingOptIn": "Send me movie recommendations and updates via email",
+  "@marketingOptIn": {"description": "Marketing opt-in label"},
+
+  "alreadyHaveAccount": "Already have an account?",
+  "@alreadyHaveAccount": {"description": "Sign in prompt on register"},
+
+  "accountCreated": "Account created!",
+  "@accountCreated": {"description": "Registration success"},
+
+  "mustAcceptTerms": "You must agree to the Terms of Service and Privacy Policy",
+  "@mustAcceptTerms": {"description": "Terms acceptance error"},
+
+  "resetPasswordTitle": "Reset Password",
+  "@resetPasswordTitle": {"description": "Forgot password page title"},
+
+  "resetPasswordDescription": "Enter your email address and we'll send you a link to reset your password.",
+  "@resetPasswordDescription": {"description": "Forgot password description"},
+
+  "pasteResetLink": "Paste the reset link from your email below:",
+  "@pasteResetLink": {"description": "Reset link paste prompt"},
+
+  "resetLinkHint": "Paste full reset link here",
+  "@resetLinkHint": {"description": "Reset link field hint"},
+
+  "continueAction": "Continue",
+  "@continueAction": {"description": "Continue button"},
+
+  "sendResetLink": "Send Reset Link",
+  "@sendResetLink": {"description": "Send reset link button"},
+
+  "backTo": "Back to ",
+  "@backTo": {"description": "Back to sign in link prefix"},
+
+  "ifEmailRegistered": "If that email is registered, you will receive a password reset link shortly.",
+  "@ifEmailRegistered": {"description": "Reset email sent message"},
+
+  "invalidLinkFormat": "Invalid link format",
+  "@invalidLinkFormat": {"description": "Invalid reset link error"},
+
+  "noResetToken": "Could not find reset token in the link",
+  "@noResetToken": {"description": "Missing token error"},
+
+  "invalidEmailInLink": "Invalid email address in the reset link",
+  "@invalidEmailInLink": {"description": "Invalid email in link error"},
+
+  "invalidResetToken": "Invalid reset token in the link",
+  "@invalidResetToken": {"description": "Invalid token error"},
+
+  "setNewPassword": "Set New Password",
+  "@setNewPassword": {"description": "Reset password page title"},
+
+  "setNewPasswordDescription": "Enter your new password below.",
+  "@setNewPasswordDescription": {"description": "Reset password description"},
+
+  "newPasswordLabel": "New Password",
+  "@newPasswordLabel": {"description": "New password field label"},
+
+  "confirmNewPasswordLabel": "Confirm New Password",
+  "@confirmNewPasswordLabel": {"description": "Confirm new password field label"},
+
+  "resetPassword": "Reset Password",
+  "@resetPassword": {"description": "Reset password button"},
+
+  "passwordResetSuccess": "Password Reset!",
+  "@passwordResetSuccess": {"description": "Reset success title"},
+
+  "passwordResetDescription": "Your password has been reset successfully. All existing sessions have been logged out.",
+  "@passwordResetDescription": {"description": "Reset success description"},
+
+  "goToHome": "Go to Home",
+  "@goToHome": {"description": "Home navigation button"},
+
+  "emailNotVerified": "Email Not Verified",
+  "@emailNotVerified": {"description": "Verify email page title"},
+
+  "verifyEmailDescription": "Please verify your email address to access all features.",
+  "@verifyEmailDescription": {"description": "Verify email description"},
+
+  "newCodeSent": "A new verification code has been sent.",
+  "@newCodeSent": {"description": "New code sent message"},
+
+  "emailVerifiedSuccess": "Email verified successfully!",
+  "@emailVerifiedSuccess": {"description": "Email verified success"},
+
+  "resendVerificationEmail": "Resend Verification Email",
+  "@resendVerificationEmail": {"description": "Resend button"},
+
+  "iVerifiedSignIn": "I've Verified — Sign In",
+  "@iVerifiedSignIn": {"description": "Verified sign in button"},
+
+  "signOut": "Sign Out",
+  "@signOut": {"description": "Sign out button"},
+
+  "checkYourEmail": "Check Your Email",
+  "@checkYourEmail": {"description": "Verification sent title"},
+
+  "emailVerified": "Email Verified!",
+  "@emailVerified": {"description": "Email verified title"},
+
+  "verificationSentTo": "We sent a verification code to",
+  "@verificationSentTo": {"description": "Verification sent message"},
+
+  "codeExpires10Min": "Enter the 6-digit code from the email. The code expires in 10 minutes.",
+  "@codeExpires10Min": {"description": "Code expiry hint"},
+
+  "youCanNowLogIn": "You can now log in to your account.",
+  "@youCanNowLogIn": {"description": "Post-verification message"},
+
+  "goToSignIn": "Go to Sign In",
+  "@goToSignIn": {"description": "Navigate to sign in button"},
+
+  "resendCode": "Resend Code",
+  "@resendCode": {"description": "Resend code button"},
+
+  "resendCodeCountdown": "Resend Code ({count})",
+  "@resendCodeCountdown": {
+    "description": "Resend code with cooldown",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "editProfile": "Edit Profile",
+  "@editProfile": {"description": "Edit profile title"},
+
+  "bioLabel": "Bio",
+  "@bioLabel": {"description": "Bio field label"},
+
+  "bioHint": "Tell us about yourself...",
+  "@bioHint": {"description": "Bio field hint"},
+
+  "marketingEmails": "Marketing emails",
+  "@marketingEmails": {"description": "Marketing toggle label"},
+
+  "marketingEmailsSubtitle": "Receive recommendations and updates",
+  "@marketingEmailsSubtitle": {"description": "Marketing toggle subtitle"},
+
+  "emailNotVerifiedWarning": "Email not verified",
+  "@emailNotVerifiedWarning": {"description": "Email unverified warning"},
+
+  "profileUpdated": "Profile updated!",
+  "@profileUpdated": {"description": "Profile save success"},
+
+  "changeEmailWarning": "Changing email will require re-verification",
+  "@changeEmailWarning": {"description": "Email change warning"},
+
+  "signOutTitle": "Sign Out",
+  "@signOutTitle": {"description": "Sign out dialog title"},
+
+  "signOutConfirm": "Are you sure you want to sign out?",
+  "@signOutConfirm": {"description": "Sign out confirmation"},
+
+  "deleteAccount": "Delete Account",
+  "@deleteAccount": {"description": "Delete account button"},
+
+  "deleteAccountWarning": "This action cannot be undone. All your data will be permanently deleted.",
+  "@deleteAccountWarning": {"description": "Delete account warning"},
+
+  "enterPasswordConfirm": "Enter your password to confirm",
+  "@enterPasswordConfirm": {"description": "Password confirmation field"},
+
+  "delete": "Delete",
+  "@delete": {"description": "Delete confirm button"},
+
+  "clearCache": "Clear Cache",
+  "@clearCache": {"description": "Clear cache button"},
+
+  "clearCacheConfirm": "Clear cached images and data?",
+  "@clearCacheConfirm": {"description": "Clear cache confirmation"},
+
+  "cacheCleared": "Cache cleared",
+  "@cacheCleared": {"description": "Cache cleared snackbar"},
+
+  "language": "Language",
+  "@language": {"description": "Language settings label"},
+
+  "english": "English",
+  "@english": {"description": "English language option"},
+
+  "spanish": "Spanish",
+  "@spanish": {"description": "Spanish language option"},
+
+  "french": "French",
+  "@french": {"description": "French language option"},
+
+  "german": "German",
+  "@german": {"description": "German language option"},
+
+  "close": "Close",
+  "@close": {"description": "Close button"},
+
+  "about": "About",
+  "@about": {"description": "About dialog title"},
+
+  "appTagline": "Track your movies, build watchlists, and discover new favorites.",
+  "@appTagline": {"description": "App tagline in about dialog"},
+
+  "avatarUpdated": "Avatar updated",
+  "@avatarUpdated": {"description": "Avatar update success"},
+
+  "passwordChanged": "Password changed successfully",
+  "@passwordChanged": {"description": "Password change success"},
+
+  "changePassword": "Change Password",
+  "@changePassword": {"description": "Change password button"},
+
+  "currentPasswordLabel": "Current Password",
+  "@currentPasswordLabel": {"description": "Current password field label"},
+
+  "update": "Update",
+  "@update": {"description": "Update button"},
+
+  "fillAllPasswordFields": "Fill in all password fields",
+  "@fillAllPasswordFields": {"description": "Password fields required error"},
+
+  "newPasswordMinChars": "New password must be at least 8 characters",
+  "@newPasswordMinChars": {"description": "New password min length"},
+
+  "guestBrowsing": "You're browsing as a guest",
+  "@guestBrowsing": {"description": "Guest mode label"},
+
+  "saveFavorites": "Save Favorites",
+  "@saveFavorites": {"description": "Guest feature card title"},
+
+  "saveFavoritesDesc": "Bookmark movies you love for quick access",
+  "@saveFavoritesDesc": {"description": "Guest feature card description"},
+
+  "buildWatchlist": "Build Watchlist",
+  "@buildWatchlist": {"description": "Guest feature card title"},
+
+  "buildWatchlistDesc": "Plan what to watch next",
+  "@buildWatchlistDesc": {"description": "Guest feature card description"},
+
+  "trackHistory": "Track History",
+  "@trackHistory": {"description": "Guest feature card title"},
+
+  "trackHistoryDesc": "Keep a record of every movie you watch",
+  "@trackHistoryDesc": {"description": "Guest feature card description"},
+
+  "signInCreateAccount": "Sign In / Create Account",
+  "@signInCreateAccount": {"description": "Guest CTA button"},
+
+  "settings": "Settings",
+  "@settings": {"description": "Settings section header"},
+
+  "lightMode": "Light Mode",
+  "@lightMode": {"description": "Light mode toggle"},
+
+  "darkMode": "Dark Mode",
+  "@darkMode": {"description": "Dark mode toggle"},
+
+  "myReviews": "My Reviews",
+  "@myReviews": {"description": "My reviews nav"},
+
+  "myLists": "My Lists",
+  "@myLists": {"description": "My lists nav"},
+
+  "stats": "Stats",
+  "@stats": {"description": "Stats nav"},
+
+  "notifications": "Notifications",
+  "@notifications": {"description": "Notifications nav"},
+
+  "notificationComingSoon": "Notification settings coming soon",
+  "@notificationComingSoon": {"description": "Not implemented yet"},
+
+  "manageSessions": "Manage Sessions",
+  "@manageSessions": {"description": "Sessions nav"},
+
+  "blockedUsers": "Blocked Users",
+  "@blockedUsers": {"description": "Blocked users nav"},
+
+  "movies": "Movies",
+  "@movies": {"description": "Movies stat label"},
+
+  "reviews": "Reviews",
+  "@reviews": {"description": "Reviews stat label"},
+
+  "lists": "Lists",
+  "@lists": {"description": "Lists stat label"},
+
+  "followers": "Followers",
+  "@followers": {"description": "Followers stat label"},
+
+  "following": "Following",
+  "@following": {"description": "Following stat label"},
+
+  "favorites": "Favorites",
+  "@favorites": {"description": "Favorites stat label"},
+
+  "watchHistory": "Watch History",
+  "@watchHistory": {"description": "History section title"},
+
+  "seeAll": "See All",
+  "@seeAll": {"description": "See all link"},
+
+  "noWatchHistory": "No watch history yet",
+  "@noWatchHistory": {"description": "Empty history message"},
+
+  "marketingEmailsEnabled": "Marketing emails enabled",
+  "@marketingEmailsEnabled": {"description": "Marketing status in profile"},
+
+  "resend": "Resend",
+  "@resend": {"description": "Resend verification button"},
+
+  "showCurrentPassword": "Show current password",
+  "@showCurrentPassword": {"description": "Show current password tooltip"},
+
+  "hideCurrentPassword": "Hide current password",
+  "@hideCurrentPassword": {"description": "Hide current password tooltip"},
+
+  "showNewPassword": "Show new password",
+  "@showNewPassword": {"description": "Show new password tooltip"},
+
+  "hideNewPassword": "Hide new password",
+  "@hideNewPassword": {"description": "Hide new password tooltip"},
+
+  "showConfirmPassword": "Show confirm password",
+  "@showConfirmPassword": {"description": "Show confirm password tooltip"},
+
+  "hideConfirmPassword": "Hide confirm password",
+  "@hideConfirmPassword": {"description": "Hide confirm password tooltip"},
+
+  "browseMovies": "Browse Movies",
+  "@browseMovies": {"description": "Browse page title"},
+
+  "recentlyWatched": "Recently Watched",
+  "@recentlyWatched": {"description": "Recently watched section title"},
+
+  "trendingNow": "Trending Now",
+  "@trendingNow": {"description": "Trending section title"},
+
+  "nowPlaying": "Now Playing",
+  "@nowPlaying": {"description": "Now playing section title"},
+
+  "popular": "Popular",
+  "@popular": {"description": "Popular section title"},
+
+  "comingSoon": "Coming Soon",
+  "@comingSoon": {"description": "Coming soon section title"},
+
+  "topRated": "Top Rated",
+  "@topRated": {"description": "Top rated section title"},
+
+  "noMoviesFound": "No movies found",
+  "@noMoviesFound": {"description": "Empty genre grid"},
+
+  "noMoviesAvailable": "No movies available",
+  "@noMoviesAvailable": {"description": "Empty section"},
+
+  "featuredMovies": "Featured Movies",
+  "@featuredMovies": {"description": "Featured carousel title"},
+
+  "searchMoviesHint": "Search movies...",
+  "@searchMoviesHint": {"description": "Search field hint"},
+
+  "clearSearch": "Clear search",
+  "@clearSearch": {"description": "Clear search tooltip"},
+
+  "filterByYear": "Filter by year",
+  "@filterByYear": {"description": "Year filter tooltip"},
+
+  "sortBy": "Sort by",
+  "@sortBy": {"description": "Sort filter tooltip"},
+
+  "rating": "Rating",
+  "@rating": {"description": "Sort option: rating"},
+
+  "newest": "Newest",
+  "@newest": {"description": "Sort option: newest date"},
+
+  "searchMillions": "Search millions of movies",
+  "@searchMillions": {"description": "Search empty prompt"},
+
+  "noResultsFor": "No results for \"{query}\"",
+  "@noResultsFor": {
+    "description": "Search empty state with query",
+    "placeholders": {
+      "query": {}
+    }
+  },
+
+  "movie": "Movie",
+  "@movie": {"description": "AppBar title fallback"},
+
+  "movieNotFound": "Movie not found",
+  "@movieNotFound": {"description": "Movie load error"},
+
+  "failedToLoadMovie": "Failed to load movie details",
+  "@failedToLoadMovie": {"description": "Movie details error"},
+
+  "failedToLoadCast": "Failed to load cast",
+  "@failedToLoadCast": {"description": "Cast load error"},
+
+  "failedToLoadSimilar": "Failed to load similar movies",
+  "@failedToLoadSimilar": {"description": "Similar movies error"},
+
+  "failedToLoadRecommendations": "Failed to load recommendations",
+  "@failedToLoadRecommendations": {"description": "Recommendations error"},
+
+  "failedToLoadTrailer": "Failed to load trailer",
+  "@failedToLoadTrailer": {"description": "Trailer load error"},
+
+  "retry": "Retry",
+  "@retry": {"description": "Retry button"},
+
+  "reportReview": "Report Review",
+  "@reportReview": {"description": "Report review dialog title"},
+
+  "reportReasonHint": "Why are you reporting this review?",
+  "@reportReasonHint": {"description": "Report reason field hint"},
+
+  "submit": "Submit",
+  "@submit": {"description": "Submit button"},
+
+  "reviewReported": "Review reported",
+  "@reviewReported": {"description": "Report success snackbar"},
+
+  "failedToReportReview": "Failed to report review",
+  "@failedToReportReview": {"description": "Report failure snackbar"},
+
+  "notAvailable": "N/A",
+  "@notAvailable": {"description": "Not available fallback"},
+
+  "hoursAbbr": "h",
+  "@hoursAbbr": {"description": "Hours abbreviation"},
+
+  "minutesAbbr": "m",
+  "@minutesAbbr": {"description": "Minutes abbreviation"},
+
+  "minutesSuffix": " min",
+  "@minutesSuffix": {"description": "Minutes suffix"},
+
+  "overview": "Overview",
+  "@overview": {"description": "Movie overview section"},
+
+  "noOverview": "No overview available.",
+  "@noOverview": {"description": "Empty overview text"},
+
+  "cast": "Cast",
+  "@cast": {"description": "Cast section title"},
+
+  "similarMovies": "Similar Movies",
+  "@similarMovies": {"description": "Similar movies section"},
+
+  "recommendationSection": "Recommendations",
+  "@recommendationSection": {"description": "Recommendations section title"},
+
+  "ratingsReviews": "Ratings & Reviews",
+  "@ratingsReviews": {"description": "Reviews section title"},
+
+  "yourReview": "Your review",
+  "@yourReview": {"description": "User's own review label"},
+
+  "watchTeaser": "Watch Teaser",
+  "@watchTeaser": {"description": "Teaser button"},
+
+  "watchTrailer": "Watch Trailer",
+  "@watchTrailer": {"description": "Trailer button"},
+
+  "favorited": "Favorited",
+  "@favorited": {"description": "Already favorited button"},
+
+  "favoriteAction": "Favorite",
+  "@favoriteAction": {"description": "Favorite button"},
+
+  "saved": "Saved",
+  "@saved": {"description": "Already in watchlist button"},
+
+  "watchlistAction": "Watchlist",
+  "@watchlistAction": {"description": "Watchlist button"},
+
+  "listAction": "List",
+  "@listAction": {"description": "Add to list button"},
+
+  "share": "Share",
+  "@share": {"description": "Share button"},
+
+  "watchNow": "Watch Now",
+  "@watchNow": {"description": "Stream CTA button"},
+
+  "editAction": "Edit",
+  "@editAction": {"description": "Edit button"},
+
+  "deleteAction": "Delete",
+  "@deleteAction": {"description": "Delete action button"},
+
+  "writeReviewHint": "Write your review (optional)",
+  "@writeReviewHint": {"description": "Review field hint"},
+
+  "updateReview": "Update Review",
+  "@updateReview": {"description": "Update review button"},
+
+  "submitReview": "Submit Review",
+  "@submitReview": {"description": "Submit review button"},
+
+  "shareReview": "Share review",
+  "@shareReview": {"description": "Share review tooltip"},
+
+  "reportAction": "Report",
+  "@reportAction": {"description": "Report review button"},
+
+  "landingTitle": "CineTrack",
+  "@landingTitle": {"description": "Landing page title"},
+
+  "landingTagline": "Your personal cinema command center",
+  "@landingTagline": {"description": "Landing page tagline"},
+
+  "landingSubtitle": "Track every film. Discover your next obsession.",
+  "@landingSubtitle": {"description": "Landing page subtitle"},
+
+  "smartSearch": "Smart Search",
+  "@smartSearch": {"description": "Feature card title"},
+
+  "smartSearchDesc": "Find any movie instantly with powerful search",
+  "@smartSearchDesc": {"description": "Feature card description"},
+
+  "apiDiscovery": "API-Powered Discovery",
+  "@apiDiscovery": {"description": "Feature card title"},
+
+  "apiDiscoveryDesc": "Browse trending and top-rated movies live from TMDB",
+  "@apiDiscoveryDesc": {"description": "Feature card description"},
+
+  "favoritesWatchlist": "Favorites & Watchlist",
+  "@favoritesWatchlist": {"description": "Feature card title"},
+
+  "favoritesWatchlistDesc": "Save movies to your favorites or build a watchlist",
+  "@favoritesWatchlistDesc": {"description": "Feature card description"},
+
+  "guestExplanation": "Guest mode: browse and search only. Sign in to save favorites, build watchlists, and track history.",
+  "@guestExplanation": {"description": "Guest mode explanation"},
+
+  "landingFooter": "\u00a9 2026 CineTrack. Powered by TMDB.",
+  "@landingFooter": {"description": "Landing page footer"},
+
+  "continueAsGuest": "Continue as Guest",
+  "@continueAsGuest": {"description": "Guest mode button"},
+
+  "switchToLightMode": "Switch to light mode",
+  "@switchToLightMode": {"description": "Theme toggle tooltip"},
+
+  "switchToDarkMode": "Switch to dark mode",
+  "@switchToDarkMode": {"description": "Theme toggle tooltip"},
+
+  "discoverMovies": "Discover Movies",
+  "@discoverMovies": {"description": "Onboarding page 1 title"},
+
+  "discoverMoviesDesc": "Browse thousands of movies from TMDB. Search by genre, year, or popularity to find your next favorite film.",
+  "@discoverMoviesDesc": {"description": "Onboarding page 1 description"},
+
+  "trackFavorites": "Track Favorites",
+  "@trackFavorites": {"description": "Onboarding page 2 title"},
+
+  "trackFavoritesDesc": "Save movies to your favorites, build a watchlist, and keep track of everything you've watched.",
+  "@trackFavoritesDesc": {"description": "Onboarding page 2 description"},
+
+  "startWatching": "Start Watching",
+  "@startWatching": {"description": "Onboarding page 3 title"},
+
+  "startWatchingDesc": "Stream movies built-in, read reviews, rate films, and explore recommendations tailored just for you.",
+  "@startWatchingDesc": {"description": "Onboarding page 3 description"},
+
+  "signInOrExplore": "Sign In or Explore",
+  "@signInOrExplore": {"description": "Onboarding page 4 title"},
+
+  "signInOrExploreDesc": "Create an account to sync across devices, or browse as a guest and start watching right away.",
+  "@signInOrExploreDesc": {"description": "Onboarding page 4 description"},
+
+  "skip": "Skip",
+  "@skip": {"description": "Skip onboarding button"},
+
+  "next": "Next",
+  "@next": {"description": "Next button"},
+
+  "getStarted": "Get Started",
+  "@getStarted": {"description": "Get started button"},
+
+  "changeProfilePicture": "Change Profile Picture",
+  "@changeProfilePicture": {"description": "Avatar sheet title"},
+
+  "takePhoto": "Take Photo",
+  "@takePhoto": {"description": "Camera option"},
+
+  "chooseFromGallery": "Choose from Gallery",
+  "@chooseFromGallery": {"description": "Gallery option"},
+
+  "removeCurrentPhoto": "Remove Current Photo",
+  "@removeCurrentPhoto": {"description": "Remove avatar option"},
+
+  "failedToPickImage": "Failed to pick image: {error}",
+  "@failedToPickImage": {
+    "description": "Image pick error",
+    "placeholders": {
+      "error": {}
+    }
+  },
+
+  "sessionExpiring": "Session Expiring",
+  "@sessionExpiring": {"description": "Idle timer dialog title"},
+
+  "sessionExpiringDesc": "Your session will expire in 2 minutes due to inactivity.\n\nTap \"Stay Logged In\" to continue.",
+  "@sessionExpiringDesc": {"description": "Idle timer dialog body"},
+
+  "stayLoggedIn": "Stay Logged In",
+  "@stayLoggedIn": {"description": "Keep session alive button"},
+
+  "hideReplies": "Hide replies ({count})",
+  "@hideReplies": {
+    "description": "Hide replies toggle",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "repliesCount": "Replies ({count})",
+  "@repliesCount": {
+    "description": "Show replies toggle",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "anonymous": "Anonymous",
+  "@anonymous": {"description": "Fallback username"},
+
+  "writeReplyHint": "Write a reply...",
+  "@writeReplyHint": {"description": "Reply input hint"},
+
+  "movieCount": "{count} movies",
+  "@movieCount": {
+    "description": "Movie count label in list card",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "publicBadge": "Public",
+  "@publicBadge": {"description": "Public list badge"},
+
+  "privateBadge": "Private",
+  "@privateBadge": {"description": "Private list badge"},
+
+  "pageIndicator": "Page {current} of {total}",
+  "@pageIndicator": {
+    "description": "Pagination indicator",
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+
+  "ratingOutOf10": "Rating: {rating} out of 10",
+  "@ratingOutOf10": {
+    "description": "Rating accessibility label",
+    "placeholders": {
+      "rating": {}
+    }
+  },
+
+  "ratingSelector": "Rating selector",
+  "@ratingSelector": {"description": "Rating bar accessibility label"},
+
+  "selectRatingHint": "Select a rating from 1 to 10",
+  "@selectRatingHint": {"description": "Rating bar accessibility hint"},
+
+  "rateOutOf10": "Rate {starValue} out of 10",
+  "@rateOutOf10": {
+    "description": "Per-star accessibility label",
+    "placeholders": {
+      "starValue": {}
+    }
+  },
+
+  "tapToRate": "Tap to rate",
+  "@tapToRate": {"description": "Unrated state label"},
+
+  "ratingDisplay": "{rating} / 10",
+  "@ratingDisplay": {
+    "description": "Selected rating display",
+    "placeholders": {
+      "rating": {}
+    }
+  },
+
+  "notificationSettings": "Notification Settings",
+  "@notificationSettings": {"description": "Notification settings page title"},
+
+  "notifFollowLabel": "New Followers",
+  "@notifFollowLabel": {"description": "Follow notification toggle label"},
+
+  "notifFollowSubtitle": "When someone follows you",
+  "@notifFollowSubtitle": {"description": "Follow notification toggle subtitle"},
+
+  "notifReviewLikeLabel": "Review Likes",
+  "@notifReviewLikeLabel": {"description": "Review like notification toggle label"},
+
+  "notifReviewLikeSubtitle": "When someone likes your review",
+  "@notifReviewLikeSubtitle": {"description": "Review like notification toggle subtitle"},
+
+  "notifReplyLabel": "Replies",
+  "@notifReplyLabel": {"description": "Reply notification toggle label"},
+
+  "notifReplySubtitle": "When someone replies to your review",
+  "@notifReplySubtitle": {"description": "Reply notification toggle subtitle"},
+
+  "notifModerationLabel": "Moderation",
+  "@notifModerationLabel": {"description": "Moderation notification toggle label"},
+
+  "notifModerationSubtitle": "When your content is moderated",
+  "@notifModerationSubtitle": {"description": "Moderation notification toggle subtitle"},
+
+  "notifListAddLabel": "List Additions",
+  "@notifListAddLabel": {"description": "List add notification toggle label"},
+
+  "notifListAddSubtitle": "When someone adds you to a list",
+  "@notifListAddSubtitle": {"description": "List add notification toggle subtitle"},
+
+  "notificationSettingsHint": "You'll also receive essential notifications about your account security.",
+  "@notificationSettingsHint": {"description": "Notification settings hint text"},
+
+  "person": "Person",
+  "@person": {"description": "Person screen fallback title"},
+
+  "personNotFound": "Person not found",
+  "@personNotFound": {"description": "Person not found error"},
+
+  "failedToLoadPerson": "Failed to load person details",
+  "@failedToLoadPerson": {"description": "Person load error"},
+
+  "biography": "Biography",
+  "@biography": {"description": "Biography section header"},
+
+  "readMore": "Read more",
+  "@readMore": {"description": "Expand text action"},
+
+  "showLess": "Show less",
+  "@showLess": {"description": "Collapse text action"},
+
+  "personalInfo": "Personal Info",
+  "@personalInfo": {"description": "Personal info section header"},
+
+  "birthdayLabel": "Birthday",
+  "@birthdayLabel": {"description": "Birthday info label"},
+
+  "ageLabel": "Age",
+  "@ageLabel": {"description": "Age info label"},
+
+  "yearsOld": "{age} years old",
+  "@yearsOld": {
+    "description": "Age display",
+    "placeholders": {
+      "age": {}
+    }
+  },
+
+  "placeOfBirth": "Place of Birth",
+  "@placeOfBirth": {"description": "Place of birth info label"},
+
+  "status": "Status",
+  "@status": {"description": "Status info label"},
+
+  "alive": "Alive",
+  "@alive": {"description": "Alive status"},
+
+  "deceased": "Deceased",
+  "@deceased": {"description": "Deceased status"},
+
+  "alsoKnownAs": "Also Known As",
+  "@alsoKnownAs": {"description": "Also known as section label"},
+
+  "knownFor": "Known For",
+  "@knownFor": {"description": "Known for section header"},
+
+  "filmography": "Filmography",
+  "@filmography": {"description": "Filmography section header"}
+}

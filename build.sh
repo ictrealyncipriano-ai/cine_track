@@ -5,4 +5,5 @@ git config --global --add safe.directory /tmp/flutter
 export PATH="/tmp/flutter/bin:$PATH"
 flutter config --no-analytics
 flutter pub get
+flutter gen-l10n
 flutter build web --release --no-tree-shake-icons
