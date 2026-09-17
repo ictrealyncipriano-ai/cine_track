@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/error_message.dart';
 import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
-import 'reset_password_screen.dart';
+import '../../widgets/auth_error_banner.dart';
+import '../../l10n/app_localizations.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -36,17 +39,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     });
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.forgotPassword(_emailController.text.trim());
+    final rawError = await auth.forgotPassword(_emailController.text.trim());
 
-    if (mounted) {
-      if (error != null) {
-        setState(() => _error = error);
-      } else {
-        setState(() {
-          _success = 'If that email is registered, you will receive a password reset link shortly.';
-          _emailSent = true;
-        });
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() => _error = displayError);
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() {
+        _success = AppLocalizations.of(context)!.ifEmailRegistered;
+        _emailSent = true;
+      });
     }
   }
 
@@ -58,7 +62,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     try {
       uri = Uri.parse(link);
     } catch (_) {
-      setState(() => _error = 'Invalid link format');
+      setState(() => _error = AppLocalizations.of(context)!.invalidLinkFormat);
       return;
     }
 
@@ -67,31 +71,27 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final token = queryParams['token'];
 
     if (email == null || token == null) {
-      setState(() => _error = 'Could not find reset token in the link');
+      setState(() => _error = AppLocalizations.of(context)!.noResetToken);
       return;
     }
 
     final emailRegExp = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
     if (!emailRegExp.hasMatch(email)) {
-      setState(() => _error = 'Invalid email address in the reset link');
+      setState(() => _error = AppLocalizations.of(context)!.invalidEmailInLink);
       return;
     }
     if (token.length < 10) {
-      setState(() => _error = 'Invalid reset token in the link');
+      setState(() => _error = AppLocalizations.of(context)!.invalidResetToken);
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => ResetPasswordScreen(email: email, token: token),
-      ),
-    );
+    context.go('/login/reset-password?email=${Uri.encodeComponent(email)}&token=${Uri.encodeComponent(token)}');
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -112,7 +112,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Reset Password',
+                    l10n.resetPasswordTitle,
                     style: GoogleFonts.montserrat(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
@@ -121,7 +121,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter your email address and we\'ll send you a link to reset your password.',
+                    l10n.resetPasswordDescription,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
@@ -132,7 +132,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: l10n.emailLabel,
                       prefixIcon: const Icon(Icons.email_outlined),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
@@ -144,9 +144,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Enter a valid email';
+                      if (v == null || v.trim().isEmpty) return l10n.invalidEmail;
                       final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                      return emailRegex.hasMatch(v.trim()) ? null : 'Enter a valid email';
+                      return emailRegex.hasMatch(v.trim()) ? null : l10n.invalidEmail;
                     },
                   ),
                   if (_emailSent) ...[
@@ -154,7 +154,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     Divider(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.12)),
                     const SizedBox(height: 16),
                     Text(
-                      'Paste the reset link from your email below:',
+                      l10n.pasteResetLink,
                       style: GoogleFonts.inter(
                         fontSize: 13,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
@@ -164,7 +164,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   TextFormField(
                     controller: _linkController,
                     decoration: InputDecoration(
-                      hintText: 'Paste full reset link here',
+                      hintText: l10n.resetLinkHint,
                       prefixIcon: const Icon(Icons.link),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
@@ -187,7 +187,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text('Continue',
+                        child: Text(l10n.continueAction,
                             style: TextStyle(
                                 fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
@@ -195,7 +195,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ],
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    AuthErrorBanner(message: _error!),
                   ],
                   if (_success != null && !_emailSent) ...[
                     const SizedBox(height: 12),
@@ -221,7 +221,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Send Reset Link',
+                            : Text(l10n.sendResetLink,
                                 style: TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.w600)),
                       ),
@@ -231,11 +231,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     onPressed: () => Navigator.pop(context),
                     child: Text.rich(
                       TextSpan(
-                        text: 'Back to ',
+                        text: l10n.backTo,
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 14),
                         children: [
                           TextSpan(
-                            text: 'Sign In',
+                            text: l10n.signIn,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w600,

@@ -1,14 +1,13 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../config.dart';
+import '../../helpers/error_message.dart';
 import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
-import '../home_screen.dart';
-import 'register_screen.dart';
-import 'forgot_password_screen.dart';
+import '../../widgets/auth_error_banner.dart';
+import '../../l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -51,47 +50,41 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.login(
+    final rawError = await auth.login(
       _emailController.text.trim(),
       _passwordController.text,
       rememberMe: _rememberMe,
     );
 
-    if (mounted) {
-      if (error != null) {
-        final isVerifyError = error.contains('verify your email');
-        setState(() {
-          _error = error;
-          _emailNotVerified = isVerifyError;
-        });
-      } else {
-        if (kIsWeb) {
-          context.go('/browse');
-        } else {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-          }
-        }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() {
+        _error = displayError;
+        _emailNotVerified = isEmailNotVerifiedError(rawError);
+      });
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      if (mounted) {
+        context.go('/browse');
       }
     }
   }
 
   Future<void> _resend() async {
     final auth = context.read<AuthProvider>();
-    final error = await auth.resendVerification(_emailController.text.trim());
+    final rawError = await auth.resendVerification(_emailController.text.trim());
 
-    if (mounted) {
-      if (error != null) {
-        setState(() => _error = error);
-      } else {
-        setState(() {
-          _resendSent = true;
-          _error = 'A new verification link has been sent to your email.';
-        });
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() => _error = displayError);
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() {
+        _resendSent = true;
+        _error = AppLocalizations.of(context)!.newVerificationLinkSent;
+      });
     }
   }
 
@@ -105,35 +98,37 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.verifyEmailCode(
+    final rawError = await auth.verifyEmailCode(
       _emailController.text.trim(),
       code,
     );
 
-    if (mounted) {
-      if (error != null) {
-        setState(() {
-          _error = error;
-          _verifying = false;
-        });
-      } else {
-        setState(() {
-          _codeVerified = true;
-          _verifying = false;
-          _error = null;
-        });
-        _submit();
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() {
+        _error = displayError;
+        _verifying = false;
+      });
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() {
+        _codeVerified = true;
+        _verifying = false;
+        _error = null;
+      });
+      _submit();
     }
   }
 
   void _showApiUrlDialog() {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: AppConfig.apiBaseUrl);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Theme.of(context).cardColor,
-        title: Text('API URL', style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
+        title: Text(l10n.apiUrl, style: TextStyle(color: Theme.of(context).colorScheme.onSurface)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -153,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 12),
             Text(
-              'Enter a custom API base URL.\nThis is saved across app restarts.',
+              l10n.apiUrlDescription,
               style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
               textAlign: TextAlign.center,
             ),
@@ -162,7 +157,7 @@ class _LoginScreenState extends State<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () async {
@@ -173,12 +168,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 if (mounted) {
                   setState(() {});
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('API URL updated')),
+                    SnackBar(content: Text(l10n.apiUrlUpdated)),
                   );
                 }
               }
             },
-            child: const Text('Save'),
+            child: Text(l10n.save),
           ),
         ],
       ),
@@ -188,6 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -210,7 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   GestureDetector(
                     onLongPress: _showApiUrlDialog,
                     child: Text(
-                      'Welcome Back',
+                      l10n.welcomeBack,
                       style: GoogleFonts.montserrat(
                         fontSize: 28,
                         fontWeight: FontWeight.w700,
@@ -231,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextFormField(
                     controller: _emailController,
                     decoration: InputDecoration(
-                      labelText: 'Email',
+                      labelText: l10n.emailLabel,
                       prefixIcon: const Icon(Icons.email_outlined),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
@@ -242,22 +238,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Enter a valid email';
+                      if (v == null || v.trim().isEmpty) return l10n.invalidEmail;
                       final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                      return emailRegex.hasMatch(v.trim()) ? null : 'Enter a valid email';
+                      return emailRegex.hasMatch(v.trim()) ? null : l10n.invalidEmail;
                     },
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'Password',
+                      labelText: l10n.passwordLabel,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
                           color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
                         ),
-                        tooltip: _obscurePassword ? 'Show password' : 'Hide password',
+                        tooltip: _obscurePassword ? l10n.showPassword : l10n.hidePassword,
                         onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                       filled: true,
@@ -269,20 +265,17 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     obscureText: _obscurePassword,
                     validator: (v) =>
-                        v != null && v.length >= 8 ? null : 'Min 8 characters',
+                        v != null && v.length >= 8 ? null : l10n.minPasswordChars,
                   ),
                   const SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-                        );
+                        context.go('/login/forgot-password');
                       },
                       child: Text(
-                        'Forgot Password?',
+                        l10n.forgotPassword,
                         style: TextStyle(
                           color: Theme.of(context).colorScheme.primary,
                           fontSize: 13,
@@ -302,19 +295,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         side: BorderSide(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.24)),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                       ),
-                      Text('Remember me',
+                      Text(l10n.rememberMe,
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13)),
                     ],
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 4),
-                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error, fontSize: 13)),
+                    AuthErrorBanner(message: _error!),
                     if (_emailNotVerified) ...[
                       const SizedBox(height: 4),
                       TextButton(
                         onPressed: _resendSent ? null : _resend,
                         child: Text(
-                          _resendSent ? 'Verification email sent' : 'Resend verification email',
+                          _resendSent ? l10n.verificationEmailSent : l10n.resendVerification,
                           style: TextStyle(
                             color: _resendSent
                                 ? Colors.greenAccent
@@ -333,7 +326,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Icon(Icons.check_circle, color: Colors.greenAccent, size: 18),
                               const SizedBox(width: 6),
                               Text(
-                                'Email verified! Signing in...',
+                                l10n.emailVerifiedSigningIn,
                                 style: TextStyle(color: Colors.greenAccent, fontSize: 13),
                               ),
                             ],
@@ -374,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Enter the 6-digit code from the email',
+                          l10n.enter6DigitCode,
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
                           textAlign: TextAlign.center,
                         ),
@@ -397,7 +390,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     width: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2),
                                   )
-                                : const Text('Verify Code',
+                                : Text(l10n.verifyCode,
                                     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
                           ),
                         ),
@@ -423,7 +416,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Sign In',
+                          : Text(l10n.signIn,
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
@@ -431,18 +424,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                      );
+                      context.go('/login/register');
                     },
                     child: Text.rich(
                       TextSpan(
-                        text: "Don't have an account? ",
+                        text: l10n.noAccount,
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 14),
                         children: [
                           TextSpan(
-                            text: 'Sign Up',
+                            text: l10n.signUp,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w600,

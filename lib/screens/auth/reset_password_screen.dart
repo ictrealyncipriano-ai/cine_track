@@ -1,10 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/error_message.dart';
 import '../../providers/auth_provider.dart';
-import '../home_screen.dart';
+import '../../widgets/auth_error_banner.dart';
+import '../../l10n/app_localizations.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -45,32 +46,34 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     });
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.resetPassword(
+    final rawError = await auth.resetPassword(
       widget.email,
       widget.token,
       _passwordController.text,
       _confirmPasswordController.text,
     );
 
-    if (mounted) {
-      if (error != null) {
-        setState(() => _error = error);
-      } else {
-        setState(() => _success = true);
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() => _error = displayError);
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() => _success = true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
-            child: _success ? _buildSuccess(context) : Form(
+            child: _success ? _buildSuccess(context, l10n) : Form(
               key: _formKey,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -82,7 +85,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Set New Password',
+                    l10n.setNewPassword,
                     style: GoogleFonts.montserrat(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
@@ -91,7 +94,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Enter your new password below.',
+                    l10n.setNewPasswordDescription,
                     style: GoogleFonts.inter(
                       fontSize: 14,
                       color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
@@ -102,7 +105,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   TextFormField(
                     controller: _passwordController,
                     decoration: InputDecoration(
-                      labelText: 'New Password',
+                      labelText: l10n.newPasswordLabel,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -127,10 +130,10 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                       setState(() => _passwordStrength = s);
                     },
                     validator: (v) {
-                      if (v == null || v.length < 8) return 'Min 8 characters';
-                      if (!v.contains(RegExp(r'[A-Z]'))) return 'Needs an uppercase letter';
-                      if (!v.contains(RegExp(r'[a-z]'))) return 'Needs a lowercase letter';
-                      if (!v.contains(RegExp(r'[0-9]'))) return 'Needs a digit';
+                      if (v == null || v.length < 8) return l10n.minPasswordChars;
+                      if (!v.contains(RegExp(r'[A-Z]'))) return l10n.needsUppercase;
+                      if (!v.contains(RegExp(r'[a-z]'))) return l10n.needsLowercase;
+                      if (!v.contains(RegExp(r'[0-9]'))) return l10n.needsDigit;
                       return null;
                     },
                   ),
@@ -146,13 +149,13 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
-                    child: Text(_strengthLabel(), style: TextStyle(fontSize: 12, color: _strengthColor())),
+                    child: Text(_strengthLabel(l10n), style: TextStyle(fontSize: 12, color: _strengthColor())),
                   ),
                   const SizedBox(height: 8),
                   TextFormField(
                     controller: _confirmPasswordController,
                     decoration: InputDecoration(
-                      labelText: 'Confirm Password',
+                      labelText: l10n.confirmPasswordLabel,
                       prefixIcon: const Icon(Icons.lock_outlined),
                       suffixIcon: IconButton(
                         icon: Icon(_obscureConfirm ? Icons.visibility_outlined : Icons.visibility_off_outlined,
@@ -169,11 +172,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                     ),
                     obscureText: _obscureConfirm,
                     validator: (v) =>
-                        v == _passwordController.text ? null : 'Passwords do not match',
+                        v == _passwordController.text ? null : l10n.passwordsDoNotMatch,
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    AuthErrorBanner(message: _error!),
                   ],
                   const SizedBox(height: 24),
                   SizedBox(
@@ -194,7 +197,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Reset Password',
+                          : Text(l10n.resetPassword,
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
@@ -215,14 +218,14 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     };
   }
 
-  String _strengthLabel() {
+  String _strengthLabel(AppLocalizations l10n) {
     return switch (_passwordStrength) {
-      0 => 'Weak', 1 => 'Fair', 2 => 'Good', 3 => 'Strong',
-      _ => 'Very strong',
+      0 => l10n.passwordStrengthWeak, 1 => l10n.passwordStrengthFair, 2 => l10n.passwordStrengthGood, 3 => l10n.passwordStrengthStrong,
+      _ => l10n.passwordStrengthVeryStrong,
     };
   }
 
-  Widget _buildSuccess(BuildContext context) {
+  Widget _buildSuccess(BuildContext context, AppLocalizations l10n) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -233,7 +236,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
         const SizedBox(height: 24),
         Text(
-          'Password Reset!',
+          l10n.passwordResetSuccess,
           style: GoogleFonts.montserrat(
             fontSize: 28,
             fontWeight: FontWeight.w700,
@@ -242,7 +245,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Your password has been reset successfully. All existing sessions have been logged out.',
+          l10n.passwordResetDescription,
           style: GoogleFonts.inter(
             fontSize: 14,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
@@ -255,14 +258,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
           height: 52,
           child: ElevatedButton(
             onPressed: () {
-              if (kIsWeb) {
-                context.go('/browse');
-              } else {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const HomeScreen()),
-                );
-              }
+              context.go('/browse');
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).colorScheme.primary,
@@ -271,7 +267,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                 borderRadius: BorderRadius.circular(12),
               ),
             ),
-            child: const Text('Go to Home',
+            child: Text(l10n.goToHome,
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
           ),
         ),

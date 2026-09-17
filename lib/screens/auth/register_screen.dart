@@ -1,12 +1,12 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/error_message.dart';
 import '../../helpers/responsive.dart';
 import '../../providers/auth_provider.dart';
-import 'login_screen.dart';
-import 'verification_sent_screen.dart';
+import '../../widgets/auth_error_banner.dart';
+import '../../l10n/app_localizations.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -99,12 +99,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
-      setState(() => _error = 'You must agree to the Terms of Service and Privacy Policy');
+      setState(() => _error = AppLocalizations.of(context)!.mustAcceptTerms);
       return;
     }
 
     final auth = context.read<AuthProvider>();
-    final error = await auth.register(
+    final rawError = await auth.register(
       name: _nameController.text.trim(),
       username: _usernameController.text.trim(),
       email: _emailController.text.trim().toLowerCase(),
@@ -118,25 +118,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       confirmPassword: _confirmPasswordController.text,
     );
 
-    if (mounted) {
-      if (error != null) {
-        setState(() => _error = error);
-      } else {
-        setState(() => _showSuccess = true);
-        await Future.delayed(const Duration(seconds: 1));
-        if (mounted) {
-          if (kIsWeb) {
-            context.go('/verification-sent?email=${Uri.encodeComponent(_emailController.text.trim())}');
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => VerificationSentScreen(email: _emailController.text.trim()),
-              ),
-            );
-          }
-        }
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() => _error = displayError);
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() => _showSuccess = true);
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
+      context.go('/verification-sent?email=${Uri.encodeComponent(_emailController.text.trim())}');
     }
   }
 
@@ -151,12 +142,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   String _strengthLabel() {
+    final l10n = AppLocalizations.of(context)!;
     return switch (_passwordStrength) {
-      0 => 'Weak',
-      1 => 'Fair',
-      2 => 'Good',
-      3 => 'Strong',
-      _ => 'Very strong',
+      0 => l10n.passwordStrengthWeak,
+      1 => l10n.passwordStrengthFair,
+      2 => l10n.passwordStrengthGood,
+      3 => l10n.passwordStrengthStrong,
+      _ => l10n.passwordStrengthVeryStrong,
     };
   }
 
@@ -228,6 +220,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context)!;
 
     if (_showSuccess) {
       return Scaffold(
@@ -238,7 +231,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             children: [
               Icon(Icons.check_circle, size: 80, color: Colors.greenAccent),
               const SizedBox(height: 16),
-              Text('Account created!', style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
+              Text(l10n.accountCreated, style: GoogleFonts.inter(fontSize: 20, fontWeight: FontWeight.w600, color: Theme.of(context).colorScheme.onSurface)),
             ],
           ),
         ),
@@ -264,7 +257,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Create Account',
+                    l10n.createAccount,
                     style: GoogleFonts.montserrat(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
@@ -274,21 +267,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 32),
                   _buildTextField(
                     controller: _nameController,
-                    label: 'Name',
+                    label: l10n.nameLabel,
                     icon: Icons.person_outlined,
                     validator: (v) =>
-                        v != null && v.trim().isNotEmpty ? null : 'Name is required',
+                        v != null && v.trim().isNotEmpty ? null : l10n.nameRequired,
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _usernameController,
-                    label: 'Username',
+                    label: l10n.usernameLabel,
                     icon: Icons.alternate_email,
                     validator: (v) {
-                      if (v == null || v.trim().length < 3) return 'Min 3 characters';
-                      if (v.trim().length > 50) return 'Max 50 characters';
+                      if (v == null || v.trim().length < 3) return l10n.usernameMinChars;
+                      if (v.trim().length > 50) return l10n.usernameMaxChars;
                       if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(v.trim())) {
-                        return 'Letters, numbers, _ and - only';
+                        return l10n.usernameInvalidChars;
                       }
                       return null;
                     },
@@ -296,25 +289,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _emailController,
-                    label: 'Email',
+                    label: l10n.emailLabel,
                     icon: Icons.email_outlined,
                     keyboardType: TextInputType.emailAddress,
                     validator: (v) {
-                      if (v == null || v.trim().isEmpty) return 'Enter a valid email';
+                      if (v == null || v.trim().isEmpty) return l10n.invalidEmail;
                       final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
-                      return emailRegex.hasMatch(v.trim()) ? null : 'Enter a valid email';
+                      return emailRegex.hasMatch(v.trim()) ? null : l10n.invalidEmail;
                     },
                   ),
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _phoneController,
-                    label: 'Phone (optional)',
+                    label: l10n.phoneOptionalLabel,
                     icon: Icons.phone_outlined,
                     keyboardType: TextInputType.phone,
                     validator: (v) {
                       if (v == null || v.trim().isEmpty) return null;
                       if (!RegExp(r'^\+?[\d\s\-()]{7,20}$').hasMatch(v.trim())) {
-                        return 'Invalid phone number';
+                        return l10n.invalidPhone;
                       }
                       return null;
                     },
@@ -325,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: InputDecorator(
                       decoration: InputDecoration(
-                        labelText: 'Date of Birth (optional)',
+                        labelText: l10n.dateOfBirthOptionalLabel,
                         prefixIcon: const Icon(Icons.calendar_today),
                         suffixIcon: _dateOfBirth != null
                             ? IconButton(
@@ -354,7 +347,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   InputDecorator(
                     decoration: InputDecoration(
-                      labelText: 'Country (optional)',
+                      labelText: l10n.countryOptionalLabel,
                       prefixIcon: const Icon(Icons.language),
                       filled: true,
                       fillColor: Theme.of(context).cardColor,
@@ -369,7 +362,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         isExpanded: true,
                         dropdownColor: Theme.of(context).cardColor,
                         hint: Text(
-                          'Select your country',
+                          l10n.selectCountry,
                           style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38)),
                         ),
                         items: _countries.map((c) {
@@ -382,7 +375,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 16),
                   _buildTextField(
                     controller: _passwordController,
-                    label: 'Password',
+                    label: l10n.passwordLabel,
                     icon: Icons.lock_outlined,
                     obscureText: _obscurePassword,
                     suffix: IconButton(
@@ -394,11 +387,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                     onChanged: _onPasswordChanged,
                     validator: (v) {
-                      if (v == null || v.length < 8) return 'Min 8 characters';
-                      if (v.length > 72) return 'Max 72 characters';
-                      if (!v.contains(RegExp(r'[A-Z]'))) return 'Needs an uppercase letter';
-                      if (!v.contains(RegExp(r'[a-z]'))) return 'Needs a lowercase letter';
-                      if (!v.contains(RegExp(r'[0-9]'))) return 'Needs a digit';
+                      if (v == null || v.length < 8) return l10n.minPasswordChars;
+                      if (v.length > 72) return l10n.maxPasswordChars;
+                      if (!v.contains(RegExp(r'[A-Z]'))) return l10n.needsUppercase;
+                      if (!v.contains(RegExp(r'[a-z]'))) return l10n.needsLowercase;
+                      if (!v.contains(RegExp(r'[0-9]'))) return l10n.needsDigit;
                       return null;
                     },
                   ),
@@ -422,7 +415,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 12),
                   _buildTextField(
                     controller: _confirmPasswordController,
-                    label: 'Confirm Password',
+                    label: l10n.confirmPasswordLabel,
                     icon: Icons.lock_outlined,
                     obscureText: _obscureConfirm,
                     suffix: IconButton(
@@ -433,11 +426,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       onPressed: () => setState(() => _obscureConfirm = !_obscureConfirm),
                     ),
                     validator: (v) =>
-                        v == _passwordController.text ? null : 'Passwords do not match',
+                        v == _passwordController.text ? null : l10n.passwordsDoNotMatch,
                   ),
                   if (_error != null) ...[
                     const SizedBox(height: 12),
-                    Text(_error!, style: TextStyle(color: Theme.of(context).colorScheme.error)),
+                    AuthErrorBanner(message: _error!),
                   ],
                   const SizedBox(height: 8),
                   Row(
@@ -452,7 +445,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: GestureDetector(
                           onTap: () => setState(() => _acceptTerms = !_acceptTerms),
                           child: Text(
-                            'I agree to the Terms of Service and Privacy Policy',
+                            l10n.acceptTerms,
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13),
                           ),
                         ),
@@ -471,7 +464,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: GestureDetector(
                           onTap: () => setState(() => _marketingOptIn = !_marketingOptIn),
                           child: Text(
-                            'Send me movie recommendations and updates via email',
+                            l10n.marketingOptIn,
                             style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 13),
                           ),
                         ),
@@ -497,7 +490,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Create Account',
+                          : Text(l10n.createAccount,
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.w600)),
                     ),
@@ -505,18 +498,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => const LoginScreen()),
-                      );
+                      context.go('/login');
                     },
                     child: Text.rich(
                       TextSpan(
-                        text: 'Already have an account? ',
+                        text: l10n.alreadyHaveAccount,
                         style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54), fontSize: 14),
                         children: [
                           TextSpan(
-                            text: 'Sign In',
+                            text: l10n.signIn,
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.w600,

@@ -1,12 +1,11 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../helpers/error_message.dart';
 import '../../providers/auth_provider.dart';
-import '../home_screen.dart';
-import '../landing_page.dart';
-import 'login_screen.dart';
+import '../../widgets/auth_error_banner.dart';
+import '../../l10n/app_localizations.dart';
 
 class VerifyEmailScreen extends StatefulWidget {
   const VerifyEmailScreen({super.key});
@@ -33,20 +32,21 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
     final email = auth.user?.email;
     if (email == null) return;
 
-    final error = await auth.resendVerification(email);
+    final rawError = await auth.resendVerification(email);
 
-    if (mounted) {
-      if (error != null) {
-        setState(() {
-          _message = error;
-          _sent = false;
-        });
-      } else {
-        setState(() {
-          _message = 'A new verification code has been sent.';
-          _sent = true;
-        });
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() {
+        _message = displayError;
+        _sent = false;
+      });
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() {
+        _message = AppLocalizations.of(context)!.newCodeSent;
+        _sent = true;
+      });
     }
   }
 
@@ -63,32 +63,25 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       _message = null;
     });
 
-    final error = await auth.verifyEmailCode(email, code);
+    final rawError = await auth.verifyEmailCode(email, code);
 
-    if (mounted) {
-      if (error != null) {
-        setState(() {
-          _message = error;
-          _verifying = false;
-        });
-      } else {
-        setState(() {
-          _verified = true;
-          _verifying = false;
-          _message = 'Email verified successfully!';
-        });
-        await auth.checkAuth();
-        if (mounted) {
-          if (kIsWeb) {
-            context.go('/browse');
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const HomeScreen()),
-            );
-          }
-        }
-      }
+    if (!mounted) return;
+    if (rawError != null) {
+      final displayError = cleanAuthError(rawError);
+      setState(() {
+        _message = displayError;
+        _verifying = false;
+      });
+      showAuthErrorSnackBar(context, displayError);
+    } else {
+      setState(() {
+        _verified = true;
+        _verifying = false;
+        _message = AppLocalizations.of(context)!.emailVerifiedSuccess;
+      });
+      await auth.checkAuth();
+      if (!mounted) return;
+      context.go('/browse');
     }
   }
 
@@ -96,6 +89,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final email = auth.user?.email ?? '';
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       body: SafeArea(
@@ -112,7 +106,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Email Not Verified',
+                  l10n.emailNotVerified,
                   style: GoogleFonts.montserrat(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -121,7 +115,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Please verify your email address to access all features.',
+                  l10n.verifyEmailDescription,
                   style: GoogleFonts.inter(
                     fontSize: 14,
                     color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.54),
@@ -139,14 +133,17 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                 ),
                 if (_message != null) ...[
                   const SizedBox(height: 16),
-                  Text(
-                    _message!,
-                    style: TextStyle(
-                      color: _sent || _verified ? Colors.greenAccent : Theme.of(context).colorScheme.error,
-                      fontSize: 13,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+                  if (_sent || _verified)
+                    Text(
+                      _message!,
+                      style: const TextStyle(
+                        color: Colors.greenAccent,
+                        fontSize: 13,
+                      ),
+                      textAlign: TextAlign.center,
+                    )
+                  else
+                    AuthErrorBanner(message: _message!),
                 ],
                 if (!_verified) ...[
                   const SizedBox(height: 24),
@@ -183,7 +180,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Enter the 6-digit code from the email',
+                    l10n.enter6DigitCode,
                     style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.38), fontSize: 12),
                     textAlign: TextAlign.center,
                   ),
@@ -195,7 +192,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                   child: ElevatedButton.icon(
                     onPressed: _resend,
                     icon: const Icon(Icons.refresh),
-                    label: const Text('Resend Verification Email'),
+                    label: Text(l10n.resendVerificationEmail),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -219,7 +216,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.check),
-                      label: const Text('Verify Code'),
+                      label: Text(l10n.verifyCode),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Theme.of(context).colorScheme.primary,
                       foregroundColor: Theme.of(context).colorScheme.onPrimary,
@@ -238,14 +235,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     onPressed: () async {
                       await auth.logout();
                       if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LoginScreen()),
-                        );
+                        context.go('/login');
                       }
                     },
                     icon: const Icon(Icons.check_circle),
-                    label: const Text("I've Verified — Sign In"),
+                    label: Text(l10n.iVerifiedSignIn),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.greenAccent.shade700,
                       foregroundColor: Theme.of(context).colorScheme.onSurface,
@@ -263,14 +257,11 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
                     onPressed: () async {
                       await auth.logout();
                       if (context.mounted) {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const LandingPage()),
-                        );
+                        context.go('/landing');
                       }
                     },
                     icon: const Icon(Icons.logout),
-                    label: const Text('Sign Out'),
+                    label: Text(l10n.signOut),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Theme.of(context).colorScheme.error,
                       side: BorderSide(color: Theme.of(context).colorScheme.error),
