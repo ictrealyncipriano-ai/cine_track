@@ -289,3 +289,59 @@ function getAppUrl(): string {
     $baseDir = dirname($scriptDir);
     return $protocol . '://' . $host . $baseDir;
 }
+
+function logActivity(int $userId, string $actionType, string $targetType, ?int $targetId = null, ?array $metadata = null): void {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('INSERT INTO activity_feed (user_id, action_type, target_type, target_id, metadata) VALUES (?, ?, ?, ?, ?)');
+    $stmt->execute([$userId, $actionType, $targetType, $targetId, $metadata ? json_encode($metadata) : null]);
+}
+
+function createNotification(int $userId, string $type, ?int $actorId = null, ?string $targetType = null, ?int $targetId = null, ?array $metadata = null): void {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('INSERT INTO notifications (user_id, type, actor_id, target_type, target_id, metadata) VALUES (?, ?, ?, ?, ?, ?)');
+    $stmt->execute([$userId, $type, $actorId, $targetType, $targetId, $metadata ? json_encode($metadata) : null]);
+
+    require_once __DIR__ . '/fcm.php';
+
+    $title = '';
+    $body = '';
+    $actorName = 'Someone';
+
+    if ($actorId !== null) {
+        $actor = getUserById($actorId);
+        $actorName = $actor['name'] ?? 'Someone';
+    }
+
+    switch ($type) {
+        case 'follow':
+            $title = 'New Follower';
+            $body = "$actorName started following you";
+            break;
+        case 'review_like':
+            $title = 'Review Liked';
+            $body = "$actorName liked your review";
+            break;
+        case 'reply':
+            $title = 'New Reply';
+            $body = "$actorName replied to your review";
+            break;
+    }
+
+    if (!empty($title)) {
+        $data = [];
+        if ($targetType !== null) $data['target_type'] = $targetType;
+        if ($targetId !== null) $data['target_id'] = (string) $targetId;
+        $data['type'] = $type;
+        $data['actor_id'] = (string) ($actorId ?? '');
+
+        sendFcmNotification($userId, $title, $body, $data);
+    }
+}
+
+function getUserById(int $userId): ?array {
+    $pdo = getDb();
+    $stmt = $pdo->prepare('SELECT id, name, username, email, avatar_url, bio, role, email_verified_at, banned_at, deleted_at, created_at FROM users WHERE id = ?');
+    $stmt->execute([$userId]);
+    $user = $stmt->fetch();
+    return $user ?: null;
+}

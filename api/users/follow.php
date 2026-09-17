@@ -1,0 +1,58 @@
+<?php
+require_once __DIR__ . '/../config/database.php';
+
+header('Access-Control-Allow-Origin: ' . getAllowedOrigin());
+header('Access-Control-Allow-Methods: POST, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    exit;
+}
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    jsonError('Method not allowed', 405);
+}
+
+$userId = getAuthUserId();
+
+if (isBanned($userId)) {
+    jsonError('Your account has been suspended', 403);
+}
+
+$input = json_decode(file_get_contents('php://input'), true);
+
+if (empty($input['user_id'])) {
+    jsonError('user_id is required');
+}
+
+$targetId = (int) $input['user_id'];
+
+if ($targetId === $userId) {
+    jsonError('Cannot follow yourself');
+}
+
+$pdo = getDb();
+
+$targetUser = getUserById($targetId);
+if (!$targetUser || $targetUser['deleted_at'] !== null) {
+    jsonError('User not found', 404);
+}
+
+$stmt = $pdo->prepare('SELECT 1 FROM follows WHERE follower_id = ? AND following_id = ?');
+$stmt->execute([$userId, $targetId]);
+$alreadyFollowing = (bool) $stmt->fetch();
+
+if ($alreadyFollowing) {
+    $stmt = $pdo->prepare('DELETE FROM follows WHERE follower_id = ? AND following_id = ?');
+    $stmt->execute([$userId, $targetId]);
+    jsonResponse(['success' => true, 'following' => false]);
+}
+
+$stmt = $pdo->prepare('INSERT INTO follows (follower_id, following_id) VALUES (?, ?)');
+$stmt->execute([$userId, $targetId]);
+
+logActivity($userId, 'followed', 'user', $targetId);
+
+createNotification($targetId, 'follow', $userId);
+
+jsonResponse(['success' => true, 'following' => true]);
