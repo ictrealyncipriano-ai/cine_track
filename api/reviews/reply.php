@@ -25,13 +25,19 @@ if (empty($body)) jsonError('body is required');
 
 $pdo = getDb();
 
-$stmt = $pdo->prepare('SELECT id FROM reviews WHERE id = ?');
+$stmt = $pdo->prepare('SELECT id, user_id FROM reviews WHERE id = ?');
 $stmt->execute([$reviewId]);
-if (!$stmt->fetch()) jsonError('Review not found', 404);
+$review = $stmt->fetch();
+if (!$review) jsonError('Review not found', 404);
 
 $stmt = $pdo->prepare('INSERT INTO review_replies (review_id, user_id, body) VALUES (?, ?, ?)');
 $stmt->execute([$reviewId, $userId, $body]);
 
 $replyId = (int) $pdo->lastInsertId();
+
+$reviewAuthorId = (int) $review['user_id'];
+if ($reviewAuthorId !== $userId) {
+    createNotification($reviewAuthorId, 'reply', $userId, 'review', $reviewId);
+}
 
 jsonResponse(['success' => true, 'id' => $replyId]);
