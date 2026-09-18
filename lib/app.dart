@@ -11,6 +11,15 @@ import 'providers/reviews_provider.dart';
 import 'providers/history_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/admin_provider.dart';
+import 'providers/home_content_provider.dart';
+import 'providers/review_reply_provider.dart';
+import 'providers/admin/activity_log_provider.dart';
+import 'providers/admin/admin_settings_provider.dart';
+import 'providers/admin/analytics_provider.dart';
+import 'providers/admin/banner_management_provider.dart';
+import 'providers/admin/movie_management_provider.dart';
+import 'providers/admin/review_moderation_provider.dart';
+import 'providers/admin/user_management_provider.dart';
 import 'router/app_router.dart';
 import 'theme.dart';
 import 'screens/onboarding_screen.dart';
@@ -78,6 +87,15 @@ Provider<ApiService>.value(value: apiService),
         ChangeNotifierProvider(create: (_) => ReviewsProvider(apiService)),
         ChangeNotifierProvider(create: (_) => HistoryProvider(apiService, authService)),
         ChangeNotifierProvider(create: (_) => AdminProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => HomeContentProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => ReviewReplyProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => ActivityLogProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => AdminSettingsProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => AnalyticsProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => BannerManagementProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => MovieManagementProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => ReviewModerationProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => UserManagementProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (_, themeProvider, _) {
