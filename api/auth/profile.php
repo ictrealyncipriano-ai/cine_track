@@ -161,7 +161,7 @@ if ($action === 'update_profile') {
         $response['email_verification_failed'] = true;
     }
     jsonResponse($response);
-
+}
 
 if ($action === 'change_password') {
     $currentPassword = $input['current_password'] ?? '';
