@@ -18,3 +18,5 @@ function loadEnv(): void {
         }
     }
 }
+
+loadEnv();
