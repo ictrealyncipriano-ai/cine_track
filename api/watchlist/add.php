@@ -42,4 +42,6 @@ $stmt->execute([
     (float) ($input['vote_average'] ?? 0),
 ]);
 
+logActivity($userId, 'watchlisted', 'movie', (int) $input['movie_id']);
+
 jsonResponse(['success' => true]);

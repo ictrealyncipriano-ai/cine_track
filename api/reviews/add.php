@@ -44,4 +44,6 @@ $stmt = $pdo->prepare('
 ');
 $stmt->execute([$userId, $movieId, $rating, $reviewText]);
 
+logActivity($userId, 'reviewed', 'movie', $movieId, ['rating' => $rating]);
+
 jsonResponse(['success' => true]);
