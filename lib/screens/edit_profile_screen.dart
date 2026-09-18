@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../providers/auth_provider.dart';
+import '../l10n/app_localizations.dart';
 
 class EditProfileScreen extends StatefulWidget {
   const EditProfileScreen({super.key});
@@ -15,6 +16,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _dobController = TextEditingController();
+  final _bioController = TextEditingController();
   String? _selectedCountry;
   bool _marketingOptIn = false;
   String? _error;
@@ -52,6 +54,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.text = user?.phone ?? '';
     _dobController.text = user?.dateOfBirth ?? '';
     _selectedCountry = user?.country;
+    _bioController.text = user?.bio ?? '';
     _marketingOptIn = user?.marketingOptIn ?? false;
   }
 
@@ -61,6 +64,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _dobController.dispose();
+    _bioController.dispose();
     super.dispose();
   }
 
@@ -96,6 +100,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       phone: _phoneController.text.trim().isNotEmpty ? _phoneController.text.trim() : null,
       dateOfBirth: _dobController.text.trim().isNotEmpty ? _dobController.text.trim() : null,
       country: _selectedCountry,
+      bio: _bioController.text.trim().isNotEmpty ? _bioController.text.trim() : null,
       marketingOptIn: _marketingOptIn,
     );
 
@@ -117,6 +122,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
     final user = auth.user;
+    final l10n = AppLocalizations.of(context)!;
 
     if (_showSuccessOverlay) {
       return Scaffold(
@@ -178,6 +184,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
                   labelText: 'Phone',
+                  filled: true,
+                  fillColor: Theme.of(context).cardColor,
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextFormField(
+                controller: _bioController,
+                maxLines: 3,
+                maxLength: 500,
+                decoration: InputDecoration(
+                  labelText: l10n.bioLabel,
+                  hintText: l10n.bioHint,
                   filled: true,
                   fillColor: Theme.of(context).cardColor,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
