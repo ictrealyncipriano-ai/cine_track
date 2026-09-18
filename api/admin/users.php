@@ -27,11 +27,11 @@ if (!in_array($sortOrder, ['ASC', 'DESC'])) $sortOrder = 'DESC';
 
 $pdo = getDb();
 
-$where = ['deleted_at IS NULL'];
+$where = ['u.deleted_at IS NULL'];
 $params = [];
 
 if (!empty($search)) {
-    $where[] = '(name LIKE ? OR username LIKE ? OR email LIKE ?)';
+    $where[] = '(u.name LIKE ? OR u.username LIKE ? OR u.email LIKE ?)';
     $like = "%{$search}%";
     $params[] = $like;
     $params[] = $like;
@@ -39,24 +39,35 @@ if (!empty($search)) {
 }
 
 if (!empty($role)) {
-    $where[] = 'role = ?';
+    $where[] = 'u.role = ?';
     $params[] = $role;
 }
 
 $whereClause = implode(' AND ', $where);
 
 // Count total
-$stmt = $pdo->prepare("SELECT COUNT(*) AS cnt FROM users WHERE {$whereClause}");
+$stmt = $pdo->prepare("SELECT COUNT(*) AS cnt FROM users u WHERE {$whereClause}");
 $stmt->execute($params);
 $total = (int) $stmt->fetch()['cnt'];
 
 // Fetch page
 $offset = ($page - 1) * $perPage;
 $stmt = $pdo->prepare("
-    SELECT id, name, username, email, phone, role, banned_at, email_verified_at, created_at, updated_at
-    FROM users
+    SELECT u.id, u.name, u.username, u.email, u.phone, u.country, u.role,
+           u.avatar_url, u.banned_at,
+           CASE WHEN u.email_verified_at IS NOT NULL THEN 1 ELSE 0 END AS email_verified,
+           u.created_at, u.updated_at,
+           COALESCE(f.cnt, 0) AS favorites_count,
+           COALESCE(w.cnt, 0) AS watchlist_count,
+           COALESCE(r.cnt, 0) AS reviews_count,
+           COALESCE(h.cnt, 0) AS history_count
+    FROM users u
+    LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM favorites GROUP BY user_id) f ON f.user_id = u.id
+    LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM watchlist GROUP BY user_id) w ON w.user_id = u.id
+    LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM reviews GROUP BY user_id) r ON r.user_id = u.id
+    LEFT JOIN (SELECT user_id, COUNT(*) AS cnt FROM watch_history GROUP BY user_id) h ON h.user_id = u.id
     WHERE {$whereClause}
-    ORDER BY {$sortBy} {$sortOrder}
+    ORDER BY u.{$sortBy} {$sortOrder}
     LIMIT ? OFFSET ?
 ");
 foreach ($params as $i => $param) {
@@ -70,6 +81,10 @@ $users = $stmt->fetchAll();
 // Cast ints
 foreach ($users as &$u) {
     $u['id'] = (int) $u['id'];
+    $u['favorites_count'] = (int) $u['favorites_count'];
+    $u['watchlist_count'] = (int) $u['watchlist_count'];
+    $u['reviews_count'] = (int) $u['reviews_count'];
+    $u['history_count'] = (int) $u['history_count'];
 }
 unset($u);
 
