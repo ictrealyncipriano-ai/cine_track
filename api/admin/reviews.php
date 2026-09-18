@@ -45,10 +45,12 @@ $stmt = $pdo->prepare("
            r.moderated_by, r.moderated_at, r.moderation_note, r.created_at, r.updated_at,
            u.name AS user_name, u.username AS user_username, u.avatar_url AS user_avatar,
            m.name AS moderator_name,
-           rr.report_reason
+           rr.report_reason,
+           mo.title AS movie_title
     FROM reviews r
     LEFT JOIN users u ON u.id = r.user_id
     LEFT JOIN users m ON m.id = r.moderated_by
+    LEFT JOIN movies mo ON mo.tmdb_id = r.movie_id
     LEFT JOIN (
         SELECT review_id, GROUP_CONCAT(reason SEPARATOR '; ') AS report_reason
         FROM review_reports
