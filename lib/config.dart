@@ -45,8 +45,8 @@ class AppConfig {
   }
 
   static const List<Map<String, String>> streamingSources = [
-    {'name': 'API Player',    'url': 'https://apiplayer.ru/embed/movie/{id}'},
     {'name': 'VidLink',       'url': 'https://vidlink.pro/movie/{id}'},
+    {'name': 'API Player',    'url': 'https://apiplayer.ru/embed/movie/{id}'},
     {'name': 'vidsrcme.su',   'url': 'https://vidsrcme.su/embed/movie/{id}'},
     {'name': 'vidsrcme.ru',   'url': 'https://vidsrcme.ru/embed/movie/{id}'},
   ];

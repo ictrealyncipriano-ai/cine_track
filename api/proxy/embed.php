@@ -64,8 +64,8 @@ $sourceIndex = min($sourceIndex, count($sources) - 1);
 $source = $sources[$sourceIndex];
 $embedUrl = sprintf($source['url'], $tmdbId);
 
-// Source 1 (VidLink): redirect directly — player controls now work
-if ($sourceIndex === 1) {
+// Source 0 (VidLink): redirect directly — player controls now work
+if ($sourceIndex === 0) {
     header('Location: ' . $embedUrl);
     exit;
 }
