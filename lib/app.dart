@@ -42,6 +42,8 @@ class CineTrackApp extends StatefulWidget {
 class _CineTrackAppState extends State<CineTrackApp> {
   late bool _onboardingDone;
   GoRouter? _router;
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -98,9 +100,9 @@ Provider<ApiService>.value(value: apiService),
         ChangeNotifierProvider(create: (_) => UserManagementProvider(apiService)),
       ],
       child: Consumer<ThemeProvider>(
-        builder: (_, themeProvider, _) {
+        builder: (innerCtx, themeProvider, _) {
           if (kIsWeb) {
-            final auth = context.read<AuthProvider>();
+            final auth = innerCtx.read<AuthProvider>();
             _router ??= createAppRouter(auth);
             return MaterialApp.router(
               title: 'CineTrack',
@@ -109,6 +111,7 @@ Provider<ApiService>.value(value: apiService),
               darkTheme: AppTheme.dark,
               themeMode: themeProvider.themeMode,
               routerConfig: _router!,
+              scaffoldMessengerKey: _scaffoldMessengerKey,
             );
           }
 
