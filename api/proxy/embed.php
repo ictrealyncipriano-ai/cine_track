@@ -70,10 +70,10 @@ if ($sourceIndex === 0) {
     exit;
 }
 
-// Sources 2 & 3 (vidsrcme.su / vidsrcme.ru):
+// Sources 1 & 2 (vidsrcme.su / vidsrcme.ru):
 //   - Web (Chrome HtmlElementView): direct redirect — single iframe from Flutter avoids "Please Disable Sandbox"
 //   - Mobile (InAppWebView): iframe wrapper — avoids Adscore anti-bot detection
-if ($sourceIndex === 2 || $sourceIndex === 3) {
+if ($sourceIndex === 1 || $sourceIndex === 2) {
     if ($platform === 'web') {
         header('Location: ' . $embedUrl);
         exit;
