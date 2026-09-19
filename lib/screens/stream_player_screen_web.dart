@@ -69,11 +69,11 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
             ..style.width = '100%'
             ..style.height = '100%'
             ..allow = 'fullscreen; autoplay; encrypted-media'
-            ..referrerPolicy = 'no-referrer'
-            // Run the provider player (scripts + real origin) while keeping
-            // popups, top-navigation, and modals blocked.
-            ..setAttribute('sandbox',
-                'allow-scripts allow-same-origin allow-forms allow-presentation');
+            ..referrerPolicy = 'no-referrer';
+          // NOTE: no sandbox attribute on purpose. Providers (VidLink and its
+          // nested sources) treat ANY sandboxed frame as hostile and refuse
+          // playback ("Please Disable Sandbox" / Adscore bot detection).
+          // This matches mobile, where InAppWebView never sandboxes.
           return iframe;
         });
       }
