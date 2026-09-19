@@ -126,6 +126,9 @@ class HistoryProvider extends ChangeNotifier {
   }
 
   Future<void> addToHistory(Movie movie) async {
+    // Guests have no server-side history — skip the request instead of
+    // emitting a 401 on every movie open. Logged-in flow is unchanged.
+    if (!_authService.isAuthenticated) return;
     try {
       await _api.post('/history/add.php', movie.toJson());
     } catch (e) {

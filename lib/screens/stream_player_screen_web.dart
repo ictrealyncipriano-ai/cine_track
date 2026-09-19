@@ -69,8 +69,11 @@ class _StreamPlayerScreenState extends State<StreamPlayerScreen> {
             ..style.width = '100%'
             ..style.height = '100%'
             ..allow = 'fullscreen; autoplay; encrypted-media'
-            ..referrerPolicy = 'no-referrer';
-          try { iframe.sandbox?.value = ''; } catch (_) {}
+            ..referrerPolicy = 'no-referrer'
+            // Run the provider player (scripts + real origin) while keeping
+            // popups, top-navigation, and modals blocked.
+            ..setAttribute('sandbox',
+                'allow-scripts allow-same-origin allow-forms allow-presentation');
           return iframe;
         });
       }
